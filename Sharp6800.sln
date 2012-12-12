@@ -2,16 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{400B0B94-AD63-42DA-BF84-BCDAAA454F38}"
-	ProjectSection(SolutionItems) = preProject
-		Resources\0.bmp = Resources\0.bmp
-		Resources\1.bmp = Resources\1.bmp
-		Resources\2.bmp = Resources\2.bmp
-		Resources\3.bmp = Resources\3.bmp
-		Resources\4.bmp = Resources\4.bmp
-		Resources\5.bmp = Resources\5.bmp
-		Resources\6.bmp = Resources\6.bmp
-		Resources\7.bmp = Resources\7.bmp
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp6800", "Sharp6800.csproj", "{4124C3D6-3760-4766-BEDB-C3F30B514B63}"
 EndProject
