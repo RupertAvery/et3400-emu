@@ -115,6 +115,32 @@
     <Content Include="display\g.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\0.bmp" />
+    <Content Include="Resources\1.bmp" />
+    <Content Include="Resources\2.bmp" />
+    <Content Include="Resources\3.bmp" />
+    <Content Include="Resources\4.bmp" />
+    <Content Include="Resources\5.bmp" />
+    <Content Include="Resources\6.bmp" />
+    <Content Include="Resources\7.bmp" />
+    <Content Include="Resources\8.bmp" />
+    <Content Include="Resources\9.bmp" />
+    <Content Include="Resources\a.png" />
+    <Content Include="Resources\b.png" />
+    <Content Include="Resources\bg.png" />
+    <Content Include="Resources\c.png" />
+    <Content Include="Resources\d.png" />
+    <Content Include="Resources\dp.png" />
+    <Content Include="Resources\e.png" />
+    <Content Include="Resources\f.png" />
+    <Content Include="Resources\g.png" />
+    <Content Include="Resources\key A.bmp" />
+    <Content Include="Resources\key B.bmp" />
+    <Content Include="Resources\key C.bmp" />
+    <Content Include="Resources\key D.bmp" />
+    <Content Include="Resources\key E.bmp" />
+    <Content Include="Resources\key F.bmp" />
+    <Content Include="Resources\Reset.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

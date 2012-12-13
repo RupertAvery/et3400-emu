@@ -11,8 +11,8 @@ public partial class core6800
     public core6800()
     {
         Initialize();
-//        Breakpoint.Add(0xFC96);
-        Breakpoint.Add(0xFEFC);
+        //Breakpoint.Add(0xFC96);
+        //Breakpoint.Add(0xFEFC);
     }
 
     public void Run()
@@ -31,7 +31,10 @@ public partial class core6800
                 IRQ = 1;
             }
             cycles += Execute();
-            if (cycles >= 60000)
+
+            //1,048,576 cycles/sec = 1MHz 
+            //17476 = 1MHz / 60 = 60Hz interrupt rate
+            if (cycles >= 17476)
             {
                 if (Interrupt!=null)
                     Interrupt();
@@ -72,17 +75,14 @@ public partial class core6800
 
         if (Breakpoint.Contains(PC) || debug)
         {
-            //debug = true;
-            if (!((PC >= 0xFE3A) && (PC <= 0xFE4F))) // Ignore OUTCH
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format("PC:{0,4:X} A:{1,2:X} B:{2,2:X} IX:{3,4:X} SP:{4,4:X}", PC, A, B, IX, SP));
-            }
+            // Do something for a hardware breaskpoint
+            // Log stuff
+            //if (!((PC >= 0xFE3A) && (PC <= 0xFE4F))) // Ignore OUTCH
+            //{
+            //    System.Diagnostics.Debug.WriteLine(string.Format("PC:{0,4:X} A:{1,2:X} B:{2,2:X} IX:{3,4:X} SP:{4,4:X}", PC, A, B, IX, SP));
+            //}
         }
-        if((PC<0xFC00)&&(PC>0xFF))
-        {
-            //fail!
-            PC = PC;
-        }
+
         FetchCode = ReadMem(PC);
         Clock = Clock + Cycles[FetchCode];
 
@@ -1426,8 +1426,6 @@ public partial class core6800
             case 0x39:  
             case 0x3F:
             case 0x3B:
-                if ((PC < 0xFC00) && (PC> 0xFF))
-                    PC = PC;
             // PC already calculated
                 break;
             default:
