@@ -71,7 +71,6 @@ namespace Sharp6800
                 trainer.SetupDisplay(pictureBox1);
                 InitKeys();
                 trainer.LoadROM("zenith.rom");
-                trainer.LoadRAM("segment.ram");
                 bInit = true;
             }
             catch (Exception ex)
@@ -152,6 +151,43 @@ namespace Sharp6800
         private void ReleaseKey(object sender, EventArgs args)
         {
             trainer.ReleaseKey(Trainer.Keys.Key0);
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "S19 format files|*.obj;*.s19";
+            openFileDialog1.ShowDialog();
+            if (openFileDialog1.FileName.Length > 0)
+            {
+                trainer.Quit();
+                trainer.LoadSREC(openFileDialog1.FileName);
+                trainer.Start();
+                MessageBox.Show("File was loaded successfully into RAM", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void loadROMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "ROM files|*.rom;*.bin";
+            openFileDialog1.ShowDialog();
+            if (openFileDialog1.FileName.Length > 0)
+            {
+                trainer.Quit();
+                trainer.LoadROM(openFileDialog1.FileName);
+                trainer.Start();
+                MessageBox.Show("File was loaded successfully into ROM", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var about = new About();
+            about.ShowDialog();
         }
 
     }

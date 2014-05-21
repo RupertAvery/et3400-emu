@@ -200,10 +200,65 @@ namespace Sharp6800
             }
             catch (Exception ex)
             {
-                throw new Exception("An error occured while loading the ROM file " + file + ".", ex);
+                throw new Exception("An error occured while loading the RAM file " + file + ".", ex);
             }
 
         }
 
+
+        public void LoadSREC(string file)
+        {
+            try
+            {
+                var content = File.ReadAllText(file);
+                var lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (line.Length > 0)
+                    {
+                        var bytecount = Convert.ToInt32(line.Substring(2, 2), 16);
+                        string addr;
+                        string data;
+                        string checksum;
+                        switch (line.Substring(0, 2))
+                        {
+                            case "S1":
+                                addr = line.Substring(4, 4);
+                                data = line.Substring(8, bytecount * 2 - 6);
+                                Write(addr, data);
+                                checksum = line.Substring(bytecount * 2 + 2, 2);
+                                break;
+                            case "S2":
+                                break;
+                            case "S3":
+                                break;
+                            case "S7":
+                                break;
+                            case "S8":
+                                break;
+                            case "S9":
+                                break;
+                        }
+                    }
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occured while loading the OBJ file " + file + ".", ex);
+            }
+        }
+
+        public void Write(string addr, string data)
+        {
+            int baseAddr = Convert.ToInt32(addr, 16); 
+            for (int p = 0; p < data.Length; p += 2)
+            {
+                emu.Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
+            }
+        }
+
     }
+
 }

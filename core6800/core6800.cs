@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 /// <summary>
@@ -19,11 +20,13 @@ public partial class core6800
     {
         int cycles = 0;
         running = true;
+        //var stopwatch = new Stopwatch();
+        //stopwatch.Start();
         while (running)
         {
-            if(reset)
+            if (reset)
             {
-                reset = false; 
+                reset = false;
                 PC = (ReadMem(0xFFFE) << 8) + ReadMem(0xFFFF);
                 //Paused = FALSE;
                 Flags.I = 1;
@@ -32,13 +35,26 @@ public partial class core6800
             }
             cycles += Execute();
 
+            if (cycles%128 == 0)
+            {
+                if (Interrupt != null)
+                    Interrupt();
+                if (cycles%1024 == 0)
+                {
+                    Thread.Sleep(1);
+                }
+            }
+            
             //1,048,576 cycles/sec = 1MHz 
             //17476 = 1MHz / 60 = 60Hz interrupt rate
             if (cycles >= 17476)
             {
-                if (Interrupt!=null)
+                //var tms = stopwatch.Elapsed.TotalMilliseconds;
+                //stopwatch.Reset();
+                if (Interrupt != null)
                     Interrupt();
                 cycles = 0;
+                Thread.Sleep(40);
             }
             if (loadram) { PC = 0; loadram = false; }
         }
@@ -242,7 +258,7 @@ public partial class core6800
                 break;
 
             case 0x7F:
-                WriteMem((ReadMem(PC + 1) << 8) + ReadMem(PC + 2),  0);
+                WriteMem((ReadMem(PC + 1) << 8) + ReadMem(PC + 2), 0);
                 Flags.N = 0;
                 Flags.Z = 1;
                 Flags.V = 0;
@@ -945,7 +961,7 @@ public partial class core6800
                 TestV(B, Operand, Temp);
                 B = Temp & 0xFF;
                 TestN(B);
-                TestZ(B); 
+                TestZ(B);
                 break;
 
             //TAB
@@ -1423,10 +1439,10 @@ public partial class core6800
             case 0x7E:
             case 0xAD:
             case 0xBD:
-            case 0x39:  
+            case 0x39:
             case 0x3F:
             case 0x3B:
-            // PC already calculated
+                // PC already calculated
                 break;
             default:
                 PC += NOPS;
