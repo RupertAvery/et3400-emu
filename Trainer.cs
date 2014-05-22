@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
+using Core6800;
 
 namespace Sharp6800
 {
@@ -35,12 +36,12 @@ namespace Sharp6800
         }
 
         Thread runner;
-        core6800 emu;
+        Cpu6800 emu;
         SegDisplay disp;
 
         public Trainer()
         {
-            emu = new core6800();
+            emu = new Cpu6800();
             // Set keyboard mapped memory 'high'
             emu.Memory[0xC003] = 0xFF;
             emu.Memory[0xC005] = 0xFF;
