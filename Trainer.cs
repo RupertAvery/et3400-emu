@@ -176,6 +176,20 @@ namespace Sharp6800
                 {
                     emu.Memory[offset + i] = rom[i];
                 }
+                    using (var fs = new StreamWriter("zenith.hex"))
+                    {
+                        int j = 0;
+                        foreach (var b in rom)
+                        {
+                            fs.Write(string.Format("{0:X2}", b));
+                            j++;
+                            if (j == 32)
+                            {
+                                fs.Write("\r\n");
+                                j = 0;
+                            }
+                        }
+                    }
             }
             catch (Exception ex)
             {
