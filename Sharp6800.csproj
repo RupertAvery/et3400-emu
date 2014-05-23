@@ -86,6 +86,9 @@
     </Compile>
     <Compile Include="SegDisplay.cs" />
     <Compile Include="Trainer.cs" />
+    <Content Include="ROM.HEX">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="segment.ram">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

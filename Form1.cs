@@ -18,7 +18,10 @@ namespace Sharp6800
         {
             InitializeComponent();
         }
-              
+
+        /// <summary>
+        /// bind button picturebox mouse button and form key events to event handlers
+        /// </summary>
         private void InitKeys()
         {
             button0.MouseDown += PressKey;
@@ -70,7 +73,7 @@ namespace Sharp6800
                 trainer = new Trainer();
                 trainer.SetupDisplay(pictureBox1);
                 InitKeys();
-                trainer.LoadROM("zenith.rom");
+                trainer.LoadROM("ROM.HEX");
                 bInit = true;
             }
             catch (Exception ex)
@@ -161,8 +164,8 @@ namespace Sharp6800
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog1.Filter = "S19 format files|*.obj;*.s19";
-            openFileDialog1.ShowDialog();
-            if (openFileDialog1.FileName.Length > 0)
+            var result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
             {
                 trainer.Quit();
                 trainer.LoadSREC(openFileDialog1.FileName);
@@ -173,9 +176,9 @@ namespace Sharp6800
 
         private void loadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Filter = "ROM files|*.rom;*.bin";
-            openFileDialog1.ShowDialog();
-            if (openFileDialog1.FileName.Length > 0)
+            openFileDialog1.Filter = "ROM files|*.rom;*.bin;*.hex";
+            var result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
             {
                 trainer.Quit();
                 trainer.LoadROM(openFileDialog1.FileName);
@@ -188,6 +191,12 @@ namespace Sharp6800
         {
             var about = new About();
             about.ShowDialog();
+        }
+
+        private void startToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            trainer.AddBreakPoint(0xFE62);
+            //trainer.SetProgramCounter(1);
         }
 
     }
