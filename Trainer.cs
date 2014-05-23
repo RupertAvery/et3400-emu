@@ -4,12 +4,13 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
+using Core6800;
 
 namespace Sharp6800
 {
 
     /// <summary>
-    /// Implementation of a ET-3400 Trainer simulation
+    /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
     class Trainer
     {
@@ -35,17 +36,22 @@ namespace Sharp6800
         }
 
         Thread runner;
-        core6800 emu;
+        Cpu6800 emu;
         SegDisplay disp;
 
         public Trainer()
         {
-            emu = new core6800();
+            emu = new Cpu6800();
             // Set keyboard mapped memory 'high'
             emu.Memory[0xC003] = 0xFF;
             emu.Memory[0xC005] = 0xFF;
             emu.Memory[0xC006] = 0xFF;
             emu.Reset();
+        }
+
+        public void AddBreakPoint(int address)
+        {
+            emu.Breakpoint.Add(address);
         }
 
         public void SetupDisplay(PictureBox target)
@@ -170,11 +176,51 @@ namespace Sharp6800
         {
             try
             {
-                byte[] rom = File.ReadAllBytes(file);
-                int offset = 65536 - rom.Length;
-                for (var i = 0; i < rom.Length; i++)
+                var ext = Path.GetExtension(file).ToLower();
+                if (ext == ".rom")
                 {
-                    emu.Memory[offset + i] = rom[i];
+                    byte[] rom = File.ReadAllBytes(file);
+                    int offset = 65536 - rom.Length;
+                    for (var i = 0; i < rom.Length; i++)
+                    {
+                        emu.Memory[offset + i] = rom[i];
+                    }
+                    using (var fs = new StreamWriter("zenith.hex"))
+                    {
+                        int j = 0;
+                        foreach (var b in rom)
+                        {
+                            fs.Write(string.Format("{0:X2}", b));
+                            j++;
+                            if (j == 32)
+                            {
+                                fs.Write("\r\n");
+                                j = 0;
+                            }
+                        }
+                    }
+                }
+                else if (ext == ".hex")
+                {
+                    string content = File.ReadAllText(file);
+                    var lines = content.Trim().Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                    byte[] rom = new byte[lines.Length * 32];
+
+                    int j = 0;
+                    foreach (var line in lines)
+                    {
+                        for (int i = 0; i < 32; i++)
+                        {
+                            rom[j * 32 + i] = (byte)Convert.ToInt32(line.Substring(i * 2, 2), 16);
+                        }
+                        j++;
+                    }
+
+                    int offset = 65536 - rom.Length;
+                    for (var i = 0; i < rom.Length; i++)
+                    {
+                        emu.Memory[offset + i] = rom[i];
+                    }
                 }
                     using (var fs = new StreamWriter("zenith.hex"))
                     {
@@ -266,13 +312,17 @@ namespace Sharp6800
 
         public void Write(string addr, string data)
         {
-            int baseAddr = Convert.ToInt32(addr, 16); 
+            int baseAddr = Convert.ToInt32(addr, 16);
             for (int p = 0; p < data.Length; p += 2)
             {
                 emu.Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
             }
         }
 
+        public void SetProgramCounter(int i)
+        {
+            emu.PC = i;
+        }
     }
 
 }
