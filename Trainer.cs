@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
@@ -8,6 +9,7 @@ using Core6800;
 
 namespace Sharp6800
 {
+    public delegate void OnUpdateDelegate(Cpu6800 emu);
 
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
@@ -38,17 +40,38 @@ namespace Sharp6800
         Thread runner;
         Cpu6800 emu;
         SegDisplay disp;
+        public int[] Memory = new int[65536];
 
         public Trainer()
         {
-            emu = new Cpu6800();
+            State = new Cpu6800State();
+            emu = new Cpu6800
+                {
+                    State = State,
+                    ReadMem = loc =>
+                        {
+                            loc = loc & 0xFFFF;
+                            return Memory[loc];
+                        },
+                    WriteMem = (loc, value) =>
+                        {
+                            loc = loc & 0xFFFF;
+                            if (loc >= 0xFC00)
+                            {
+                                return;
+                            }
+                            Memory[loc] = value;
+                        }
+                };
+
             // Set keyboard mapped memory 'high'
-            emu.Memory[0xC003] = 0xFF;
-            emu.Memory[0xC005] = 0xFF;
-            emu.Memory[0xC006] = 0xFF;
-            emu.Reset();
+            Memory[0xC003] = 0xFF;
+            Memory[0xC005] = 0xFF;
+            Memory[0xC006] = 0xFF;
+
         }
 
+        public Cpu6800State State { get; set; }
         public void AddBreakPoint(int address)
         {
             emu.Breakpoint.Add(address);
@@ -61,17 +84,56 @@ namespace Sharp6800
 
         public void Start()
         {
-            emu.Interrupt += IntHandler;
-
-            runner = new Thread(new ThreadStart(emu.Run));
+            emu.Reset();
+            runner = new Thread(EmuThread);
             runner.Start();
         }
+
+        private bool _running;
+        private readonly object _lockobject = new object();
+
+        public event OnUpdateDelegate OnUpdate;
+
+        public void EmuThread()
+        {
+            int cycles = 0;
+            _running = true;
+
+            while (_running)
+            {
+
+                lock (_lockobject)
+                {
+                    cycles += emu.Execute();
+                }
+
+                if (cycles % 128 == 0)
+                {
+                    IntHandler();
+                    Thread.Sleep(1);
+                }
+
+                //1,048,576 cycles/sec = 1MHz 
+                //17476 = 1MHz / 60 = 60Hz interrupt rate
+                if (cycles >= 17476)
+                {
+                    //var tms = stopwatch.Elapsed.TotalMilliseconds;
+                    //stopwatch.Reset();
+                    IntHandler();
+                    cycles = 0;
+                    Thread.Sleep(40);
+                }
+
+            }
+        }
+
 
 
         public void IntHandler()
         {
             // Update the 7-seg display
-            disp.Display(emu.Memory);
+            disp.Display(Memory);
+            if (OnUpdate != null) OnUpdate(emu);
         }
 
         /// <summary>
@@ -79,8 +141,9 @@ namespace Sharp6800
         /// </summary>
         public void Quit()
         {
-            emu.Quit();
             // wait for emulation thread to terminate
+            _running = false;
+
             if (runner != null)
             {
                 while (runner.IsAlive)
@@ -101,55 +164,58 @@ namespace Sharp6800
             {
                 // pull appropriate bit at mem location LOW
                 case Keys.Key0:
-                    emu.Memory[0xC006] &= 0xDF;
+                    Memory[0xC006] &= 0xDF;
                     break;
                 case Keys.Key1:// 1, ACCA
-                    emu.Memory[0xC006] &= 0xEF;
+                    Memory[0xC006] &= 0xEF;
                     break;
                 case Keys.Key2:// 2
-                    emu.Memory[0xC005] &= 0xEF;
+                    Memory[0xC005] &= 0xEF;
                     break;
                 case Keys.Key3:// 3
-                    emu.Memory[0xC003] &= 0xEF;
+                    Memory[0xC003] &= 0xEF;
                     break;
                 case Keys.Key4:// 4, INDEX
-                    emu.Memory[0xC006] &= 0xF7;
+                    Memory[0xC006] &= 0xF7;
                     break;
                 case Keys.Key5:// 5, CC
-                    emu.Memory[0xC005] &= 0xF7;
+                    Memory[0xC005] &= 0xF7;
                     break;
                 case Keys.Key6:// 6
-                    emu.Memory[0xC003] &= 0xF7;
+                    Memory[0xC003] &= 0xF7;
                     break;
                 case Keys.Key7:// 7, RTI;
-                    emu.Memory[0xC006] &= 0xFB;
+                    Memory[0xC006] &= 0xFB;
                     break;
                 case Keys.Key8:// 8
-                    emu.Memory[0xC005] &= 0xFB;
+                    Memory[0xC005] &= 0xFB;
                     break;
                 case Keys.Key9:// 9
-                    emu.Memory[0xC003] &= 0xFB;
+                    Memory[0xC003] &= 0xFB;
                     break;
                 case Keys.KeyA:// A, Auto
-                    emu.Memory[0xC006] &= 0xFD;
+                    Memory[0xC006] &= 0xFD;
                     break;
                 case Keys.KeyB:// B
-                    emu.Memory[0xC005] &= 0xFD;
+                    Memory[0xC005] &= 0xFD;
                     break;
                 case Keys.KeyC:// C
-                    emu.Memory[0xC003] &= 0xFD;
+                    Memory[0xC003] &= 0xFD;
                     break;
                 case Keys.KeyD:// D, Do
-                    emu.Memory[0xC006] &= 0xFE;
+                    Memory[0xC006] &= 0xFE;
                     break;
                 case Keys.KeyE:// E, Exam
-                    emu.Memory[0xC005] &= 0xFE;
+                    Memory[0xC005] &= 0xFE;
                     break;
                 case Keys.KeyF:// F
-                    emu.Memory[0xC003] &= 0xFE;
+                    Memory[0xC003] &= 0xFE;
                     break;
                 case Keys.KeyReset:// RESET
-                    emu.Reset();
+                    lock (_lockobject)
+                    {
+                        emu.Reset();
+                    }
                     break;
             }
         }
@@ -162,9 +228,9 @@ namespace Sharp6800
         {
             // just pull everything high. 
             // we're not monitoring multiple presses anyway
-            emu.Memory[0xC003] = 0xFF;
-            emu.Memory[0xC005] = 0xFF;
-            emu.Memory[0xC006] = 0xFF;
+            Memory[0xC003] = 0xFF;
+            Memory[0xC005] = 0xFF;
+            Memory[0xC006] = 0xFF;
         }
 
 
@@ -183,22 +249,22 @@ namespace Sharp6800
                     int offset = 65536 - rom.Length;
                     for (var i = 0; i < rom.Length; i++)
                     {
-                        emu.Memory[offset + i] = rom[i];
+                        Memory[offset + i] = rom[i];
                     }
-                    using (var fs = new StreamWriter("zenith.hex"))
-                    {
-                        int j = 0;
-                        foreach (var b in rom)
-                        {
-                            fs.Write(string.Format("{0:X2}", b));
-                            j++;
-                            if (j == 32)
-                            {
-                                fs.Write("\r\n");
-                                j = 0;
-                            }
-                        }
-                    }
+                    //using (var fs = new StreamWriter("zenith.hex"))
+                    //{
+                    //    int j = 0;
+                    //    foreach (var b in rom)
+                    //    {
+                    //        fs.Write(string.Format("{0:X2}", b));
+                    //        j++;
+                    //        if (j == 32)
+                    //        {
+                    //            fs.Write("\r\n");
+                    //            j = 0;
+                    //        }
+                    //    }
+                    //}
                 }
                 else if (ext == ".hex")
                 {
@@ -219,23 +285,9 @@ namespace Sharp6800
                     int offset = 65536 - rom.Length;
                     for (var i = 0; i < rom.Length; i++)
                     {
-                        emu.Memory[offset + i] = rom[i];
+                        Memory[offset + i] = rom[i];
                     }
                 }
-                    using (var fs = new StreamWriter("zenith.hex"))
-                    {
-                        int j = 0;
-                        foreach (var b in rom)
-                        {
-                            fs.Write(string.Format("{0:X2}", b));
-                            j++;
-                            if (j == 32)
-                            {
-                                fs.Write("\r\n");
-                                j = 0;
-                            }
-                        }
-                    }
             }
             catch (Exception ex)
             {
@@ -255,7 +307,7 @@ namespace Sharp6800
                 byte[] ram = File.ReadAllBytes(file);
                 for (var i = 8; i < ram.Length; i++)
                 {
-                    emu.Memory[offset + i - 8] = ram[i];
+                    Memory[offset + i - 8] = ram[i];
                 }
             }
             catch (Exception ex)
@@ -315,13 +367,13 @@ namespace Sharp6800
             int baseAddr = Convert.ToInt32(addr, 16);
             for (int p = 0; p < data.Length; p += 2)
             {
-                emu.Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
+                Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
             }
         }
 
         public void SetProgramCounter(int i)
         {
-            emu.PC = i;
+            emu.State.PC = i;
         }
     }
 

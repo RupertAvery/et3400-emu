@@ -35,12 +35,16 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="core6800Interpreter.cs" />
     <Compile Include="Cpu6800.cs" />
     <Compile Include="core6800Defs.cs" />
     <Compile Include="core6800Funcs.cs" />
     <Compile Include="core6800Init.cs" />
     <Compile Include="core6800MMU.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

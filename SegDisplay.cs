@@ -51,7 +51,7 @@ namespace Sharp6800
             for (int i = 0xC160; i >= 0xC110; i -= 16)
             {
                 int segdata = memory[i];
-                g.DrawImage(bg, 20 + j * 45, 5, 38, 54 );
+                g.DrawImage(bg, 20 + j * 45, 5, 38, 54);
                 DrawSegData(g, 20 + j * 45, 5, segdata);
                 j++;
                 if (j > 8) j = 0;

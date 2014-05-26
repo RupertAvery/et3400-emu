@@ -1,12 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using System.Threading;
-using System.IO;
+using Core6800;
 
 namespace Sharp6800
 {
@@ -78,9 +72,9 @@ namespace Sharp6800
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"Error initializing the emulator");
+                MessageBox.Show(ex.Message, "Error initializing the emulator");
             }
-            if(bInit) trainer.Start();
+            if (bInit) trainer.Start();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -197,6 +191,52 @@ namespace Sharp6800
         {
             trainer.AddBreakPoint(0xFE62);
             //trainer.SetProgramCounter(1);
+        }
+
+        private Memory memory;
+        private DisassemblerView _disassemblerView;
+
+        private void memoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (memory == null)
+            {
+                memory = new Memory();
+                memory.Show();
+                memory.Closing += (o, args) =>
+                    {
+                        trainer.OnUpdate -= UpdateMemDisplay;
+                        memory = null;
+                    };
+                trainer.OnUpdate += UpdateMemDisplay;
+            }
+        }
+
+        private void UpdateMemDisplay(Cpu6800 emu)
+        {
+            memory.MemDisplay.Display(trainer.Memory, 0, 16);
+        }
+
+
+        private void UpdateDasmDisplay(Cpu6800 emu)
+        {
+            _disassemblerView.DasmDisplay.Display(trainer.Memory, trainer.State, 0, 16);
+        }
+
+        private void disassemblerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_disassemblerView == null)
+            {
+                _disassemblerView = new DisassemblerView();
+                _disassemblerView.State = trainer.State;
+                _disassemblerView.Memory = trainer.Memory;
+                _disassemblerView.Show();
+                _disassemblerView.Closing += (o, args) =>
+                {
+                    trainer.OnUpdate -= UpdateDasmDisplay; 
+                    _disassemblerView = null;
+                };
+                trainer.OnUpdate += UpdateDasmDisplay;
+            }
         }
 
     }

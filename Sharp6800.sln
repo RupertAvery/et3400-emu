@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp6800", "Sharp6800.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core6800", "Core6800\Core6800.csproj", "{310F0583-6DAC-4742-B4F5-E8D3C3870ED8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject1", "UnitTestProject1\UnitTestProject1.csproj", "{9874CF28-9DD1-4384-800C-ADDD73E570A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{310F0583-6DAC-4742-B4F5-E8D3C3870ED8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{310F0583-6DAC-4742-B4F5-E8D3C3870ED8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{310F0583-6DAC-4742-B4F5-E8D3C3870ED8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9874CF28-9DD1-4384-800C-ADDD73E570A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9874CF28-9DD1-4384-800C-ADDD73E570A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9874CF28-9DD1-4384-800C-ADDD73E570A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9874CF28-9DD1-4384-800C-ADDD73E570A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
