@@ -243,8 +243,8 @@ namespace Core6800
                     {
                         int t;
                         var condition = (State.CC & 0x04 >> 2 | State.CC & 0x01) == 0x00;
-                        // (!(State.CC & 0x05));
-                        BRANCH((State.CC & 0x05) != 0x05);
+                        // (State.CC & 0x05) != 0x05;
+                        BRANCH(condition);
                     }
 
                     /* 0x23 BLS relative ----- */
@@ -496,7 +496,7 @@ namespace Core6800
                         int r;
                         r = -State.A;
                         CLR_NZVC(); SET_FLAGS8(0, State.A, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x41 ILLEGAL */
@@ -529,7 +529,7 @@ namespace Core6800
                         r = (State.CC & 0x01) << 7;
                         CLR_NZC(); State.CC |= (State.A & 0x01);
                         r |= State.A >> 1; SET_NZ8(r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x47 ASRA inherent ?**-* */
@@ -539,7 +539,6 @@ namespace Core6800
                         CLR_NZC(); State.CC |= (State.A & 0x01);
                         State.A >>= 1; State.A |= ((State.A & 0x40) << 1);
                         SET_NZ8(State.A);
-                        State.A = State.A;
                     }
 
                     /* 0x48 ASLA inherent ?**** */
@@ -549,7 +548,7 @@ namespace Core6800
                         int r;
                         r = State.A << 1;
                         CLR_NZVC(); SET_FLAGS8(State.A, State.A, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x49 ROLA inherent -**** */
@@ -559,7 +558,7 @@ namespace Core6800
                         int t, r;
                         t = State.A; r = State.CC & 0x01; r |= t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x4a DECA inherent -***- */
@@ -604,7 +603,7 @@ namespace Core6800
                         int r;
                         r = -State.B;
                         CLR_NZVC(); SET_FLAGS8(0, State.B, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0x51 ILLEGAL */
@@ -637,7 +636,7 @@ namespace Core6800
                         r = (State.CC & 0x01) << 7;
                         CLR_NZC(); State.CC |= (State.B & 0x01);
                         r |= State.B >> 1; SET_NZ8(r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0x57 ASRB inherent ?**-* */
@@ -656,7 +655,7 @@ namespace Core6800
                         int r;
                         r = State.B << 1;
                         CLR_NZVC(); SET_FLAGS8(State.B, State.B, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0x59 ROLB inherent -**** */
@@ -666,7 +665,7 @@ namespace Core6800
                         int t, r;
                         t = State.B; r = State.CC & 0x01; r |= t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0x5a DECB inherent -***- */
