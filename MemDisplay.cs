@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Sharp6800
@@ -9,62 +10,53 @@ namespace Sharp6800
         private readonly IntPtr targetWnd;
         private readonly int width, height;
 
+        public int Start { get; set; }
+        public int Lines { get; set; }
+
         public MemDisplay(PictureBox target)
         {
-            try
-            {
-                width = target.Width;
-                height = target.Height;
-                //target.Image = new Bitmap(target.Width, target.Height);
-
-                targetWnd = target.Handle;
-
-
-            }
-            catch (Exception)
-            {
-                throw new Exception(
-                    "Error initializing the display. one or more segment image files may be missing.");
-            }
+            width = target.Width;
+            height = target.Height;
+            targetWnd = target.Handle;
+            Lines = 16;
         }
 
 
-        public void Display(int[] memory, int start, int lines)
+        public void Display(int[] memory)
         {
             var buffer = new Bitmap(width, height);
-            var g = Graphics.FromImage(buffer);
-            g.Clear(Color.White);
-
-            int j = 0;
-            for (int i = start; i <= start + 8 * lines; i += 8)
+            using (var g = Graphics.FromImage(buffer))
             {
-                DrawHex(g, 10, 20 * j, i + j * 8, memory);
-                j++;
+                g.Clear(Color.White);
+
+                int j = 0;
+                for (int i = Start; i <= Start + 8 * Lines; i += 8)
+                {
+                    DrawHex(g, 10, 20 * j, i + j * 8, memory);
+                    j++;
+                }
             }
 
-            g.Dispose();
-
-            var p = Graphics.FromHwnd(targetWnd);
-            p.DrawImage(buffer, 0, 0);
-            p.Dispose();
+            using (var p = Graphics.FromHwnd(targetWnd))
+            {
+                p.DrawImage(buffer, 0, 0);
+            }
         }
 
         private void DrawHex(Graphics g, int x, int y, int start, int[] memory)
         {
-            var s = string.Format("{0:X4} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} {7:X2} {8:X2}",
-                                  start,
-                                  memory[start] & 0xff,
-                                  memory[start + 1] & 0xff,
-                                  memory[start + 2] & 0xff,
-                                  memory[start + 3] & 0xff,
-                                  memory[start + 4] & 0xff,
-                                  memory[start + 5] & 0xff,
-                                  memory[start + 6] & 0xff,
-                                  memory[start + 7] & 0xff
-                );
+            int k = 0;
+            var s = new StringBuilder();
+            s.Append(string.Format("{0:X4}", start));
+
+            while (start + k < memory.Length && k < 8)
+            {
+                s.Append(" " + string.Format("{0:X2}", memory[start + k] & 0xff));
+                k++;
+            }
             var font = new Font("Courier New", 12, FontStyle.Regular);
             var brush = new SolidBrush(Color.Black);
-            g.DrawString(s, font, brush, x, y);
+            g.DrawString(s.ToString(), font, brush, x, y);
         }
     }
 }

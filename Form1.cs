@@ -1,12 +1,17 @@
 using System;
 using System.Windows.Forms;
 using Core6800;
+using Timer = System.Threading.Timer;
 
 namespace Sharp6800
 {
     public partial class Form1 : Form
     {
-        Trainer trainer;
+        private Trainer _trainer;
+        private MemoryView _memoryView;
+        private DisassemblerView _disassemblerView;
+        private Timer _updateTimer;
+        private object _lockObject = new object();
 
         public Form1()
         {
@@ -62,24 +67,50 @@ namespace Sharp6800
         private void Form1_Load(object sender, EventArgs e)
         {
             bool bInit = false;
+            _updateTimer = new Timer(state =>
+                {
+                    lock (_lockObject)
+                    {
+                        if (_memoryView != null)
+                        {
+                            _memoryView.MemDisplay.Display(_trainer.Memory);
+                        }
+
+                        if (_disassemblerView != null)
+                        {
+                            _disassemblerView.DasmDisplay.Display(_trainer.Memory, _trainer.State, 0, 16);
+                        }
+                    }
+
+
+                }, null, 0, 10);
+            InitKeys();
+
             try
             {
-                trainer = new Trainer();
-                trainer.SetupDisplay(pictureBox1);
-                InitKeys();
-                trainer.LoadROM("ROM.HEX");
+                _trainer = new Trainer();
+                _trainer.SetupDisplay(pictureBox1);
+                _trainer.LoadROM("ROM.HEX");
+
+                Action<int> updateSpeed = delegate(int second)
+                { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.ClockSpeed) * 100); };
+
+                _trainer.OnTimer += second => Invoke(updateSpeed, second);
+
                 bInit = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error initializing the emulator");
             }
-            if (bInit) trainer.Start();
+
+            if (bInit) _trainer.Start();
         }
+
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            trainer.Quit();
+            _trainer.Quit();
         }
 
         private void PressKey(object sender, EventArgs args)
@@ -93,61 +124,61 @@ namespace Sharp6800
 
             // pull appropriate bit at mem location LOW
             if (sender == button0 || keyargs.KeyCode == Keys.NumPad0 || keyargs.KeyCode == Keys.D0)
-                trainer.PressKey(Trainer.Keys.Key0);
+                _trainer.PressKey(Trainer.Keys.Key0);
 
             else if (sender == button1 || keyargs.KeyCode == Keys.NumPad1 || keyargs.KeyCode == Keys.D1) // 1, ACCA
-                trainer.PressKey(Trainer.Keys.Key1);
+                _trainer.PressKey(Trainer.Keys.Key1);
 
             else if (sender == button2 || keyargs.KeyCode == Keys.NumPad2 || keyargs.KeyCode == Keys.D2) // 2
-                trainer.PressKey(Trainer.Keys.Key2);
+                _trainer.PressKey(Trainer.Keys.Key2);
 
             else if (sender == button3 || keyargs.KeyCode == Keys.NumPad3 || keyargs.KeyCode == Keys.D3) // 3
-                trainer.PressKey(Trainer.Keys.Key3);
+                _trainer.PressKey(Trainer.Keys.Key3);
 
             else if (sender == button4 || keyargs.KeyCode == Keys.NumPad4 || keyargs.KeyCode == Keys.D4) // 4, INDEX
-                trainer.PressKey(Trainer.Keys.Key4);
+                _trainer.PressKey(Trainer.Keys.Key4);
 
             else if (sender == button5 || keyargs.KeyCode == Keys.NumPad5 || keyargs.KeyCode == Keys.D5) // 5, CC
-                trainer.PressKey(Trainer.Keys.Key5);
+                _trainer.PressKey(Trainer.Keys.Key5);
 
             else if (sender == button6 || keyargs.KeyCode == Keys.NumPad6 || keyargs.KeyCode == Keys.D6) // 6
-                trainer.PressKey(Trainer.Keys.Key6);
+                _trainer.PressKey(Trainer.Keys.Key6);
 
             else if (sender == button7 || keyargs.KeyCode == Keys.NumPad7 || keyargs.KeyCode == Keys.D7) // 7, RTI;
-                trainer.PressKey(Trainer.Keys.Key7);
+                _trainer.PressKey(Trainer.Keys.Key7);
 
             else if (sender == button8 || keyargs.KeyCode == Keys.NumPad8 || keyargs.KeyCode == Keys.D8) // 8
-                trainer.PressKey(Trainer.Keys.Key8);
+                _trainer.PressKey(Trainer.Keys.Key8);
 
             else if (sender == button9 || keyargs.KeyCode == Keys.NumPad9 || keyargs.KeyCode == Keys.D9) // 9
-                trainer.PressKey(Trainer.Keys.Key9);
+                _trainer.PressKey(Trainer.Keys.Key9);
 
             else if (sender == buttonA || keyargs.KeyCode == Keys.A) // A, Auto
-                trainer.PressKey(Trainer.Keys.KeyA);
+                _trainer.PressKey(Trainer.Keys.KeyA);
 
             else if (sender == buttonB || keyargs.KeyCode == Keys.B) // B
-                trainer.PressKey(Trainer.Keys.KeyB);
+                _trainer.PressKey(Trainer.Keys.KeyB);
 
             else if (sender == buttonC || keyargs.KeyCode == Keys.C) // C
-                trainer.PressKey(Trainer.Keys.KeyC);
+                _trainer.PressKey(Trainer.Keys.KeyC);
 
             else if (sender == buttonD || keyargs.KeyCode == Keys.D) // D, Do
-                trainer.PressKey(Trainer.Keys.KeyD);
+                _trainer.PressKey(Trainer.Keys.KeyD);
 
             else if (sender == buttonE || keyargs.KeyCode == Keys.E) // E, Exam
-                trainer.PressKey(Trainer.Keys.KeyE);
+                _trainer.PressKey(Trainer.Keys.KeyE);
 
             else if (sender == buttonF || keyargs.KeyCode == Keys.F) // F
-                trainer.PressKey(Trainer.Keys.KeyF);
+                _trainer.PressKey(Trainer.Keys.KeyF);
 
             else if (sender == buttonReset || keyargs.KeyCode == Keys.Escape) // RESET
-                trainer.PressKey(Trainer.Keys.KeyReset);
+                _trainer.PressKey(Trainer.Keys.KeyReset);
 
         }
 
         private void ReleaseKey(object sender, EventArgs args)
         {
-            trainer.ReleaseKey(Trainer.Keys.Key0);
+            _trainer.ReleaseKey(Trainer.Keys.Key0);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -161,9 +192,9 @@ namespace Sharp6800
             var result = openFileDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
-                trainer.Quit();
-                trainer.LoadSREC(openFileDialog1.FileName);
-                trainer.Start();
+                _trainer.Quit();
+                _trainer.LoadSREC(openFileDialog1.FileName);
+                _trainer.Start();
                 MessageBox.Show("File was loaded successfully into RAM", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -174,9 +205,9 @@ namespace Sharp6800
             var result = openFileDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
-                trainer.Quit();
-                trainer.LoadROM(openFileDialog1.FileName);
-                trainer.Start();
+                _trainer.Quit();
+                _trainer.LoadROM(openFileDialog1.FileName);
+                _trainer.Start();
                 MessageBox.Show("File was loaded successfully into ROM", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -189,53 +220,44 @@ namespace Sharp6800
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            trainer.AddBreakPoint(0xFE62);
+            _trainer.AddBreakPoint(0xFDBB);
             //trainer.SetProgramCounter(1);
         }
 
-        private Memory memory;
-        private DisassemblerView _disassemblerView;
-
         private void memoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (memory == null)
+            lock (_lockObject)
             {
-                memory = new Memory();
-                memory.Show();
-                memory.Closing += (o, args) =>
+                if (_memoryView == null)
+                {
+                    _memoryView = new MemoryView();
+                    _memoryView.Show();
+                    _memoryView.Closing += (o, args) =>
                     {
-                        trainer.OnUpdate -= UpdateMemDisplay;
-                        memory = null;
+                        //_trainer.OnUpdate -= UpdateMemDisplay;
+                        _memoryView = null;
                     };
-                trainer.OnUpdate += UpdateMemDisplay;
+                    // _trainer.OnUpdate += UpdateMemDisplay;
+
+                }
             }
-        }
-
-        private void UpdateMemDisplay(Cpu6800 emu)
-        {
-            memory.MemDisplay.Display(trainer.Memory, 0, 16);
-        }
-
-
-        private void UpdateDasmDisplay(Cpu6800 emu)
-        {
-            _disassemblerView.DasmDisplay.Display(trainer.Memory, trainer.State, 0, 16);
         }
 
         private void disassemblerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_disassemblerView == null)
+            lock (_lockObject)
             {
-                _disassemblerView = new DisassemblerView();
-                _disassemblerView.State = trainer.State;
-                _disassemblerView.Memory = trainer.Memory;
-                _disassemblerView.Show();
-                _disassemblerView.Closing += (o, args) =>
+                if (_disassemblerView == null)
                 {
-                    trainer.OnUpdate -= UpdateDasmDisplay; 
-                    _disassemblerView = null;
-                };
-                trainer.OnUpdate += UpdateDasmDisplay;
+                    _disassemblerView = new DisassemblerView { State = _trainer.State, Memory = _trainer.Memory };
+                    _disassemblerView.Show();
+                    _disassemblerView.Closing += (o, args) =>
+                        {
+                            //_trainer.OnUpdate -= UpdateDasmDisplay;
+                            _disassemblerView = null;
+                        };
+                    //_trainer.OnUpdate += UpdateDasmDisplay;
+                }
             }
         }
 

@@ -273,5 +273,35 @@ namespace Core6800
         private void SET_NZ16(int a) { SET_N16(a); SET_Z16(a); }
         private void SET_FLAGS8(int a, int b, int r) { SET_N8(r); SET_Z8(r); SET_V8(a, b, r); SET_C8(r); }
         private void SET_FLAGS16(int a, int b, int r) { SET_N16(r); SET_Z16(r); SET_V16(a, b, r); SET_C16(r); }
+
+        private int ADD8(int a, int b)
+        {
+            return (a + b) & 0xff;
+        }
+
+        private int SUB8(int a, int b)
+        {
+            return (a - b) & 0xff;
+        }
+
+        private int INC8(int a)
+        {
+            return ++a & 0xff;
+        }
+
+        private int DEC8(int a)
+        {
+            return --a & 0xff;
+        }
+
+        private int INC18(int a)
+        {
+            return ++a & 0xffff;
+        }
+
+        private int DEC16(int a)
+        {
+            return --a & 0xffff;
+        }
     }
 }

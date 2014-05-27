@@ -10,12 +10,22 @@ namespace Core6800
 
         public int Execute()
         {
-            //if (Breakpoint.Contains(PC) || debug)
+            //if (Breakpoint.Contains(State.PC))
             //{
+            //    var x = 1;
             //    // Do something for a hardware breaskpoint
             //    // Log stuff
 
             //}
+
+            if (State.PC == 0xFDC2 && State.A == 0xF7)
+            {
+                var x = 1;
+                // Do something for a hardware breaskpoint
+                // Log stuff
+
+            }
+
 
             //if (!((PC >= 0xFE3A) && (PC <= 0xFE4F))) // Ignore OUTCH
             //{
@@ -25,8 +35,13 @@ namespace Core6800
             int fetchCode = ReadMem(State.PC) & 0xff;
             State.PC++;
             InterpretOpCode(fetchCode);
+            //if (State.A > 255 || State.B > 255 ||State.A < 0 || State.B < 0)
+            //{
+            //    var x = 1;
+            //}
 
-            return cycles[fetchCode];
+
+    return cycles[fetchCode];
         }
 
         public void Reset()

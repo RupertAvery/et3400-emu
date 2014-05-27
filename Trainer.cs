@@ -1,21 +1,41 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using Core6800;
+using Timer = System.Threading.Timer;
 
 namespace Sharp6800
 {
     public delegate void OnUpdateDelegate(Cpu6800 emu);
+    public delegate void OnTimerDelegate(int cyclePerSecond);
 
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
-    class Trainer
+    public class Trainer
     {
+        private bool _running;
+        private readonly object _lockobject = new object();
+        private Thread _runner;
+        private readonly Cpu6800 _emu;
+        private SegDisplay _disp;
+        public int CyclesPerSecond { get; private set; }
+
+        public int[] Memory = new int[65536];
+        public event OnUpdateDelegate OnUpdate;
+        public event OnTimerDelegate OnTimer;
+
+        public Cpu6800State State { get; set; }
+        private int _cycles;
+        private int _lastCycles;
+        private Timer _timer;
+        private Timer _displayTimer;
+        private int limit = 100;
+        public int ClockSpeed { get; private set; }
+        public int sleeps;
+
         public enum Keys
         {
             Key0,
@@ -37,22 +57,22 @@ namespace Sharp6800
             KeyReset
         }
 
-        Thread runner;
-        Cpu6800 emu;
-        SegDisplay disp;
-        public int[] Memory = new int[65536];
-
         public Trainer()
         {
+            ClockSpeed = 100000;
+            
             State = new Cpu6800State();
-            emu = new Cpu6800
+
+            _emu = new Cpu6800
                 {
                     State = State,
+
                     ReadMem = loc =>
                         {
                             loc = loc & 0xFFFF;
                             return Memory[loc];
                         },
+
                     WriteMem = (loc, value) =>
                         {
                             loc = loc & 0xFFFF;
@@ -60,80 +80,91 @@ namespace Sharp6800
                             {
                                 return;
                             }
+
                             Memory[loc] = value;
+
+                            if (loc >= 0xC110 && loc < 0xC16F)
+                            {
+                                _disp.Display(Memory);
+                            }
+                            //if (OnUpdate != null) OnUpdate(_emu);
                         }
                 };
+
+
 
             // Set keyboard mapped memory 'high'
             Memory[0xC003] = 0xFF;
             Memory[0xC005] = 0xFF;
             Memory[0xC006] = 0xFF;
-
         }
 
-        public Cpu6800State State { get; set; }
         public void AddBreakPoint(int address)
         {
-            emu.Breakpoint.Add(address);
+            _emu.Breakpoint.Add(address);
         }
 
         public void SetupDisplay(PictureBox target)
         {
-            disp = new SegDisplay(target);
+            _disp = new SegDisplay(target);
         }
 
         public void Start()
         {
-            emu.Reset();
-            runner = new Thread(EmuThread);
-            runner.Start();
+            _emu.Reset();
+            _runner = new Thread(EmuThread);
+            _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
+            //_displayTimer = new Timer(state => _disp.Display(Memory), null, 0, 50);
+           _runner.Start();
         }
 
-        private bool _running;
-        private readonly object _lockobject = new object();
-
-        public event OnUpdateDelegate OnUpdate;
-
-        public void EmuThread()
+        private void CheckSpeed()
         {
-            int cycles = 0;
+            CyclesPerSecond = _cycles - _lastCycles;
+            if (OnTimer != null) OnTimer(CyclesPerSecond);
+            if (CyclesPerSecond > ClockSpeed)
+            {
+                limit -= (CyclesPerSecond - ClockSpeed) / 1000;
+            }
+            else if (CyclesPerSecond < 1000000)
+            {
+                limit += (ClockSpeed - CyclesPerSecond) / 1000;
+            }
+            Debug.WriteLine(limit);
+            Debug.WriteLine(sleeps);
+            sleeps = 0;
+            _lastCycles = _cycles;
+        }
+
+        private void EmuThread()
+        {
             _running = true;
+            var loopCycles = 0;
 
             while (_running)
             {
-
+                var cycles = 0;
                 lock (_lockobject)
                 {
-                    cycles += emu.Execute();
+                    cycles = _emu.Execute();
+                    loopCycles += cycles;
+                    _cycles += cycles;
                 }
 
-                if (cycles % 128 == 0)
+                if (loopCycles > limit)
                 {
-                    IntHandler();
+                    loopCycles = 0;
                     Thread.Sleep(1);
+                    sleeps++;
                 }
-
-                //1,048,576 cycles/sec = 1MHz 
-                //17476 = 1MHz / 60 = 60Hz interrupt rate
-                if (cycles >= 17476)
-                {
-                    //var tms = stopwatch.Elapsed.TotalMilliseconds;
-                    //stopwatch.Reset();
-                    IntHandler();
-                    cycles = 0;
-                    Thread.Sleep(40);
-                }
-
             }
         }
-
-
 
         public void IntHandler()
         {
             // Update the 7-seg display
-            disp.Display(Memory);
-            if (OnUpdate != null) OnUpdate(emu);
+            _disp.Display(Memory);
+            if (OnUpdate != null) OnUpdate(_emu);
         }
 
         /// <summary>
@@ -144,13 +175,21 @@ namespace Sharp6800
             // wait for emulation thread to terminate
             _running = false;
 
-            if (runner != null)
+            if (_runner != null)
             {
-                while (runner.IsAlive)
+                while (_runner.IsAlive)
                 {
                     Thread.Sleep(50);
                     Application.DoEvents();
                 }
+            }
+            if (_timer != null)
+            {
+                _timer.Dispose();
+            }
+            if (_displayTimer != null)
+            {
+                _displayTimer.Dispose();
             }
         }
 
@@ -214,7 +253,7 @@ namespace Sharp6800
                 case Keys.KeyReset:// RESET
                     lock (_lockobject)
                     {
-                        emu.Reset();
+                        _emu.Reset();
                     }
                     break;
             }
@@ -268,21 +307,21 @@ namespace Sharp6800
                 }
                 else if (ext == ".hex")
                 {
-                    string content = File.ReadAllText(file);
+                    var content = File.ReadAllText(file);
                     var lines = content.Trim().Split(new string[] { "\r\n" }, StringSplitOptions.None);
-                    byte[] rom = new byte[lines.Length * 32];
+                    var rom = new byte[lines.Length * 32];
 
-                    int j = 0;
+                    var j = 0;
                     foreach (var line in lines)
                     {
-                        for (int i = 0; i < 32; i++)
+                        for (var i = 0; i < 32; i++)
                         {
                             rom[j * 32 + i] = (byte)Convert.ToInt32(line.Substring(i * 2, 2), 16);
                         }
                         j++;
                     }
 
-                    int offset = 65536 - rom.Length;
+                    var offset = 65536 - rom.Length;
                     for (var i = 0; i < rom.Length; i++)
                     {
                         Memory[offset + i] = rom[i];
@@ -364,8 +403,8 @@ namespace Sharp6800
 
         public void Write(string addr, string data)
         {
-            int baseAddr = Convert.ToInt32(addr, 16);
-            for (int p = 0; p < data.Length; p += 2)
+            var baseAddr = Convert.ToInt32(addr, 16);
+            for (var p = 0; p < data.Length; p += 2)
             {
                 Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
             }
@@ -373,7 +412,7 @@ namespace Sharp6800
 
         public void SetProgramCounter(int i)
         {
-            emu.State.PC = i;
+            _emu.State.PC = i;
         }
     }
 

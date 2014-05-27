@@ -259,7 +259,7 @@ namespace Sharp6800
         {
             int flags = 0;
             int invalid_mask;
-            int code = oprom[0];
+            int code = oprom[0] & 0xff;
             int opcode, args, invalid;
 
             invalid_mask = 1;

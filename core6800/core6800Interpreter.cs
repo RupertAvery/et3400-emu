@@ -1,7 +1,6 @@
 ﻿/*
  *    NOTICE - This code contains work derived from the MAME project (http://mamedev.org/source/src/emu/cpu/m6800/index.html)
  */
-
 namespace Core6800
 {
     public partial class Cpu6800
@@ -188,7 +187,7 @@ namespace Core6800
                         if (msn > 0x90 || ((State.CC & 0x01) == 0x01)) cf |= 0x60;
                         var t = cf + State.A;
                         CLR_NZV(); /* keep carry from previous operation */
-                        SET_NZ8((int)t); SET_C8(t);
+                        SET_NZ8(t); SET_C8(t);
                         State.A = t;
                     }
 
@@ -245,7 +244,7 @@ namespace Core6800
                         int t;
                         var condition = (State.CC & 0x04 >> 2 | State.CC & 0x01) == 0x00;
                         // (!(State.CC & 0x05));
-                        BRANCH(condition);
+                        BRANCH((State.CC & 0x05) != 0x05);
                     }
 
                     /* 0x23 BLS relative ----- */

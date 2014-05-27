@@ -149,14 +149,14 @@ namespace Sharp6800
             // memoryToolStripMenuItem
             // 
             this.memoryToolStripMenuItem.Name = "memoryToolStripMenuItem";
-            this.memoryToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.memoryToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.memoryToolStripMenuItem.Text = "Memory";
             this.memoryToolStripMenuItem.Click += new System.EventHandler(this.memoryToolStripMenuItem_Click);
             // 
             // disassemblerToolStripMenuItem
             // 
             this.disassemblerToolStripMenuItem.Name = "disassemblerToolStripMenuItem";
-            this.disassemblerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.disassemblerToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.disassemblerToolStripMenuItem.Text = "Disassembler";
             this.disassemblerToolStripMenuItem.Click += new System.EventHandler(this.disassemblerToolStripMenuItem_Click);
             // 
@@ -418,7 +418,7 @@ namespace Sharp6800
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "ET3400 Emulator";
+            this.Text = "ET-3400 Emulator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
