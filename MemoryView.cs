@@ -15,10 +15,10 @@ namespace Sharp6800
         private void Memory_Load(object sender, EventArgs e)
         {
             MemDisplay = new MemDisplay(pictureBox1);
-            comboBox1.Items.Add(new ComboBoxItem() { Description = "RAM (0x0000)", Start = 0x0000 });
-            comboBox1.Items.Add(new ComboBoxItem() { Description = "Keypad (0xC003)", Start = 0xC003 });
-            comboBox1.Items.Add(new ComboBoxItem() { Description = "Display (0xC110)", Start = 0xC110 });
-            comboBox1.Items.Add(new ComboBoxItem() { Description = "ROM (0xFC00)", Start = 0xFC00 });
+            comboBox1.Items.Add(new ComboBoxItem() { Description = "RAM ($0000)", Start = 0x0000 });
+            comboBox1.Items.Add(new ComboBoxItem() { Description = "Keypad ($C003)", Start = 0xC003 });
+            comboBox1.Items.Add(new ComboBoxItem() { Description = "Display ($C110)", Start = 0xC110 });
+            comboBox1.Items.Add(new ComboBoxItem() { Description = "ROM ($FC00)", Start = 0xFC00 });
             comboBox1.SelectedItem = comboBox1.Items[0];
         }
 

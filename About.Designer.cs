@@ -48,9 +48,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(77, 68);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(234, 13);
+            this.label2.Size = new System.Drawing.Size(261, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "©2013, David Khristepher Santos (RupertAvery)";
+            this.label2.Text = "©2013-2014, David Khristepher Santos (RupertAvery)";
             // 
             // buttonClose
             // 

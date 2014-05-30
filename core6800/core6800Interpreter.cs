@@ -1151,7 +1151,7 @@ namespace Core6800
                         int t, r;
                         t = IMMBYTE(); r = State.A + t;
                         CLR_HNZVC(); SET_FLAGS8(State.A, t, r); SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x8c CMPX immediate -***- */
@@ -1334,7 +1334,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.A, t, r);
                         SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x9c CMPX direct -***- */
@@ -1525,7 +1525,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.A, t, r);
                         SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xac CMPX indexed -***- */
@@ -1718,7 +1718,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.A, t, r);
                         SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xbc CMPX extended -***- */

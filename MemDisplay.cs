@@ -29,10 +29,10 @@ namespace Sharp6800
             {
                 g.Clear(Color.White);
 
-                int j = 0;
-                for (int i = Start; i <= Start + 8 * Lines; i += 8)
+                var j = 0;
+                for (var i = Start; i <= Start + 8 * Lines; i += 8)
                 {
-                    DrawHex(g, 10, 20 * j, i + j * 8, memory);
+                    DrawHex(g, 10, 20 * j, i, memory);
                     j++;
                 }
             }
@@ -45,8 +45,9 @@ namespace Sharp6800
 
         private void DrawHex(Graphics g, int x, int y, int start, int[] memory)
         {
-            int k = 0;
+            var k = 0;
             var s = new StringBuilder();
+            if (start >= memory.Length) return;
             s.Append(string.Format("{0:X4}", start));
 
             while (start + k < memory.Length && k < 8)

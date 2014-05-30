@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using Core6800;
 using Timer = System.Threading.Timer;
@@ -12,6 +14,7 @@ namespace Sharp6800
         private DisassemblerView _disassemblerView;
         private Timer _updateTimer;
         private object _lockObject = new object();
+        private List<DataRange> romDataRanges;
 
         public Form1()
         {
@@ -78,7 +81,7 @@ namespace Sharp6800
 
                         if (_disassemblerView != null)
                         {
-                            _disassemblerView.DasmDisplay.Display(_trainer.Memory, _trainer.State, 0, 16);
+                            _disassemblerView.DasmDisplay.Display(_trainer.Memory);
                         }
                     }
 
@@ -91,9 +94,9 @@ namespace Sharp6800
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(pictureBox1);
                 _trainer.LoadROM("ROM.HEX");
-
+                LoadRomDataRanges("ROM.HEX");
                 Action<int> updateSpeed = delegate(int second)
-                { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.ClockSpeed) * 100); };
+                { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.DefaultClockSpeed) * 100); };
 
                 _trainer.OnTimer += second => Invoke(updateSpeed, second);
 
@@ -207,6 +210,7 @@ namespace Sharp6800
             {
                 _trainer.Quit();
                 _trainer.LoadROM(openFileDialog1.FileName);
+                LoadRomDataRanges(openFileDialog1.FileName);
                 _trainer.Start();
                 MessageBox.Show("File was loaded successfully into ROM", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -250,6 +254,7 @@ namespace Sharp6800
                 if (_disassemblerView == null)
                 {
                     _disassemblerView = new DisassemblerView { State = _trainer.State, Memory = _trainer.Memory };
+                    _disassemblerView.DasmDisplay.DataRanges = romDataRanges;
                     _disassemblerView.Show();
                     _disassemblerView.Closing += (o, args) =>
                         {
@@ -259,6 +264,33 @@ namespace Sharp6800
                     //_trainer.OnUpdate += UpdateDasmDisplay;
                 }
             }
+        }
+
+        private void LoadRomDataRanges(string path)
+        {
+            romDataRanges = new List<DataRange>();
+            path = Path.GetFileNameWithoutExtension(path) + ".dat";
+            if (File.Exists(path))
+            {
+                var content = File.ReadAllText(path);
+                var lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith(".data"))
+                    {
+                        var ranges = line.Split(new char[] { ' ' });
+                        romDataRanges.Add(new DataRange() { Start = Convert.ToInt32(ranges[1], 16), End = Convert.ToInt32(ranges[2], 16) });
+                    }
+                }
+
+            }
+
+        }
+
+        private void settingsToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var settings = new SettingsForm { Trainer = _trainer };
+            settings.Show();
         }
 
     }

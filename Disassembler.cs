@@ -3,6 +3,14 @@ using System.Diagnostics;
 
 namespace Sharp6800
 {
+    public class Disassembly
+    {
+        public string Operand { get; set; }
+        public string Arguments { get; set; }
+        public int Length;
+        public byte[] Bytes { get; set; }
+    }
+
     public class Disassembler
     {
         private const int inh = 1; /* inherent */
@@ -255,11 +263,16 @@ namespace Sharp6800
         public const int DASMFLAG_STEP_OVER = 0x08;
         public const int DASMFLAG_STEP_OUT = 0x10;
 
-        public static int Disassemble(int pc, ref string buf, int[] oprom, int[] opram)
+        private static int SIGNED(int b)
+        {
+            return ((int)((b & 0x80) == 0x80 ? b | 0xffffff00 : b));
+        }
+
+        public static int Disassemble(int[] memory, int pc, ref string buf)
         {
             int flags = 0;
             int invalid_mask;
-            int code = oprom[0] & 0xff;
+            int code = memory[pc] & 0xff;
             int opcode, args, invalid;
 
             invalid_mask = 1;
@@ -279,33 +292,33 @@ namespace Sharp6800
             //    return 1 | flags | DASMFLAG_SUPPORTED;
             //}
 
-            buf += string.Format("{0} ", op_name_str[opcode]);
+            buf += string.Format("{0,-4} ", op_name_str[opcode]);
 
             switch (args)
             {
                 case rel:  /* relative */
-                    buf += string.Format("${0:X4}", pc + opram[1] + 2);
+                    buf += string.Format("${0:X4}", pc + SIGNED(memory[pc + 1]) + 2);
                     return 2 | flags | DASMFLAG_SUPPORTED;
                 case imb:  /* immediate (byte) */
-                    buf += string.Format("#${0:X2}", opram[1]);
+                    buf += string.Format("#${0:X2}", memory[pc + 1]);
                     return 2 | flags | DASMFLAG_SUPPORTED;
                 case imw:  /* immediate (word) */
-                    buf += string.Format("#${0:X4}", (opram[1] << 8) + opram[2]);
+                    buf += string.Format("#${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
                     return 3 | flags | DASMFLAG_SUPPORTED;
                 case idx:  /* indexed + byte offset */
-                    buf += string.Format("(x+${0:X2})", opram[1]);
+                    buf += string.Format("(x+${0:X2})", memory[pc + 1]);
                     return 2 | flags | DASMFLAG_SUPPORTED;
                 case imx:  /* immediate, indexed + byte offset */
-                    buf += string.Format("#${0:X2},(x+${1:X2})", opram[1], opram[2]);
+                    buf += string.Format("#${0:X2},(x+${1:X2})", memory[pc + 1], memory[pc + 2]);
                     return 3 | flags | DASMFLAG_SUPPORTED;
                 case dir:  /* direct address */
-                    buf += string.Format("${0:X2}", opram[1]);
+                    buf += string.Format("${0:X2}", memory[1]);
                     return 2 | flags | DASMFLAG_SUPPORTED;
                 case imd:  /* immediate, direct address */
-                    buf += string.Format("#${0:X2},${1:X2}", opram[1], opram[2]);
+                    buf += string.Format("#${0:X2},${1:X2}", memory[pc + 1], memory[pc + 2]);
                     return 3 | flags | DASMFLAG_SUPPORTED;
                 case ext:  /* extended address */
-                    buf += string.Format("${0:X4}", (opram[1] << 8) + opram[2]);
+                    buf += string.Format("${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
                     return 3 | flags | DASMFLAG_SUPPORTED;
                 case sx1:  /* byte from address (s + 1) */
                     buf += string.Format("(s+1)");

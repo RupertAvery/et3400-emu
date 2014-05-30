@@ -1,10 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Core6800;
 
 namespace Sharp6800
 {
+    public class DataRange
+    {
+        public int Start { get; set; }
+        public int End { get; set; }
+    }
+
     public class DasmDisplay
     {
         private readonly IntPtr targetWnd;
@@ -19,7 +27,7 @@ namespace Sharp6800
                 //target.Image = new Bitmap(target.Width, target.Height);
 
                 targetWnd = target.Handle;
-
+                DataRanges = new List<DataRange>();
 
             }
             catch (Exception)
@@ -29,18 +37,47 @@ namespace Sharp6800
             }
         }
 
+        public Cpu6800State State { get; set; }
 
-        public void Display(int[] memory, Cpu6800State state, int start, int lines)
+        public List<DataRange> DataRanges { get; set; }
+
+        public void Display(int[] memory)
         {
             var buffer = new Bitmap(width, height);
             var g = Graphics.FromImage(buffer);
             g.Clear(Color.White);
 
             int j = 0;
-            for (int i = start; j <= lines; )
+
+            for (int i = Start, offset = 0; j <= 16; offset++)
             {
-                i += DrawHex(g, 10, 20 * j, ref i, memory, state);
-                j++;
+                string buf = "";
+                string code = "";
+                if (i < memory.Length)
+                {
+                    var inDataRange = DataRanges.Find(range => i >= range.Start && i <= range.End);
+                    if (inDataRange != null)
+                    {
+                        i = inDataRange.End + 1;
+                    }
+                    var ops = Disassembler.Disassemble(memory, i, ref buf) & 0x3;
+                    int k;
+                    for (k = 0; k < ops; k++)
+                    {
+                        code = code + string.Format("{0:X2}", memory[i + k]) + " ";
+                    }
+                    if (offset >= Offset)
+                    {
+                        DrawHex(g, 10, 20 * j, string.Format("{0:X4} {1,-9} {2}", i, code, buf.ToUpper()));
+                        j++;
+                    }
+                    i += ops;
+                    
+                }
+                else
+                {
+                    break;
+                }
             }
 
             g.Dispose();
@@ -50,27 +87,18 @@ namespace Sharp6800
             p.Dispose();
         }
 
-        private int DrawHex(Graphics g, int x, int y, ref int start, int[] memory, Cpu6800State state)
+        private void DrawHex(Graphics g, int x, int y, string asm)
         {
-            string buf = "";
-            var ops = Disassembler.Disassemble(start, ref buf, new int[] { memory[start] }, new int[] { memory[start], memory[start + 1], memory[start + 2], memory[start + 3] });
-
-            var s = string.Format("{0:X4} {1}", start, buf);
             Brush brush;
             FontStyle fs;
-            if (start == state.PC)
-            {
-                brush = new SolidBrush(Color.DarkRed);
-                fs = FontStyle.Bold;
-            }
-            else
-            {
-                brush = new SolidBrush(Color.Black);
-                fs = FontStyle.Regular;
-            }
+            brush = new SolidBrush(Color.Black);
+            fs = FontStyle.Regular;
             var font = new Font("Courier New", 12, fs);
-            g.DrawString(s, font, brush, x, y);
-            return ops & 0x3;
+            g.DrawString(asm, font, brush, x, y);
         }
+
+        public int Start { get; set; }
+
+        public int Offset { get; set; }
     }
 }

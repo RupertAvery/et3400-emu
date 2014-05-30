@@ -40,6 +40,21 @@ namespace Sharp6800
             }
         }
 
+        public void Write(int loc, int value)
+        {
+            var buffer = new Bitmap(width, height);
+            var g = Graphics.FromImage(buffer);
+            int j = 6 - ((loc & 0xF0) >> 4);
+            g.DrawImage(bg, 0, 5, 38, 54);
+            DrawSegData(g, 0, 5, value);
+
+            g.Dispose();
+
+            var p = Graphics.FromHwnd(targetWnd);
+            p.DrawImage(buffer, 20 + j * 45, 5);
+            p.Dispose();
+        }
+
 
         public void Display(int[] memory)
         {

@@ -33,7 +33,7 @@ namespace Sharp6800
         private Timer _timer;
         private Timer _displayTimer;
         private int limit = 100;
-        public int ClockSpeed { get; private set; }
+        public int ClockSpeed { get; set; }
         public int sleeps;
 
         public enum Keys
@@ -60,7 +60,7 @@ namespace Sharp6800
         public Trainer()
         {
             ClockSpeed = 100000;
-            
+
             State = new Cpu6800State();
 
             _emu = new Cpu6800
@@ -83,9 +83,10 @@ namespace Sharp6800
 
                             Memory[loc] = value;
 
-                            if (loc >= 0xC110 && loc < 0xC16F)
+                            if (loc >= 0xC110 && loc <= 0xC16F && ((loc & 0x0F) == 0x00))
                             {
-                                _disp.Display(Memory);
+                                _disp.Write(loc, value);
+                                //                                _disp.Display(Memory);
                             }
                             //if (OnUpdate != null) OnUpdate(_emu);
                         }
@@ -115,7 +116,7 @@ namespace Sharp6800
             _runner = new Thread(EmuThread);
             _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
             //_displayTimer = new Timer(state => _disp.Display(Memory), null, 0, 50);
-           _runner.Start();
+            _runner.Start();
         }
 
         private void CheckSpeed()
@@ -126,7 +127,7 @@ namespace Sharp6800
             {
                 limit -= (CyclesPerSecond - ClockSpeed) / 1000;
             }
-            else if (CyclesPerSecond < 1000000)
+            else if (CyclesPerSecond < ClockSpeed)
             {
                 limit += (ClockSpeed - CyclesPerSecond) / 1000;
             }
@@ -413,6 +414,10 @@ namespace Sharp6800
         public void SetProgramCounter(int i)
         {
             _emu.State.PC = i;
+        }
+
+        public int DefaultClockSpeed {
+            get { return 100000; } 
         }
     }
 

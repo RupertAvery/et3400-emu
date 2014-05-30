@@ -28,6 +28,7 @@ namespace Sharp6800
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -200,7 +201,6 @@ namespace Sharp6800
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.settingsToolStripMenuItem1});
-            this.settingsToolStripMenuItem.Enabled = false;
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.settingsToolStripMenuItem.Text = "Settings";
@@ -208,8 +208,9 @@ namespace Sharp6800
             // settingsToolStripMenuItem1
             // 
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(116, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem1.Text = "Settings";
+            this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem1_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -228,7 +229,7 @@ namespace Sharp6800
             // 
             // buttonF
             // 
-            this.buttonF.Image = global::Sharp6800.Properties.Resources.key_F;
+            this.buttonF.Image = ((System.Drawing.Image)(resources.GetObject("buttonF.Image")));
             this.buttonF.Location = new System.Drawing.Point(347, 127);
             this.buttonF.Name = "buttonF";
             this.buttonF.Size = new System.Drawing.Size(37, 37);
@@ -237,7 +238,7 @@ namespace Sharp6800
             // 
             // buttonE
             // 
-            this.buttonE.Image = global::Sharp6800.Properties.Resources.key_E;
+            this.buttonE.Image = ((System.Drawing.Image)(resources.GetObject("buttonE.Image")));
             this.buttonE.Location = new System.Drawing.Point(304, 127);
             this.buttonE.Name = "buttonE";
             this.buttonE.Size = new System.Drawing.Size(37, 37);
@@ -246,7 +247,7 @@ namespace Sharp6800
             // 
             // buttonD
             // 
-            this.buttonD.Image = global::Sharp6800.Properties.Resources.key_D;
+            this.buttonD.Image = ((System.Drawing.Image)(resources.GetObject("buttonD.Image")));
             this.buttonD.Location = new System.Drawing.Point(261, 127);
             this.buttonD.Name = "buttonD";
             this.buttonD.Size = new System.Drawing.Size(37, 37);
@@ -255,7 +256,7 @@ namespace Sharp6800
             // 
             // buttonC
             // 
-            this.buttonC.Image = global::Sharp6800.Properties.Resources.key_C;
+            this.buttonC.Image = ((System.Drawing.Image)(resources.GetObject("buttonC.Image")));
             this.buttonC.Location = new System.Drawing.Point(347, 170);
             this.buttonC.Name = "buttonC";
             this.buttonC.Size = new System.Drawing.Size(37, 37);
@@ -264,7 +265,7 @@ namespace Sharp6800
             // 
             // buttonB
             // 
-            this.buttonB.Image = global::Sharp6800.Properties.Resources.key_B;
+            this.buttonB.Image = ((System.Drawing.Image)(resources.GetObject("buttonB.Image")));
             this.buttonB.Location = new System.Drawing.Point(304, 170);
             this.buttonB.Name = "buttonB";
             this.buttonB.Size = new System.Drawing.Size(37, 37);
@@ -273,7 +274,7 @@ namespace Sharp6800
             // 
             // buttonA
             // 
-            this.buttonA.Image = global::Sharp6800.Properties.Resources.key_A;
+            this.buttonA.Image = ((System.Drawing.Image)(resources.GetObject("buttonA.Image")));
             this.buttonA.Location = new System.Drawing.Point(261, 170);
             this.buttonA.Name = "buttonA";
             this.buttonA.Size = new System.Drawing.Size(37, 37);
@@ -282,7 +283,7 @@ namespace Sharp6800
             // 
             // button9
             // 
-            this.button9.Image = global::Sharp6800.Properties.Resources._9;
+            this.button9.Image = ((System.Drawing.Image)(resources.GetObject("button9.Image")));
             this.button9.Location = new System.Drawing.Point(347, 213);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(37, 37);
@@ -291,7 +292,7 @@ namespace Sharp6800
             // 
             // button8
             // 
-            this.button8.Image = global::Sharp6800.Properties.Resources._8;
+            this.button8.Image = ((System.Drawing.Image)(resources.GetObject("button8.Image")));
             this.button8.Location = new System.Drawing.Point(304, 213);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(37, 37);
@@ -300,7 +301,7 @@ namespace Sharp6800
             // 
             // button7
             // 
-            this.button7.Image = global::Sharp6800.Properties.Resources._7;
+            this.button7.Image = ((System.Drawing.Image)(resources.GetObject("button7.Image")));
             this.button7.Location = new System.Drawing.Point(261, 213);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(37, 37);
@@ -309,7 +310,7 @@ namespace Sharp6800
             // 
             // button6
             // 
-            this.button6.Image = global::Sharp6800.Properties.Resources._6;
+            this.button6.Image = ((System.Drawing.Image)(resources.GetObject("button6.Image")));
             this.button6.Location = new System.Drawing.Point(347, 256);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(37, 37);
@@ -318,7 +319,7 @@ namespace Sharp6800
             // 
             // button5
             // 
-            this.button5.Image = global::Sharp6800.Properties.Resources._5;
+            this.button5.Image = ((System.Drawing.Image)(resources.GetObject("button5.Image")));
             this.button5.Location = new System.Drawing.Point(304, 256);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(37, 37);
@@ -328,7 +329,7 @@ namespace Sharp6800
             // button4
             // 
             this.button4.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
-            this.button4.Image = global::Sharp6800.Properties.Resources._4;
+            this.button4.Image = ((System.Drawing.Image)(resources.GetObject("button4.Image")));
             this.button4.Location = new System.Drawing.Point(261, 256);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(37, 37);
@@ -337,7 +338,7 @@ namespace Sharp6800
             // 
             // button3
             // 
-            this.button3.Image = global::Sharp6800.Properties.Resources._3;
+            this.button3.Image = ((System.Drawing.Image)(resources.GetObject("button3.Image")));
             this.button3.Location = new System.Drawing.Point(347, 299);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(37, 37);
@@ -346,7 +347,7 @@ namespace Sharp6800
             // 
             // button2
             // 
-            this.button2.Image = global::Sharp6800.Properties.Resources._2;
+            this.button2.Image = ((System.Drawing.Image)(resources.GetObject("button2.Image")));
             this.button2.Location = new System.Drawing.Point(304, 299);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(37, 37);
@@ -355,7 +356,7 @@ namespace Sharp6800
             // 
             // button1
             // 
-            this.button1.Image = global::Sharp6800.Properties.Resources._1;
+            this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
             this.button1.Location = new System.Drawing.Point(261, 299);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(37, 37);
@@ -364,7 +365,7 @@ namespace Sharp6800
             // 
             // buttonReset
             // 
-            this.buttonReset.Image = global::Sharp6800.Properties.Resources.Reset;
+            this.buttonReset.Image = ((System.Drawing.Image)(resources.GetObject("buttonReset.Image")));
             this.buttonReset.Location = new System.Drawing.Point(325, 342);
             this.buttonReset.Name = "buttonReset";
             this.buttonReset.Size = new System.Drawing.Size(37, 37);
@@ -373,7 +374,7 @@ namespace Sharp6800
             // 
             // button0
             // 
-            this.button0.Image = global::Sharp6800.Properties.Resources._0;
+            this.button0.Image = ((System.Drawing.Image)(resources.GetObject("button0.Image")));
             this.button0.Location = new System.Drawing.Point(282, 342);
             this.button0.Name = "button0";
             this.button0.Size = new System.Drawing.Size(37, 37);

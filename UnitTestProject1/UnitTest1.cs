@@ -17,13 +17,14 @@ namespace UnitTestProject1
             {
                 Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
             }
-
         }
+
         [TestInitialize]
         public void Init()
         {
             emu = new Cpu6800
                 {
+                    State = new Cpu6800State(),
                     ReadMem = loc =>
                         {
                             loc = loc & 0xFFFF;
@@ -39,55 +40,85 @@ namespace UnitTestProject1
                             Memory[loc] = value;
                         }
                 };
+            emu.ClearFlags();
             emu.State.PC = 0;
+        }
+
+        private void ExpectAToBe(int value)
+        {
+            Assert.AreEqual(value, emu.State.A);
+        }
+
+        private void ExpectBToBe(int value)
+        {
+            Assert.AreEqual(value, emu.State.A);
+        }
+
+        private void ExpectCCToBe(int value)
+        {
+            Assert.AreEqual(value, emu.State.CC);
+        }
+
+        private void ExpectCCToBe(string value)
+        {
+            Assert.AreEqual(value, emu.State.CC);
+        }
+
+
+        private void ResetEmu(string addr = "0000")
+        {
+            int baseAddr = Convert.ToInt32(addr, 16);
+            emu.State.CC = 0x00;
+            emu.State.PC = baseAddr;
+            emu.State.IRQ = 1;
+            emu.State.NMI = 1;
+            emu.State.A = 0x00;
+            emu.State.B = 0x00;
+            emu.State.S = 0xd9;
+            emu.State.X = 0x0000;
+            // Clear first 255 bytes of memory
+            for (int i = 0; i < 0xFF; i++)
+            {
+                Memory[i] = 0;
+            }
+        }
+
+        private void RunToNop()
+        {
+            while (Memory[emu.State.PC] != 0x01)
+            {
+                emu.Execute();
+            }
+        }
+
+        private void LoadProgram(string code, string progstart = "0000")
+        {
+            ResetEmu(progstart);
+            Write("0000", code + "01");
         }
 
         [TestMethod]
         public void ADDA_IMMED()
         {
-            Write("0000", "8B01");
-            emu.ClearFlags();
-            emu.State.PC = 0;
-            emu.Execute();
-            Assert.AreEqual(1, emu.State.A);
-            //Assert.AreEqual(0, emu.Flags.H);
-            //Assert.AreEqual(0, emu.Flags.I);
-            //Assert.AreEqual(0, emu.Flags.N);
-            //Assert.AreEqual(0, emu.Flags.Z);
-            //Assert.AreEqual(0, emu.Flags.V);
-            //Assert.AreEqual(0, emu.Flags.C);
+            LoadProgram("860F8B01");
+            RunToNop();
+            ExpectAToBe(0x10);
+            ExpectCCToBe(0x20);
 
-            Write("0000", "860F8B01");
-            emu.ClearFlags();
-            emu.State.PC = 0;
-            emu.Execute();
-            emu.Execute();
-            Assert.AreEqual(0x10, emu.State.A);
-            Assert.AreEqual(0x20, emu.State.CC);
-
-            Write("0000", "86FF8B01");
-            emu.ClearFlags();
-            emu.State.PC = 0;
-            emu.Execute();
-            emu.Execute();
-            Assert.AreEqual(0x00, emu.State.A);
-            Assert.AreEqual(0x21, emu.State.CC);
+            LoadProgram("86FF8B01");
+            RunToNop();
+            ExpectAToBe(0x00);
+            // HINZVC-100101
+            //ExpectCCToBe(0x21);
+            ExpectCCToBe(0x25);
         }
 
         [TestMethod]
         public void ADDA_DIRECT()
         {
-            Write("0000", "01");
-            Write("0001", "9B00");
-            emu.State.PC = 1;
-            emu.Execute();
-            Assert.AreEqual(1, emu.State.A);
-            //Assert.AreEqual(0, emu.Flags.H);
-            //Assert.AreEqual(0, emu.Flags.I);
-            //Assert.AreEqual(0, emu.Flags.N);
-            //Assert.AreEqual(0, emu.Flags.Z);
-            //Assert.AreEqual(0, emu.Flags.V);
-            //Assert.AreEqual(0, emu.Flags.C);
+            LoadProgram("019B00", "0001");
+            RunToNop();
+            ExpectAToBe(1);
         }
 
     }
