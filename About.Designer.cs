@@ -86,6 +86,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "About";
+            this.Load += new System.EventHandler(this.About_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

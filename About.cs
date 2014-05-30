@@ -19,5 +19,10 @@ namespace Sharp6800
         {
             Close();
         }
+
+        private void About_Load(object sender, EventArgs e)
+        {
+            label1.Text = "Sharp6800 - ET3400 Emulator v" + Application.ProductVersion;
+        }
     }
 }
