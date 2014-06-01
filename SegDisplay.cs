@@ -8,11 +8,11 @@ namespace Sharp6800
     {
         readonly IntPtr targetWnd;
         readonly int width, height;
-        readonly Image[] segments = new Image[8];
+        //readonly Image[] segments = new Image[8];
         readonly Image[] vt = new Image[2];
         readonly Image[] hr = new Image[2];
         readonly Image[] dp = new Image[2];
-        readonly Image bg;
+        //readonly Image bg;
         private object bglock = new object();
 
 
@@ -29,15 +29,15 @@ namespace Sharp6800
                 targetWnd = target.Handle;
                 target.Paint += (sender, args) => Repaint(args.Graphics);
 
-                segments[0] = Image.FromFile("display/g.png");
-                segments[1] = Image.FromFile("display/f.png");
-                segments[2] = Image.FromFile("display/e.png");
-                segments[3] = Image.FromFile("display/d.png");
-                segments[4] = Image.FromFile("display/c.png");
-                segments[5] = Image.FromFile("display/b.png");
-                segments[6] = Image.FromFile("display/a.png");
-                segments[7] = Image.FromFile("display/dp.png");
-                bg = Image.FromFile("display/bg.png");
+                //segments[0] = Image.FromFile("display/g.png");
+                //segments[1] = Image.FromFile("display/f.png");
+                //segments[2] = Image.FromFile("display/e.png");
+                //segments[3] = Image.FromFile("display/d.png");
+                //segments[4] = Image.FromFile("display/c.png");
+                //segments[5] = Image.FromFile("display/b.png");
+                //segments[6] = Image.FromFile("display/a.png");
+                //segments[7] = Image.FromFile("display/dp.png");
+                //bg = Image.FromFile("display/bg.png");
 
                 vt[0] = Image.FromFile("display/vtoff.png");
                 vt[1] = Image.FromFile("display/vton.png");
@@ -58,7 +58,7 @@ namespace Sharp6800
             var buffer = new Bitmap(38, 54);
             int position = 6 - ((loc & 0xF0) >> 4);
             int segment = loc & 0x7;
-
+            System.Diagnostics.Debug.WriteLine("{0:X4}: {1:X2} {2}", loc, value, segment);
 
             lock (bglock)
             {
@@ -93,25 +93,30 @@ namespace Sharp6800
             graphics.DrawImage(buffer, 20 + position * 45, 5);
         }
 
-
+        private string[] flags = {"H", "I", "N", "Z", "V", "C"};
         public void Repaint(Graphics graphics)
         {
             for (int i = 0xC16F; i >= 0xC110; i--)
             {
                 Write(i, Memory[i], graphics);
             }
-        }
 
-        private void DrawSegData(Graphics g, int x, int y, int segdata)
-        {
-            for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 6; j++)
             {
-                if (((segdata >> i) & 1) == 1)
-                {
-                    g.DrawImage(segments[i], x, y, 38, 54);
-                }
+                graphics.DrawString(flags[j], new Font("Arial", 8), Brushes.White, 42 + j * 45, 62);
             }
         }
+
+        //private void DrawSegData(Graphics g, int x, int y, int segdata)
+        //{
+        //    for (int i = 0; i < 8; i++)
+        //    {
+        //        if (((segdata >> i) & 1) == 1)
+        //        {
+        //            g.DrawImage(segments[i], x, y, 38, 54);
+        //        }
+        //    }
+        //}
 
 
         private void DrawSingleSegData(Graphics g, int x, int y, int segment, int segdata)

@@ -93,32 +93,47 @@ namespace Sharp6800
 
         public void SetupDisplay(PictureBox target)
         {
-            _disp = new SegDisplay(target);
-            _disp.Memory = Memory;
+            _disp = new SegDisplay(target) { Memory = Memory };
         }
 
         public void Start()
         {
             _emu.Reset();
-            _runner = CreateThread();
-            _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
-            //_displayTimer = new Timer(state => _disp.Display(Memory), null, 0, 50);
-            _runner.Start();
+            Continue();
         }
 
-        private void CheckSpeed()
+        private void CheckSpeedSpin()
         {
             CyclesPerSecond = _cycles - _lastCycles;
             if (OnTimer != null) OnTimer(CyclesPerSecond);
             if (CyclesPerSecond > ClockSpeed)
             {
+                spinTime += (CyclesPerSecond - ClockSpeed) / 10;
+            }
+            else if (CyclesPerSecond < ClockSpeed)
+            {
+                spinTime -= (ClockSpeed - CyclesPerSecond) / 10;
+            }
+
+            if (spinTime > 25000) spinTime = 25000;
+            if (spinTime < 1) spinTime = 1;
+            sleeps = 0;
+            _lastCycles = _cycles;
+        }
+
+
+        private void CheckSpeedSleep()
+        {
+            CyclesPerSecond = _cycles - _lastCycles;
+            if (OnTimer != null) OnTimer(CyclesPerSecond);
+
+            if (CyclesPerSecond > ClockSpeed)
+            {
                 limit -= (CyclesPerSecond - ClockSpeed) / 1000;
-                spinTime += (CyclesPerSecond - ClockSpeed) / 2500;
             }
             else if (CyclesPerSecond < ClockSpeed)
             {
                 limit += (ClockSpeed - CyclesPerSecond) / 1000;
-                spinTime -= (ClockSpeed - CyclesPerSecond) / 2500;
             }
 
             if (spinTime < 1) spinTime = 1;
@@ -432,8 +447,14 @@ namespace Sharp6800
         public void Continue()
         {
             _runner = CreateThread();
-            _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
-            //_displayTimer = new Timer(state => _disp.Display(Memory), null, 0, 50);
+            if (EmulationMode == EmulationModes.Regular)
+            {
+                _timer = new Timer(state => CheckSpeedSleep(), null, 0, 1000);
+            }
+            else if (EmulationMode == EmulationModes.CycleExact)
+            {
+                _timer = new Timer(state => CheckSpeedSpin(), null, 0, 1000);
+            }
             _runner.Start();
         }
 

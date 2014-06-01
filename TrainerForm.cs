@@ -91,15 +91,16 @@ namespace Sharp6800
             {
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(pictureBox1);
-                _trainer.LoadROM("ROM.HEX");
-                var datPath = Path.GetFileNameWithoutExtension("ROM.HEX") + ".dat";
-                _romDataRanges = DatFile.Read(datPath);
+                LoadROM("ROM.HEX");
+
                 Action<int> updateSpeed = delegate(int second)
                 { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.DefaultClockSpeed) * 100); };
 
                 _trainer.OnTimer += second => Invoke(updateSpeed, second);
 
-                _trainer.Start();
+                // ensure that the form is completely visible before starting the emulator, otherwise 
+                // the initial segments will be "blank"
+                this.Shown += (o, args) => _trainer.Start();
             }
             catch (Exception ex)
             {
@@ -209,16 +210,29 @@ namespace Sharp6800
                 if (result == DialogResult.OK)
                 {
                     _trainer.Quit();
-                    _trainer.LoadRam(openFileDialog1.FileName);
+                    try
+                    {
+                        _trainer.LoadRam(openFileDialog1.FileName);
+                    }
+                    finally
+                    {
+                        _trainer.Start();
+                    }
                 }
             }
             catch (Exception)
             {
                 MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog1.FileName)), "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            finally
+        }
+
+        private void LoadROM(string path)
+        {
+            _trainer.LoadROM(path);
+            var datPath = Path.GetFileNameWithoutExtension(path) + ".dat";
+            if (File.Exists(datPath))
             {
-                _trainer.Start();
+                _romDataRanges = DatFile.Read(datPath);
             }
         }
 
@@ -231,19 +245,20 @@ namespace Sharp6800
                 if (result == DialogResult.OK)
                 {
                     _trainer.Quit();
-                    _trainer.LoadROM(openFileDialog1.FileName);
-                    var datPath = Path.GetFileNameWithoutExtension(openFileDialog1.FileName) + ".dat";
-                    _romDataRanges = DatFile.Read(datPath);
+                    try
+                    {
+                        LoadROM(openFileDialog1.FileName);
+                    }
+                    finally
+                    {
+                        _trainer.Start();
+                    }
                 }
             }
             catch (Exception)
             {
                 MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog1.FileName)),
                                 "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            finally
-            {
-                _trainer.Start();
             }
         }
 
