@@ -4,62 +4,50 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using Core6800;
+using Sharp6800.Debug;
 using Timer = System.Threading.Timer;
 
 namespace Sharp6800
 {
-    public delegate void OnUpdateDelegate(Cpu6800 emu);
-    public delegate void OnTimerDelegate(int cyclePerSecond);
-
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
     public class Trainer
     {
-        private bool _running;
-        private readonly object _lockobject = new object();
-        private Thread _runner;
-        private readonly Cpu6800 _emu;
-        private SegDisplay _disp;
-        public int CyclesPerSecond { get; private set; }
-
-        public int[] Memory = new int[65536];
-        public event OnUpdateDelegate OnUpdate;
-        public event OnTimerDelegate OnTimer;
-
-        public Cpu6800State State { get; set; }
+        private int limit = 100;
+        private int spinTime = 1;
         private int _cycles;
         private int _lastCycles;
         private Timer _timer;
         private Timer _displayTimer;
-        private int limit = 100;
-        public int ClockSpeed { get; set; }
-        public int sleeps;
+        private Thread _runner;
+        private readonly object _lockobject = new object();
 
-        public enum Keys
+        public enum EmulationModes
         {
-            Key0,
-            Key1,
-            Key2,
-            Key3,
-            Key4,
-            Key5,
-            Key6,
-            Key7,
-            Key8,
-            Key9,
-            KeyA,
-            KeyB,
-            KeyC,
-            KeyD,
-            KeyE,
-            KeyF,
-            KeyReset
+            Regular,
+            CycleExact
         }
+
+        public EmulationModes EmulationMode { get; set; }
+
+        private bool _running;
+        public int sleeps;
+        private SegDisplay _disp;
+        private readonly Cpu6800 _emu;
+
+        public int CyclesPerSecond { get; private set; }
+        public int[] Memory = new int[65536];
+        public Cpu6800State State { get; set; }
+        public int ClockSpeed { get; set; }
+
+        //public event OnUpdateDelegate OnUpdate;
+        public event OnTimerDelegate OnTimer;
 
         public Trainer()
         {
             ClockSpeed = 100000;
+            EmulationMode = EmulationModes.Regular;
 
             State = new Cpu6800State();
 
@@ -83,12 +71,10 @@ namespace Sharp6800
 
                             Memory[loc] = value;
 
-                            if (loc >= 0xC110 && loc <= 0xC16F && ((loc & 0x0F) == 0x00))
+                            if ((loc & 0xC100) == 0xC100)
                             {
                                 _disp.Write(loc, value);
-                                //                                _disp.Display(Memory);
                             }
-                            //if (OnUpdate != null) OnUpdate(_emu);
                         }
                 };
 
@@ -108,12 +94,13 @@ namespace Sharp6800
         public void SetupDisplay(PictureBox target)
         {
             _disp = new SegDisplay(target);
+            _disp.Memory = Memory;
         }
 
         public void Start()
         {
             _emu.Reset();
-            _runner = new Thread(EmuThread);
+            _runner = CreateThread();
             _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
             //_displayTimer = new Timer(state => _disp.Display(Memory), null, 0, 50);
             _runner.Start();
@@ -126,18 +113,20 @@ namespace Sharp6800
             if (CyclesPerSecond > ClockSpeed)
             {
                 limit -= (CyclesPerSecond - ClockSpeed) / 1000;
+                spinTime += (CyclesPerSecond - ClockSpeed) / 2500;
             }
             else if (CyclesPerSecond < ClockSpeed)
             {
                 limit += (ClockSpeed - CyclesPerSecond) / 1000;
+                spinTime -= (ClockSpeed - CyclesPerSecond) / 2500;
             }
-            Debug.WriteLine(limit);
-            Debug.WriteLine(sleeps);
+
+            if (spinTime < 1) spinTime = 1;
             sleeps = 0;
             _lastCycles = _cycles;
         }
 
-        private void EmuThread()
+        private void EmuThreadSleep()
         {
             _running = true;
             var loopCycles = 0;
@@ -145,12 +134,9 @@ namespace Sharp6800
             while (_running)
             {
                 var cycles = 0;
-                lock (_lockobject)
-                {
-                    cycles = _emu.Execute();
-                    loopCycles += cycles;
-                    _cycles += cycles;
-                }
+                cycles = _emu.Execute();
+                loopCycles += cycles;
+                _cycles += cycles;
 
                 if (loopCycles > limit)
                 {
@@ -161,11 +147,15 @@ namespace Sharp6800
             }
         }
 
-        public void IntHandler()
+        private void EmuThreadSpin()
         {
-            // Update the 7-seg display
-            _disp.Display(Memory);
-            if (OnUpdate != null) OnUpdate(_emu);
+            _running = true;
+
+            while (_running)
+            {
+                _cycles += _emu.Execute();
+                Thread.SpinWait(spinTime);
+            }
         }
 
         /// <summary>
@@ -176,82 +166,85 @@ namespace Sharp6800
             // wait for emulation thread to terminate
             _running = false;
 
-            if (_runner != null)
+            lock (_lockobject)
             {
-                while (_runner.IsAlive)
+                if (_runner != null)
                 {
-                    Thread.Sleep(50);
-                    Application.DoEvents();
+                    while (_runner.IsAlive)
+                    {
+                        Thread.Sleep(50);
+                        Application.DoEvents();
+                    }
                 }
-            }
-            if (_timer != null)
-            {
-                _timer.Dispose();
-            }
-            if (_displayTimer != null)
-            {
-                _displayTimer.Dispose();
+                if (_timer != null)
+                {
+                    _timer.Dispose();
+                }
+                if (_displayTimer != null)
+                {
+                    _displayTimer.Dispose();
+                }
             }
         }
 
         /// <summary>
         /// Simulate keypress through memory-mapped locations C003-C006
         /// </summary>
-        /// <param name="key"></param>
-        public void PressKey(Keys key)
+        /// <param name="trainerKey"></param>
+        public void PressKey(TrainerKeys trainerKey)
         {
-            switch (key)
+            switch (trainerKey)
             {
                 // pull appropriate bit at mem location LOW
-                case Keys.Key0:
+                case TrainerKeys.Key0:
                     Memory[0xC006] &= 0xDF;
                     break;
-                case Keys.Key1:// 1, ACCA
+                case TrainerKeys.Key1:// 1, ACCA
                     Memory[0xC006] &= 0xEF;
                     break;
-                case Keys.Key2:// 2
+                case TrainerKeys.Key2:// 2
                     Memory[0xC005] &= 0xEF;
                     break;
-                case Keys.Key3:// 3
+                case TrainerKeys.Key3:// 3
                     Memory[0xC003] &= 0xEF;
                     break;
-                case Keys.Key4:// 4, INDEX
+                case TrainerKeys.Key4:// 4, INDEX
                     Memory[0xC006] &= 0xF7;
                     break;
-                case Keys.Key5:// 5, CC
+                case TrainerKeys.Key5:// 5, CC
                     Memory[0xC005] &= 0xF7;
                     break;
-                case Keys.Key6:// 6
+                case TrainerKeys.Key6:// 6
                     Memory[0xC003] &= 0xF7;
                     break;
-                case Keys.Key7:// 7, RTI;
+                case TrainerKeys.Key7:// 7, RTI;
                     Memory[0xC006] &= 0xFB;
                     break;
-                case Keys.Key8:// 8
+                case TrainerKeys.Key8:// 8
                     Memory[0xC005] &= 0xFB;
                     break;
-                case Keys.Key9:// 9
+                case TrainerKeys.Key9:// 9
                     Memory[0xC003] &= 0xFB;
                     break;
-                case Keys.KeyA:// A, Auto
+                case TrainerKeys.KeyA:// A, Auto
                     Memory[0xC006] &= 0xFD;
                     break;
-                case Keys.KeyB:// B
+                case TrainerKeys.KeyB:// B
                     Memory[0xC005] &= 0xFD;
                     break;
-                case Keys.KeyC:// C
+                case TrainerKeys.KeyC:// C
                     Memory[0xC003] &= 0xFD;
                     break;
-                case Keys.KeyD:// D, Do
+                case TrainerKeys.KeyD:// D, Do
                     Memory[0xC006] &= 0xFE;
                     break;
-                case Keys.KeyE:// E, Exam
+                case TrainerKeys.KeyE:// E, Exam
                     Memory[0xC005] &= 0xFE;
                     break;
-                case Keys.KeyF:// F
+                case TrainerKeys.KeyF:// F
                     Memory[0xC003] &= 0xFE;
                     break;
-                case Keys.KeyReset:// RESET
+                case TrainerKeys.KeyReset:// RESET
                     lock (_lockobject)
                     {
                         _emu.Reset();
@@ -263,8 +256,8 @@ namespace Sharp6800
         /// <summary>
         /// Simulate releasing of keys
         /// </summary>
-        /// <param name="key"></param>
-        public void ReleaseKey(Keys key)
+        /// <param name="trainerKey"></param>
+        public void ReleaseKey(TrainerKeys trainerKey)
         {
             // just pull everything high. 
             // we're not monitoring multiple presses anyway
@@ -291,20 +284,6 @@ namespace Sharp6800
                     {
                         Memory[offset + i] = rom[i];
                     }
-                    //using (var fs = new StreamWriter("zenith.hex"))
-                    //{
-                    //    int j = 0;
-                    //    foreach (var b in rom)
-                    //    {
-                    //        fs.Write(string.Format("{0:X2}", b));
-                    //        j++;
-                    //        if (j == 32)
-                    //        {
-                    //            fs.Write("\r\n");
-                    //            j = 0;
-                    //        }
-                    //    }
-                    //}
                 }
                 else if (ext == ".hex")
                 {
@@ -358,7 +337,7 @@ namespace Sharp6800
         }
 
 
-        public void LoadSREC(string file)
+        public void LoadRam(string file)
         {
             try
             {
@@ -416,8 +395,58 @@ namespace Sharp6800
             _emu.State.PC = i;
         }
 
-        public int DefaultClockSpeed {
-            get { return 100000; } 
+        public int DefaultClockSpeed
+        {
+            get { return 100000; }
+        }
+
+        public bool IsInBreak { get; set; }
+
+        public void Break()
+        {
+            Quit();
+            IsInBreak = true;
+        }
+
+        public void StepOver()
+        {
+            if (StepInto()) StepOutOf();
+        }
+
+        public void StepOutOf()
+        {
+            var nextOpCode = Memory[_emu.State.PC] & 0xFF;
+            do
+            {
+                _emu.Execute();
+            } while (!Disassembler.IsReturn(nextOpCode));
+        }
+
+        public bool StepInto()
+        {
+            var nextOpCode = Memory[_emu.State.PC] & 0xFF;
+            _emu.Execute();
+            return Disassembler.IsSubroutine(nextOpCode);
+        }
+
+        public void Continue()
+        {
+            _runner = CreateThread();
+            _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
+            //_displayTimer = new Timer(state => _disp.Display(Memory), null, 0, 50);
+            _runner.Start();
+        }
+
+        private Thread CreateThread()
+        {
+            switch (EmulationMode)
+            {
+                case EmulationModes.Regular:
+                    return new Thread(EmuThreadSleep);
+                case EmulationModes.CycleExact:
+                    return new Thread(EmuThreadSpin);
+            }
+            return null;
         }
     }
 

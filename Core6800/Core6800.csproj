@@ -41,6 +41,7 @@
     <Compile Include="core6800Funcs.cs" />
     <Compile Include="core6800Init.cs" />
     <Compile Include="core6800MMU.cs" />
+    <Compile Include="Cpu6800State.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

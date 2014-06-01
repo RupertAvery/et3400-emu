@@ -41,7 +41,7 @@ namespace Core6800
             //}
 
 
-    return cycles[fetchCode];
+            return cycles[fetchCode];
         }
 
         public void Reset()
