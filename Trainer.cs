@@ -9,6 +9,18 @@ using Timer = System.Threading.Timer;
 
 namespace Sharp6800
 {
+    public enum EmulationModes
+    {
+        Regular,
+        CycleExact
+    }
+
+    public class TrainerSettings
+    {
+        public bool EnableOUTCHHack { get; set; }
+        public int ClockSpeed { get; set; }
+        public EmulationModes EmulationMode { get; set; }
+    }
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
@@ -22,12 +34,7 @@ namespace Sharp6800
         private Timer _displayTimer;
         private Thread _runner;
         private readonly object _lockobject = new object();
-
-        public enum EmulationModes
-        {
-            Regular,
-            CycleExact
-        }
+        public TrainerSettings Settings { get; set; }
 
         public EmulationModes EmulationMode { get; set; }
 
@@ -48,6 +55,7 @@ namespace Sharp6800
         {
             ClockSpeed = 100000;
             EmulationMode = EmulationModes.Regular;
+            Settings = new TrainerSettings() { EnableOUTCHHack = true };
 
             State = new Cpu6800State();
 
@@ -73,6 +81,11 @@ namespace Sharp6800
 
                             if ((loc & 0xC100) == 0xC100)
                             {
+                                // OUTCH flicker hack
+                                if (_emu.State.PC == 0xFE46 && (loc & 0x08) == 0x08 && Settings.EnableOUTCHHack)
+                                {
+                                    return;
+                                }
                                 _disp.Write(loc, value);
                             }
                         }
