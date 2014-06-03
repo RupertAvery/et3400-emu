@@ -50,20 +50,20 @@
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
     <Compile Include="Common.cs" />
-    <Compile Include="Debug\DasmDisplay.cs" />
-    <Compile Include="Debug\DataRange.cs" />
-    <Compile Include="Debug\Disassembler.cs" />
-    <Compile Include="Debug\DisassemblerView.cs">
+    <Compile Include="Debugger\DasmDisplay.cs" />
+    <Compile Include="Debugger\DataRange.cs" />
+    <Compile Include="Debugger\Disassembler.cs" />
+    <Compile Include="Debugger\DisassemblerView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Debug\DisassemblerView.Designer.cs">
+    <Compile Include="Debugger\DisassemblerView.Designer.cs">
       <DependentUpon>DisassemblerView.cs</DependentUpon>
     </Compile>
-    <Compile Include="Debug\MemDisplay.cs" />
-    <Compile Include="Debug\MemoryView.cs">
+    <Compile Include="Debugger\MemDisplay.cs" />
+    <Compile Include="Debugger\MemoryView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Debug\MemoryView.Designer.cs">
+    <Compile Include="Debugger\MemoryView.Designer.cs">
       <DependentUpon>MemoryView.cs</DependentUpon>
     </Compile>
     <Compile Include="TrainerForm.cs">
@@ -77,10 +77,10 @@
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Debug\DisassemblerView.resx">
+    <EmbeddedResource Include="Debugger\DisassemblerView.resx">
       <DependentUpon>DisassemblerView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Debug\MemoryView.resx">
+    <EmbeddedResource Include="Debugger\MemoryView.resx">
       <DependentUpon>MemoryView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TrainerForm.resx">

@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Sharp6800.Debug;
+using Sharp6800.Debugger;
 
 namespace Sharp6800
 {

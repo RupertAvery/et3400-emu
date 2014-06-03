@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using Core6800;
-using Sharp6800.Debug;
+using Sharp6800.Debugger;
 using Timer = System.Threading.Timer;
 
 namespace Sharp6800
