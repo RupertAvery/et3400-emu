@@ -49,7 +49,10 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
-    <Compile Include="Common.cs" />
+    <Compile Include="Common\EmulationModes.cs" />
+    <Compile Include="Common\OnTimerDelegate.cs" />
+    <Compile Include="Common\OnUpdateDelegate.cs" />
+    <Compile Include="Common\TrainerKeys.cs" />
     <Compile Include="Debugger\DasmDisplay.cs" />
     <Compile Include="Debugger\DataRange.cs" />
     <Compile Include="Debugger\Disassembler.cs" />
@@ -66,14 +69,20 @@
     <Compile Include="Debugger\MemoryView.Designer.cs">
       <DependentUpon>MemoryView.cs</DependentUpon>
     </Compile>
-    <Compile Include="TrainerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TrainerForm.Designer.cs">
-      <DependentUpon>TrainerForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Trainer\CycleExactRunner.cs" />
+    <Compile Include="Trainer\ITrainerRunner.cs" />
+    <Compile Include="Trainer\StandardRunner.cs" />
+    <Compile Include="Trainer\Trainer.cs" />
+    <Compile Include="Trainer\TrainerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Trainer\TrainerForm.Designer.cs">
+      <DependentUpon>TrainerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Trainer\TrainerRunnerBase.cs" />
+    <Compile Include="Trainer\TrainerSettings.cs" />
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
@@ -82,10 +91,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Debugger\MemoryView.resx">
       <DependentUpon>MemoryView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TrainerForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>TrainerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -99,6 +104,10 @@
     </Compile>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Trainer\TrainerForm.resx">
+      <DependentUpon>TrainerForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
@@ -118,7 +127,6 @@
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SrecFile.cs" />
-    <Compile Include="Trainer.cs" />
     <Content Include="display\dpoff.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -146,6 +154,7 @@
     <None Include="segment.ram">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="zenith.hex" />
     <None Include="zenith.rom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

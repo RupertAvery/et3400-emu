@@ -1,4 +1,4 @@
-namespace Sharp6800
+namespace Sharp6800.Trainer
 {
     partial class TrainerForm
     {

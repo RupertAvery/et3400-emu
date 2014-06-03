@@ -40,7 +40,7 @@ namespace UnitTestProject1
                             Memory[loc] = value;
                         }
                 };
-            emu.ClearFlags();
+            emu.State.CC = 0;
             emu.State.PC = 0;
         }
 

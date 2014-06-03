@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
+using Sharp6800.Common;
 using Sharp6800.Debugger;
 using Timer = System.Threading.Timer;
 
-namespace Sharp6800
+namespace Sharp6800.Trainer
 {
     public partial class TrainerForm : Form
     {
@@ -96,7 +97,7 @@ namespace Sharp6800
                 Action<int> updateSpeed = delegate(int second)
                 { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.DefaultClockSpeed) * 100); };
 
-                _trainer.OnTimer += second => Invoke(updateSpeed, second);
+                _trainer.Runner.OnTimer += second => Invoke(updateSpeed, second);
 
                 // ensure that the form is completely visible before starting the emulator, otherwise 
                 // the initial segments will be "blank"
@@ -111,7 +112,7 @@ namespace Sharp6800
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _trainer.Quit();
+            _trainer.Runner.Quit();
         }
 
         private void PressKey(object sender, EventArgs args)
@@ -178,7 +179,7 @@ namespace Sharp6800
                 _trainer.PressKey(TrainerKeys.KeyReset);
 
             else if (keyargs.KeyCode == Keys.F5 && _trainer.IsInBreak)
-                _trainer.Continue();
+                _trainer.Runner.Continue();
 
             else if (keyargs.KeyCode == Keys.F10 && _trainer.IsInBreak)
                 _trainer.StepOver();
@@ -209,7 +210,7 @@ namespace Sharp6800
                 var result = openFileDialog1.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    _trainer.Quit();
+                    _trainer.Runner.Quit();
                     try
                     {
                         _trainer.LoadRam(openFileDialog1.FileName);
@@ -244,7 +245,7 @@ namespace Sharp6800
                 var result = openFileDialog1.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    _trainer.Quit();
+                    _trainer.Runner.Quit();
                     try
                     {
                         LoadROM(openFileDialog1.FileName);
@@ -318,7 +319,7 @@ namespace Sharp6800
 
         private void settingsToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            var settings = new SettingsForm { Trainer = _trainer };
+            var settings = new SettingsForm { Settings = _trainer.Settings };
             settings.Show();
         }
 
