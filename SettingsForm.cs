@@ -44,5 +44,10 @@ namespace Sharp6800
         {
             hScrollBar1.Value = 5;
         }
+
+        private void OUTCHCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.EnableOUTCHHack = OUTCHCheckBox.Checked;
+        }
     }
 }

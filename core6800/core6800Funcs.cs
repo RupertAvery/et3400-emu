@@ -170,8 +170,8 @@ namespace Core6800
 
         int RM16(int Addr)
         {
-            int result = ReadMem(Addr) << 8;
-            return result | ReadMem((Addr + 1) & 0xffff);
+            int result = ReadMem(Addr) << 8 | ReadMem(Addr + 1);
+            return result & 0xffff;
         }
 
         void WM16(int Addr, int p)

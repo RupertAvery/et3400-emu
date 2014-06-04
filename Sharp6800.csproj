@@ -55,6 +55,12 @@
     <Compile Include="Common\TrainerKeys.cs" />
     <Compile Include="Debugger\DasmDisplay.cs" />
     <Compile Include="Debugger\DataRange.cs" />
+    <Compile Include="Debugger\DebuggerView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Debugger\DebuggerView.Designer.cs">
+      <DependentUpon>DebuggerView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Debugger\Disassembler.cs" />
     <Compile Include="Debugger\DisassemblerView.cs">
       <SubType>Form</SubType>
@@ -85,6 +91,9 @@
     <Compile Include="Trainer\TrainerSettings.cs" />
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Debugger\DebuggerView.resx">
+      <DependentUpon>DebuggerView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Debugger\DisassemblerView.resx">
       <DependentUpon>DisassemblerView.cs</DependentUpon>

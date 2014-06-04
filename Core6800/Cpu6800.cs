@@ -2,6 +2,7 @@ namespace Core6800
 {
     public partial class Cpu6800
     {
+        private bool _isHalted = false;
 
         public Cpu6800()
         {
@@ -10,6 +11,53 @@ namespace Core6800
 
         public int Execute()
         {
+            if (State.Reset == 0)
+            {
+                State.PC = RM16(0xFFFE);
+                State.CC = 0xC0;
+                SEI();
+                State.NonMaskableInterrupt = 1;
+                State.InterruptRequest = 1;
+                State.ValidMemoryAddress = 0;
+                State.BusAvailable = 0;
+                State.ReadWrite = 1;
+            }
+
+            if (_isHalted)
+            {
+                if (State.Halt == 1)
+                {
+                    _isHalted = false;
+                    State.BusAvailable = 1;
+                }
+                else
+                {
+                    return 5;
+                }
+            }
+            else
+            {
+                if (State.Halt == 0)
+                {
+                    _isHalted = true;
+                    State.BusAvailable = 0;
+                }
+            }
+
+            if (State.NonMaskableInterrupt == 0)
+            {
+                CheckInterrupts();
+                return 5;
+            }
+
+            if (State.InterruptRequest == 0 && (State.CC & 0x10) == 0x10)
+            {
+                CheckInterrupts();
+                return 5;
+            }
+
+            // State.ITemp 
+
             //if (Breakpoint.Contains(State.PC))
             //{
             //    var x = 1;
@@ -18,14 +66,13 @@ namespace Core6800
 
             //}
 
-            if (State.PC == 0xFDC2 && State.A == 0xF7)
-            {
-                var x = 1;
-                // Do something for a hardware breaskpoint
-                // Log stuff
+            //if (State.PC == 0xFDC2 && State.A == 0xF7)
+            //{
+            //    var x = 1;
+            //    // Do something for a hardware breaskpoint
+            //    // Log stuff
 
-            }
-
+            //}
 
             //if (!((PC >= 0xFE3A) && (PC <= 0xFE4F))) // Ignore OUTCH
             //{
@@ -35,29 +82,45 @@ namespace Core6800
             int fetchCode = ReadMem(State.PC) & 0xff;
             State.PC++;
             InterpretOpCode(fetchCode);
-            //if (State.A > 255 || State.B > 255 ||State.A < 0 || State.B < 0)
-            //{
-            //    var x = 1;
-            //}
-
 
             return cycles[fetchCode];
         }
 
-        public void Reset()
+        private void CheckInterrupts()
         {
-            State.PC = (ReadMem(0xFFFE) << 8) + ReadMem(0xFFFF);
-            //Paused = FALSE;
+            State.CC |= State.ITemp << 4;
+
+            PUSHWORD(State.PC);
+            PUSHWORD(State.X);
+            PUSHBYTE(State.A);
+            PUSHBYTE(State.B);
+            PUSHBYTE(State.CC);
+
+            //if (!State.SWI)
+            //{
+            //    if (State.NonMaskableInterrupt == 1)
+            //    {
+            //        if(State.InterruptRequest == 0 && )
+            //    }
+            //}
+
+            State.BusAvailable = 0;
+            State.ITemp = 1;
             SEI();
-            //Flags.I = 1;
-            //NMI = 1;
-            //IRQ = 1;
+
+            if (State.NonMaskableInterrupt == 0) State.PC = RM16(0xFFFC);
+            else if (State.SWI) State.PC = RM16(0xFFFA);
+            else if (State.InterruptRequest == 0) State.PC = RM16(0xFFF8);
         }
 
-
-        public void ClearFlags()
+        /// <summary>
+        /// Initiates power-on sequence
+        /// </summary>
+        public void BootStrap()
         {
-            State.CC = 0x00;
+            State.Reset = 0;
+            Execute();
+            State.Reset = 1;
         }
 
     }

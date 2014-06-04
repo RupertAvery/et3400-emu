@@ -81,6 +81,7 @@
             this.OUTCHCheckBox.Text = "OUTCH Hack";
             this.toolTip1.SetToolTip(this.OUTCHCheckBox, resources.GetString("OUTCHCheckBox.ToolTip"));
             this.OUTCHCheckBox.UseVisualStyleBackColor = true;
+            this.OUTCHCheckBox.CheckedChanged += new System.EventHandler(this.OUTCHCheckBox_CheckedChanged);
             // 
             // SettingsForm
             // 

@@ -33,12 +33,14 @@ namespace Sharp6800.Trainer
                     ReadMem = loc =>
                         {
                             loc = loc & 0xFFFF;
+
                             return Memory[loc];
                         },
 
                     WriteMem = (loc, value) =>
                         {
                             loc = loc & 0xFFFF;
+
                             if (loc >= 0xFC00)
                             {
                                 return;
@@ -76,9 +78,14 @@ namespace Sharp6800.Trainer
             _disp = new SegDisplay(target) { Memory = Memory };
         }
 
-        public void Start()
+        public void Stop()
         {
-            Emulator.Reset();
+            Runner.Quit();
+        }
+
+        public void Initialize()
+        {
+            Emulator.BootStrap();
             Runner.Continue();
         }
 
@@ -140,6 +147,7 @@ namespace Sharp6800.Trainer
                     Memory[0xC003] &= 0xFE;
                     break;
                 case TrainerKeys.KeyReset:// RESET
+                    Emulator.State.Reset = 0;
                     break;
             }
         }
@@ -155,6 +163,12 @@ namespace Sharp6800.Trainer
             Memory[0xC003] = 0xFF;
             Memory[0xC005] = 0xFF;
             Memory[0xC006] = 0xFF;
+            switch (trainerKey)
+            {
+                case TrainerKeys.KeyReset:// RESET
+                    Emulator.State.Reset = 1;
+                    break;
+            }
         }
 
 

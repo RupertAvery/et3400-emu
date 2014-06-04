@@ -11,8 +11,7 @@ namespace Sharp6800.Trainer
     public partial class TrainerForm : Form
     {
         private Trainer _trainer;
-        private MemoryView _memoryView;
-        private DisassemblerView _disassemblerView;
+        private DebuggerView _debuggerView;
         private Timer _updateTimer;
         private readonly object _lockObject = new object();
         private IEnumerable<DataRange> _romDataRanges;
@@ -74,14 +73,10 @@ namespace Sharp6800.Trainer
                 {
                     lock (_lockObject)
                     {
-                        if (_memoryView != null)
+                        if (_debuggerView != null)
                         {
-                            _memoryView.MemDisplay.Display(_trainer.Memory);
-                        }
-
-                        if (_disassemblerView != null)
-                        {
-                            _disassemblerView.DasmDisplay.Display(_trainer.Memory);
+                            _debuggerView.MemDisplay.Display(_trainer.Memory);
+                            _debuggerView.DasmDisplay.Display(_trainer.Memory);
                         }
                     }
                 }, null, 0, 10);
@@ -91,7 +86,7 @@ namespace Sharp6800.Trainer
             try
             {
                 _trainer = new Trainer();
-                _trainer.SetupDisplay(pictureBox1);
+                _trainer.SetupDisplay(SegmentPictureBox);
                 LoadROM("ROM.HEX");
 
                 Action<int> updateSpeed = delegate(int second)
@@ -101,7 +96,7 @@ namespace Sharp6800.Trainer
 
                 // ensure that the form is completely visible before starting the emulator, otherwise 
                 // the initial segments will be "blank"
-                this.Shown += (o, args) => _trainer.Start();
+                this.Shown += (o, args) => _trainer.Initialize();
             }
             catch (Exception ex)
             {
@@ -194,7 +189,19 @@ namespace Sharp6800.Trainer
 
         private void ReleaseKey(object sender, EventArgs args)
         {
-            _trainer.ReleaseKey(TrainerKeys.Key0);
+            var keyargs = new KeyEventArgs(Keys.None);
+
+            // We use this event handler for both PictureBox and Form events, so check who raised the call
+            if (sender == this)
+            {
+                // this is a Form event, so override the keyargs variable with the actual data
+                keyargs = (KeyEventArgs)args;
+            }
+
+            if (sender == buttonReset || keyargs.KeyCode == Keys.Escape)
+                _trainer.ReleaseKey(TrainerKeys.KeyReset);
+            else
+                _trainer.ReleaseKey(TrainerKeys.Key0);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -206,24 +213,24 @@ namespace Sharp6800.Trainer
         {
             try
             {
-                openFileDialog1.Filter = "S19 format files|*.obj;*.s19|All files|*.*";
-                var result = openFileDialog1.ShowDialog();
+                openFileDialog.Filter = "S19 format files|*.obj;*.s19|All files|*.*";
+                var result = openFileDialog.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    _trainer.Runner.Quit();
+                    _trainer.Stop();
                     try
                     {
-                        _trainer.LoadRam(openFileDialog1.FileName);
+                        _trainer.LoadRam(openFileDialog.FileName);
                     }
                     finally
                     {
-                        _trainer.Start();
+                        _trainer.Initialize();
                     }
                 }
             }
             catch (Exception)
             {
-                MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog1.FileName)), "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog.FileName)), "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -241,24 +248,24 @@ namespace Sharp6800.Trainer
         {
             try
             {
-                openFileDialog1.Filter = "ROM files|*.rom;*.bin;*.hex|All files|*.*";
-                var result = openFileDialog1.ShowDialog();
+                openFileDialog.Filter = "ROM files|*.rom;*.bin;*.hex|All files|*.*";
+                var result = openFileDialog.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    _trainer.Runner.Quit();
+                    _trainer.Stop();
                     try
                     {
-                        LoadROM(openFileDialog1.FileName);
+                        LoadROM(openFileDialog.FileName);
                     }
                     finally
                     {
-                        _trainer.Start();
+                        _trainer.Initialize();
                     }
                 }
             }
             catch (Exception)
             {
-                MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog1.FileName)),
+                MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog.FileName)),
                                 "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -275,48 +282,6 @@ namespace Sharp6800.Trainer
             //trainer.SetProgramCounter(1);
         }
 
-        private void memoryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            lock (_lockObject)
-            {
-                if (_memoryView == null)
-                {
-                    _memoryView = new MemoryView();
-                    _memoryView.Show();
-                    _memoryView.Closing += (o, args) =>
-                    {
-                        //_trainer.OnUpdate -= UpdateMemDisplay;
-                        _memoryView = null;
-                    };
-                    // _trainer.OnUpdate += UpdateMemDisplay;
-
-                }
-            }
-        }
-
-        private void disassemblerToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            lock (_lockObject)
-            {
-                if (_disassemblerView == null)
-                {
-                    _disassemblerView = new DisassemblerView
-                        {
-                            State = _trainer.State,
-                            Memory = _trainer.Memory,
-                            DasmDisplay = { DataRanges = _romDataRanges }
-                        };
-                    _disassemblerView.Show();
-                    _disassemblerView.Closing += (o, args) =>
-                        {
-                            //_trainer.OnUpdate -= UpdateDasmDisplay;
-                            _disassemblerView = null;
-                        };
-                    //_trainer.OnUpdate += UpdateDasmDisplay;
-                }
-            }
-        }
-
         private void settingsToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             var settings = new SettingsForm { Settings = _trainer.Settings };
@@ -326,6 +291,30 @@ namespace Sharp6800.Trainer
         private void breakToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.Break();
+        }
+
+        private void debuggerToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            lock (_lockObject)
+            {
+                if (_debuggerView == null)
+                {
+                    _debuggerView = new DebuggerView
+                    {
+                        State = _trainer.State,
+                        Memory = _trainer.Memory,
+                        DasmDisplay = { DataRanges = _romDataRanges }
+                    };
+                    _debuggerView.Closing += (o, args) =>
+                    {
+                        lock (_lockObject)
+                        {
+                            _debuggerView = null;
+                        }
+                    };
+                    _debuggerView.Show();
+                }
+            }
         }
 
 

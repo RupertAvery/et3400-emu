@@ -36,8 +36,7 @@ namespace Sharp6800.Trainer
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.memoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.disassemblerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.debuggerToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.breakToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,7 +46,7 @@ namespace Sharp6800.Trainer
             this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.buttonF = new System.Windows.Forms.PictureBox();
             this.buttonE = new System.Windows.Forms.PictureBox();
             this.buttonD = new System.Windows.Forms.PictureBox();
@@ -65,7 +64,7 @@ namespace Sharp6800.Trainer
             this.button1 = new System.Windows.Forms.PictureBox();
             this.buttonReset = new System.Windows.Forms.PictureBox();
             this.button0 = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.SegmentPictureBox = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.buttonF)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.buttonE)).BeginInit();
@@ -84,7 +83,7 @@ namespace Sharp6800.Trainer
             ((System.ComponentModel.ISupportInitialize)(this.button1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.buttonReset)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.button0)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SegmentPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -141,25 +140,17 @@ namespace Sharp6800.Trainer
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.memoryToolStripMenuItem,
-            this.disassemblerToolStripMenuItem});
+            this.debuggerToolStripMenuItem1});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
             // 
-            // memoryToolStripMenuItem
+            // debuggerToolStripMenuItem1
             // 
-            this.memoryToolStripMenuItem.Name = "memoryToolStripMenuItem";
-            this.memoryToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.memoryToolStripMenuItem.Text = "Memory";
-            this.memoryToolStripMenuItem.Click += new System.EventHandler(this.memoryToolStripMenuItem_Click);
-            // 
-            // disassemblerToolStripMenuItem
-            // 
-            this.disassemblerToolStripMenuItem.Name = "disassemblerToolStripMenuItem";
-            this.disassemblerToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.disassemblerToolStripMenuItem.Text = "Disassembler";
-            this.disassemblerToolStripMenuItem.Click += new System.EventHandler(this.disassemblerToolStripMenuItem_Click);
+            this.debuggerToolStripMenuItem1.Name = "debuggerToolStripMenuItem1";
+            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.debuggerToolStripMenuItem1.Text = "Debugger";
+            this.debuggerToolStripMenuItem1.Click += new System.EventHandler(this.debuggerToolStripMenuItem1_Click);
             // 
             // debugToolStripMenuItem
             // 
@@ -175,27 +166,27 @@ namespace Sharp6800.Trainer
             // startToolStripMenuItem
             // 
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.startToolStripMenuItem.Text = "Run";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.startToolStripMenuItem_Click);
             // 
             // breakToolStripMenuItem
             // 
             this.breakToolStripMenuItem.Name = "breakToolStripMenuItem";
-            this.breakToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.breakToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.breakToolStripMenuItem.Text = "Break";
             this.breakToolStripMenuItem.Click += new System.EventHandler(this.breakToolStripMenuItem_Click);
             // 
             // stepIntoToolStripMenuItem
             // 
             this.stepIntoToolStripMenuItem.Name = "stepIntoToolStripMenuItem";
-            this.stepIntoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stepIntoToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.stepIntoToolStripMenuItem.Text = "Step into";
             // 
             // stepOutOfToolStripMenuItem
             // 
             this.stepOutOfToolStripMenuItem.Name = "stepOutOfToolStripMenuItem";
-            this.stepOutOfToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stepOutOfToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.stepOutOfToolStripMenuItem.Text = "Step out of";
             // 
             // settingsToolStripMenuItem
@@ -384,13 +375,13 @@ namespace Sharp6800.Trainer
             // 
             // pictureBox1
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.Black;
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 37);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(307, 84);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.SegmentPictureBox.BackColor = System.Drawing.Color.Black;
+            this.SegmentPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.SegmentPictureBox.Location = new System.Drawing.Point(12, 37);
+            this.SegmentPictureBox.Name = "SegmentPictureBox";
+            this.SegmentPictureBox.Size = new System.Drawing.Size(307, 84);
+            this.SegmentPictureBox.TabIndex = 0;
+            this.SegmentPictureBox.TabStop = false;
             // 
             // TrainerForm
             // 
@@ -414,7 +405,7 @@ namespace Sharp6800.Trainer
             this.Controls.Add(this.button1);
             this.Controls.Add(this.buttonReset);
             this.Controls.Add(this.button0);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.SegmentPictureBox);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
@@ -442,7 +433,7 @@ namespace Sharp6800.Trainer
             ((System.ComponentModel.ISupportInitialize)(this.button1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.buttonReset)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.button0)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SegmentPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -450,7 +441,7 @@ namespace Sharp6800.Trainer
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox SegmentPictureBox;
         private System.Windows.Forms.PictureBox button0;
         private System.Windows.Forms.PictureBox buttonReset;
         private System.Windows.Forms.PictureBox button2;
@@ -476,17 +467,16 @@ namespace Sharp6800.Trainer
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.ToolStripMenuItem loadROMToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem memoryToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem disassemblerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem breakToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stepIntoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stepOutOfToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem debuggerToolStripMenuItem1;
     }
 }
 

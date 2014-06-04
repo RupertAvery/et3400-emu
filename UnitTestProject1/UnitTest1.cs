@@ -70,8 +70,8 @@ namespace UnitTestProject1
             int baseAddr = Convert.ToInt32(addr, 16);
             emu.State.CC = 0x00;
             emu.State.PC = baseAddr;
-            emu.State.IRQ = 1;
-            emu.State.NMI = 1;
+            emu.State.InterruptRequest = 1;
+            emu.State.NonMaskableInterrupt = 1;
             emu.State.A = 0x00;
             emu.State.B = 0x00;
             emu.State.S = 0xd9;
