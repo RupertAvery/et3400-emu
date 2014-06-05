@@ -2,6 +2,11 @@ using System.Threading;
 
 namespace Sharp6800.Trainer
 {
+    /// <summary>
+    /// Attempts to spread out instructions by executing one then sleeping for a quantum 
+    /// of time before executing the next instruction. Consumes more CPU asit does not alwyas
+    /// yield
+    /// </summary>
     public class CycleExactRunner : TrainerRunnerBase
     {
         public CycleExactRunner(Trainer trainer)
@@ -15,14 +20,7 @@ namespace Sharp6800.Trainer
         {
             CyclesPerSecond = _cycles - _lastCycles;
             RaiseTimerEvent();
-            if (CyclesPerSecond > _trainer.Settings.ClockSpeed)
-            {
-                spinTime += (CyclesPerSecond - _trainer.Settings.ClockSpeed) / 10;
-            }
-            else if (CyclesPerSecond < _trainer.Settings.ClockSpeed)
-            {
-                spinTime -= (_trainer.Settings.ClockSpeed - CyclesPerSecond) / 10;
-            }
+            spinTime += (CyclesPerSecond - _trainer.Settings.ClockSpeed) / 10;
 
             if (spinTime > 25000) spinTime = 25000;
             if (spinTime < 1) spinTime = 1;

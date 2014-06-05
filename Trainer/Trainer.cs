@@ -61,6 +61,7 @@ namespace Sharp6800.Trainer
                 };
 
             Runner = new StandardRunner(this);
+            //Runner = new CycleExactRunner(this);
 
             // Set keyboard mapped memory 'high'
             Memory[0xC003] = 0xFF;

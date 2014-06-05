@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
@@ -69,18 +70,6 @@ namespace Sharp6800.Trainer
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            _updateTimer = new Timer(state =>
-                {
-                    lock (_lockObject)
-                    {
-                        if (_debuggerView != null)
-                        {
-                            _debuggerView.MemDisplay.Display(_trainer.Memory);
-                            _debuggerView.DasmDisplay.Display(_trainer.Memory);
-                        }
-                    }
-                }, null, 0, 10);
-
             InitKeys();
 
             try
@@ -278,7 +267,7 @@ namespace Sharp6800.Trainer
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _trainer.AddBreakPoint(0xFDBB);
+            //_trainer.AddBreakPoint(0xFDBB);
             //trainer.SetProgramCounter(1);
         }
 
@@ -295,28 +284,37 @@ namespace Sharp6800.Trainer
 
         private void debuggerToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            lock (_lockObject)
+            if (_debuggerView == null)
             {
-                if (_debuggerView == null)
+                _debuggerView = new DebuggerView
                 {
-                    _debuggerView = new DebuggerView
-                    {
-                        State = _trainer.State,
-                        Memory = _trainer.Memory,
-                        DasmDisplay = { DataRanges = _romDataRanges }
-                    };
-                    _debuggerView.Closing += (o, args) =>
+                    State = _trainer.State,
+                    Memory = _trainer.Memory,
+                    DataRanges = _romDataRanges
+                };
+                _debuggerView.Closing += (o, args) =>
                     {
                         lock (_lockObject)
                         {
+                            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                            _updateTimer.Dispose();
+                            _updateTimer = null;
                             _debuggerView = null;
                         }
                     };
-                    _debuggerView.Show();
-                }
+                _updateTimer = new Timer(state =>
+                {
+                    lock (_lockObject)
+                    {
+                        if (_debuggerView != null)
+                        {
+                            _debuggerView.UpdateDisplay();
+                        }
+                    }
+                }, null, 0, 100);
+
+                _debuggerView.Show();
             }
         }
-
-
     }
 }

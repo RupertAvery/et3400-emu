@@ -30,16 +30,16 @@
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.MemoryViewComboBox = new System.Windows.Forms.ComboBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.MemAddrTextBox = new System.Windows.Forms.TextBox();
             this.MemoryViewScrollBar = new System.Windows.Forms.VScrollBar();
-            this.MemeoryViewPictureBox = new System.Windows.Forms.PictureBox();
+            this.MemoryViewPictureBox = new System.Windows.Forms.PictureBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.DasmViewComboBox = new System.Windows.Forms.ComboBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.DasmAddrTextBox = new System.Windows.Forms.TextBox();
             this.DasmViewScrollBar = new System.Windows.Forms.VScrollBar();
             this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.MemeoryViewPictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).BeginInit();
             this.SuspendLayout();
@@ -47,9 +47,9 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.MemoryViewComboBox);
-            this.groupBox1.Controls.Add(this.textBox1);
+            this.groupBox1.Controls.Add(this.MemAddrTextBox);
             this.groupBox1.Controls.Add(this.MemoryViewScrollBar);
-            this.groupBox1.Controls.Add(this.MemeoryViewPictureBox);
+            this.groupBox1.Controls.Add(this.MemoryViewPictureBox);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(357, 423);
@@ -67,12 +67,13 @@
             this.MemoryViewComboBox.TabIndex = 7;
             this.MemoryViewComboBox.SelectedIndexChanged += new System.EventHandler(this.MemoryViewComboBox_SelectedIndexChanged);
             // 
-            // textBox1
+            // MemAddrTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(6, 20);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(135, 20);
-            this.textBox1.TabIndex = 6;
+            this.MemAddrTextBox.Location = new System.Drawing.Point(6, 20);
+            this.MemAddrTextBox.Name = "MemAddrTextBox";
+            this.MemAddrTextBox.Size = new System.Drawing.Size(135, 20);
+            this.MemAddrTextBox.TabIndex = 6;
+            this.MemAddrTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MemAddrTextBox_KeyDown);
             // 
             // MemoryViewScrollBar
             // 
@@ -82,21 +83,22 @@
             this.MemoryViewScrollBar.Size = new System.Drawing.Size(23, 367);
             this.MemoryViewScrollBar.TabIndex = 5;
             this.MemoryViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.MemoryViewScrollBar_Scroll);
+            this.MemoryViewScrollBar.ValueChanged += new System.EventHandler(this.MemoryViewScrollBar_ValueChanged);
             // 
-            // MemeoryViewPictureBox
+            // MemoryViewPictureBox
             // 
-            this.MemeoryViewPictureBox.BackColor = System.Drawing.Color.White;
-            this.MemeoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.MemeoryViewPictureBox.Location = new System.Drawing.Point(6, 46);
-            this.MemeoryViewPictureBox.Name = "MemeoryViewPictureBox";
-            this.MemeoryViewPictureBox.Size = new System.Drawing.Size(319, 367);
-            this.MemeoryViewPictureBox.TabIndex = 4;
-            this.MemeoryViewPictureBox.TabStop = false;
+            this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
+            this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.MemoryViewPictureBox.Location = new System.Drawing.Point(6, 46);
+            this.MemoryViewPictureBox.Name = "MemoryViewPictureBox";
+            this.MemoryViewPictureBox.Size = new System.Drawing.Size(319, 367);
+            this.MemoryViewPictureBox.TabIndex = 4;
+            this.MemoryViewPictureBox.TabStop = false;
             // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.DasmViewComboBox);
-            this.groupBox2.Controls.Add(this.textBox2);
+            this.groupBox2.Controls.Add(this.DasmAddrTextBox);
             this.groupBox2.Controls.Add(this.DasmViewScrollBar);
             this.groupBox2.Controls.Add(this.DasmViewPictureBox);
             this.groupBox2.Location = new System.Drawing.Point(375, 12);
@@ -116,12 +118,13 @@
             this.DasmViewComboBox.TabIndex = 10;
             this.DasmViewComboBox.SelectedIndexChanged += new System.EventHandler(this.DasmViewComboBox_SelectedIndexChanged);
             // 
-            // textBox2
+            // DasmAddrTextBox
             // 
-            this.textBox2.Location = new System.Drawing.Point(6, 20);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(135, 20);
-            this.textBox2.TabIndex = 9;
+            this.DasmAddrTextBox.Location = new System.Drawing.Point(6, 20);
+            this.DasmAddrTextBox.Name = "DasmAddrTextBox";
+            this.DasmAddrTextBox.Size = new System.Drawing.Size(135, 20);
+            this.DasmAddrTextBox.TabIndex = 9;
+            this.DasmAddrTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DasmAddrTextBox_KeyDown);
             // 
             // DasmViewScrollBar
             // 
@@ -131,8 +134,9 @@
             this.DasmViewScrollBar.Size = new System.Drawing.Size(23, 367);
             this.DasmViewScrollBar.TabIndex = 8;
             this.DasmViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.DasmViewScrollBar_Scroll);
+            this.DasmViewScrollBar.ValueChanged += new System.EventHandler(this.DasmViewScrollBar_ValueChanged);
             // 
-            // pictureBox1
+            // DasmViewPictureBox
             // 
             this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
             this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -146,7 +150,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(788, 499);
+            this.ClientSize = new System.Drawing.Size(743, 444);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "DebuggerView";
@@ -154,7 +158,7 @@
             this.Load += new System.EventHandler(this.DebuggerView_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.MemeoryViewPictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).EndInit();
@@ -166,12 +170,12 @@
 
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.ComboBox MemoryViewComboBox;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox MemAddrTextBox;
         private System.Windows.Forms.VScrollBar MemoryViewScrollBar;
-        private System.Windows.Forms.PictureBox MemeoryViewPictureBox;
+        private System.Windows.Forms.PictureBox MemoryViewPictureBox;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ComboBox DasmViewComboBox;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox DasmAddrTextBox;
         private System.Windows.Forms.VScrollBar DasmViewScrollBar;
         private System.Windows.Forms.PictureBox DasmViewPictureBox;
 

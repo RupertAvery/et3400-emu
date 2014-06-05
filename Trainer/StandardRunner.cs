@@ -2,6 +2,10 @@ using System.Threading;
 
 namespace Sharp6800.Trainer
 {
+    /// <summary>
+    /// Implements a speed limiter that executes as many instructions in succession as possible
+    /// before yielding processor time. Uses less CPU
+    /// </summary>
     public class StandardRunner : TrainerRunnerBase
     {
         public StandardRunner(Trainer trainer)
@@ -16,14 +20,8 @@ namespace Sharp6800.Trainer
             CyclesPerSecond = _cycles - _lastCycles;
             RaiseTimerEvent();
 
-            if (CyclesPerSecond > _trainer.Settings.ClockSpeed)
-            {
-                limit -= (CyclesPerSecond - _trainer.Settings.ClockSpeed) / 1000;
-            }
-            else if (CyclesPerSecond < _trainer.Settings.ClockSpeed)
-            {
-                limit += (_trainer.Settings.ClockSpeed - CyclesPerSecond) / 1000;
-            }
+            limit += (_trainer.Settings.ClockSpeed - CyclesPerSecond) / 1000;
+
             sleeps = 0;
             _lastCycles = _cycles;
         }
@@ -35,8 +33,7 @@ namespace Sharp6800.Trainer
 
             while (_running)
             {
-                var cycles = 0;
-                cycles = _trainer.Emulator.Execute();
+                int cycles = _trainer.Emulator.Execute();
                 loopCycles += cycles;
                 _cycles += cycles;
 

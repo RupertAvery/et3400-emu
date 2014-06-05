@@ -50,6 +50,7 @@
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\ComboBoxItem.cs" />
+    <Compile Include="Common\CustomComboBoxItem.cs" />
     <Compile Include="Common\EmulationModes.cs" />
     <Compile Include="Common\OnTimerDelegate.cs" />
     <Compile Include="Common\OnUpdateDelegate.cs" />
