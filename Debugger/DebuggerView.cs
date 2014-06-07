@@ -22,19 +22,138 @@ namespace Sharp6800.Debugger
         public int[] Memory { get; set; }
         public Cpu6800State State { get; set; }
         public IEnumerable<DataRange> DataRanges { set { _dasmDisplay.DataRanges = value; } }
+        private Control focusObject;
+
+        private const int WM_LBUTTONDOWN = 0x0201;
+        private const int WM_KEYDOWN = 0x0100;
+        private const int WM_MOUSEWHEEL = 0x20a;
 
         public bool PreFilterMessage(ref Message m)
         {
-            if (m.Msg == 0x20a)
+            switch (m.Msg)
             {
-                // WM_MOUSEWHEEL, find the control at screen position m.LParam
-                Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
-                IntPtr hWnd = WindowFromPoint(pos);
-                if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
-                {
-                    SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
-                    return true;
-                }
+                case WM_MOUSEWHEEL:
+                    {
+                        // WM_MOUSEWHEEL, find the control at screen position m.LParam
+                        Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
+                        IntPtr hWnd = WindowFromPoint(pos);
+                        if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
+                        {
+                            SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
+                            return true;
+                        }
+                    }
+                    break;
+                case WM_LBUTTONDOWN:
+                    {
+                        var lParam = ((int)m.LParam.ToInt64());
+                        var pos = new Point()
+                        {
+                            X = lParam & 0xFFFF,
+                            Y = (lParam >> 0x10) & 0xFFFF,
+                        };
+                        focusObject = FindControlAtPoint(this);
+                        if (focusObject == MemoryViewPictureBox || focusObject == DasmViewPictureBox)
+                        {
+                            var x = DummyButton.Focus();
+                        }
+                    }
+
+                    break;
+                case WM_KEYDOWN:
+                    {
+                        // Extract the keys being pressed
+                        Keys keys = ((Keys)((int)m.WParam.ToInt64()));
+
+                        if (focusObject == MemoryViewPictureBox)
+                        {
+                            var oldValue = MemoryViewScrollBar.Value;
+                            ;
+                            switch (keys)
+                            {
+                                case Keys.Down:
+                                    if (oldValue + 1 > MemoryViewScrollBar.Maximum)
+                                    {
+                                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
+                                    }
+                                    else
+                                    {
+                                        MemoryViewScrollBar.Value = oldValue + 1;
+                                    }
+                                    break;
+                                case Keys.Up:
+                                    if (oldValue - 1 < 0) return true;
+                                    MemoryViewScrollBar.Value = oldValue - 1;
+                                    break;
+                                case Keys.PageDown:
+                                    if (oldValue + 16 > MemoryViewScrollBar.Maximum)
+                                    {
+                                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
+                                    }
+                                    else
+                                    {
+                                        MemoryViewScrollBar.Value = oldValue + 16;
+                                    }
+                                    break;
+                                case Keys.PageUp:
+                                    if (oldValue - 16 < 0)
+                                    {
+                                        MemoryViewScrollBar.Value = 0;
+                                    }
+                                    else
+                                    {
+                                        MemoryViewScrollBar.Value = oldValue - 16;
+                                    }
+                                    break;
+                            }
+
+                        }
+                        else if (focusObject == DasmViewPictureBox)
+                        {
+                            var oldValue = DasmViewScrollBar.Value;
+                            ;
+                            switch (keys)
+                            {
+                                case Keys.Down:
+                                    if (oldValue + 1 > DasmViewScrollBar.Maximum)
+                                    {
+                                        DasmViewScrollBar.Value = DasmViewScrollBar.Maximum;
+                                    }
+                                    else
+                                    {
+                                        DasmViewScrollBar.Value = oldValue + 1;
+                                    }
+                                    break;
+                                case Keys.Up:
+                                    if (oldValue - 1 < 0) return true;
+                                    DasmViewScrollBar.Value = oldValue - 1;
+                                    break;
+                                case Keys.PageDown:
+                                    if (oldValue + 16 > DasmViewScrollBar.Maximum)
+                                    {
+                                        DasmViewScrollBar.Value = DasmViewScrollBar.Maximum;
+                                    }
+                                    else
+                                    {
+                                        DasmViewScrollBar.Value = oldValue + 16;
+                                    }
+                                    break;
+                                case Keys.PageUp:
+                                    if (oldValue - 16 < 0)
+                                    {
+                                        DasmViewScrollBar.Value = 0;
+                                    }
+                                    else
+                                    {
+                                        DasmViewScrollBar.Value = oldValue - 16;
+                                    }
+                                    break;
+                            }
+                            return true; // Prevent message reaching destination
+
+                        }
+                        return false;
+                    }
             }
             return false;
         }
@@ -45,8 +164,31 @@ namespace Sharp6800.Debugger
             Application.AddMessageFilter(this);
             MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
+            MemoryViewPictureBox.KeyDown += MemoryViewPictureBoxOnKeyDown;
+            DasmViewPictureBox.KeyDown += DasmViewPictureBoxOnKeyDown;
             _memDisplay = new MemDisplay(MemoryViewPictureBox);
             _dasmDisplay = new DasmDisplay(DasmViewPictureBox);
+        }
+
+        private void MemoryViewPictureBoxOnKeyDown(object sender, KeyEventArgs keyEventArgs)
+        {
+
+        }
+
+        private void DasmViewPictureBoxOnKeyDown(object sender, KeyEventArgs keyEventArgs)
+        {
+            var oldValue = DasmViewScrollBar.Value;
+            ;
+            if (keyEventArgs.KeyCode == Keys.Down)
+            {
+                if (oldValue + 1 > DasmViewScrollBar.Maximum) return;
+                DasmViewScrollBar.Value = oldValue + 1;
+            }
+            if (keyEventArgs.KeyCode == Keys.Up)
+            {
+                if (oldValue - 1 < 0) return;
+                DasmViewScrollBar.Value = oldValue - 1;
+            }
         }
 
         public void UpdateDisplay()
@@ -175,6 +317,45 @@ namespace Sharp6800.Debugger
             }
         }
 
+        private void DasmViewPictureBox_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DasmViewPictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+
+        public static Control FindControlAtPoint(Control container, Point pos)
+        {
+            Control child;
+            foreach (Control c in container.Controls)
+            {
+                if (c.Visible && c.Bounds.Contains(pos))
+                {
+                    //
+                    child = FindControlAtPoint(c, new Point(pos.X - c.Left, pos.Y - c.Top));
+                    if (child == null) return c;
+                    else return child;
+                }
+            }
+            return null;
+        }
+
+        public static Control FindControlAtPoint(Form form)
+        {
+            Point pos = Cursor.Position;
+            if (form.Bounds.Contains(pos))
+                return FindControlAtPoint(form, form.PointToClient(Cursor.Position));
+            return null;
+        }
+
+        private void MemoryViewPictureBox_Click(object sender, EventArgs e)
+        {
+
+        }
 
     }
 }

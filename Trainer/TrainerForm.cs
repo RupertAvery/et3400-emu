@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
@@ -68,6 +69,7 @@ namespace Sharp6800.Trainer
             this.KeyUp += ReleaseKey;
         }
 
+
         private void Form1_Load(object sender, EventArgs e)
         {
             InitKeys();
@@ -83,15 +85,27 @@ namespace Sharp6800.Trainer
 
                 _trainer.Runner.OnTimer += second => Invoke(updateSpeed, second);
 
+
                 // ensure that the form is completely visible before starting the emulator, otherwise 
                 // the initial segments will be "blank"
-                this.Shown += (o, args) => _trainer.Initialize();
+                var timer = new System.Timers.Timer() { Interval = 100 };
+                timer.Elapsed += timer_Elapsed; 
+                this.Shown += (o, args) => timer.Start();
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error initializing the emulator");
             }
 
+        }
+
+        void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            var timer = (System.Timers.Timer) sender;
+            timer.Stop();
+            timer.Elapsed -= timer_Elapsed;
+            _trainer.Initialize();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -316,5 +330,6 @@ namespace Sharp6800.Trainer
                 _debuggerView.Show();
             }
         }
+
     }
 }

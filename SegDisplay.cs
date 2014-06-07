@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -96,6 +97,8 @@ namespace Sharp6800
         private string[] flags = {"H", "I", "N", "Z", "V", "C"};
         public void Repaint(Graphics graphics)
         {
+            Debug.WriteLine("Repaint!");
+
             for (int i = 0xC16F; i >= 0xC110; i--)
             {
                 Write(i, Memory[i], graphics);

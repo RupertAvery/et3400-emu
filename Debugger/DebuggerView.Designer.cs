@@ -38,6 +38,7 @@
             this.DasmAddrTextBox = new System.Windows.Forms.TextBox();
             this.DasmViewScrollBar = new System.Windows.Forms.VScrollBar();
             this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
+            this.DummyButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -46,6 +47,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.DummyButton);
             this.groupBox1.Controls.Add(this.MemoryViewComboBox);
             this.groupBox1.Controls.Add(this.MemAddrTextBox);
             this.groupBox1.Controls.Add(this.MemoryViewScrollBar);
@@ -94,6 +96,7 @@
             this.MemoryViewPictureBox.Size = new System.Drawing.Size(319, 367);
             this.MemoryViewPictureBox.TabIndex = 4;
             this.MemoryViewPictureBox.TabStop = false;
+            this.MemoryViewPictureBox.Click += new System.EventHandler(this.MemoryViewPictureBox_Click);
             // 
             // groupBox2
             // 
@@ -145,6 +148,16 @@
             this.DasmViewPictureBox.Size = new System.Drawing.Size(319, 367);
             this.DasmViewPictureBox.TabIndex = 7;
             this.DasmViewPictureBox.TabStop = false;
+            this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
+            // 
+            // DummyButton
+            // 
+            this.DummyButton.Location = new System.Drawing.Point(-100, -100);
+            this.DummyButton.Name = "DummyButton";
+            this.DummyButton.Size = new System.Drawing.Size(75, 23);
+            this.DummyButton.TabIndex = 2;
+            this.DummyButton.Text = "button1";
+            this.DummyButton.UseVisualStyleBackColor = true;
             // 
             // DebuggerView
             // 
@@ -178,6 +191,7 @@
         private System.Windows.Forms.TextBox DasmAddrTextBox;
         private System.Windows.Forms.VScrollBar DasmViewScrollBar;
         private System.Windows.Forms.PictureBox DasmViewPictureBox;
+        private System.Windows.Forms.Button DummyButton;
 
     }
 }

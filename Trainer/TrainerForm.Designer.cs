@@ -142,7 +142,7 @@ namespace Sharp6800.Trainer
             // debuggerToolStripMenuItem1
             // 
             this.debuggerToolStripMenuItem1.Name = "debuggerToolStripMenuItem1";
-            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(126, 22);
             this.debuggerToolStripMenuItem1.Text = "Debugger";
             this.debuggerToolStripMenuItem1.Click += new System.EventHandler(this.debuggerToolStripMenuItem1_Click);
             // 
@@ -157,7 +157,7 @@ namespace Sharp6800.Trainer
             // settingsToolStripMenuItem1
             // 
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(116, 22);
             this.settingsToolStripMenuItem1.Text = "Settings";
             this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem1_Click);
             // 

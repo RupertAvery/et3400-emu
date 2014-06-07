@@ -150,25 +150,46 @@ namespace Sharp6800.Debugger
         const int addx = 126;
         const int adcx = 127;
 
+        private static string[] op_name_str_orig =
+            {
+                "aba",  "abx",  "adca", "adcb", "adda", "addb", "addd", "aim",
+                "anda", "andb", "asl",  "asla", "aslb", "asld", "asr",  "asra",
+                "asrb", "bcc",  "bcs",  "beq",  "bge",  "bgt",  "bhi",  "bita",
+                "bitb", "ble",  "bls",  "blt",  "bmi",  "bne",  "bpl",  "bra",
+                "brn",  "bsr",  "bvc",  "bvs",  "cba",  "clc",  "cli",  "clr",
+                "clra", "clrb", "clv",  "cmpa", "cmpb", "cmpx", "com",  "coma",
+                "comb", "daa",  "dec",  "deca", "decb", "des",  "dex",  "eim",
+                "eora", "eorb", "illegal", "inc", "inca", "incb", "ins", "inx",
+                "jmp",  "jsr",  "lda",  "ldb",  "ldd",  "lds",  "ldx",  "lsr",
+                "lsra", "lsrb", "lsrd", "mul",  "neg",  "nega", "negb", "nop",
+                "oim",  "ora",  "orb",  "psha", "pshb", "pshx", "pula", "pulb",
+                "pulx", "rol",  "rola", "rolb", "ror",  "rora", "rorb", "rti",
+                "rts",  "sba",  "sbca", "sbcb", "sec",  "sev",  "sta",  "stb",
+                "std",  "sei",  "sts",  "stx",  "suba", "subb", "subd", "swi",
+                "wai",  "tab",  "tap",  "tba",  "tim",  "tpa",  "tst",  "tsta",
+                "tstb", "tsx",  "txs",  "asx1", "asx2", "xgdx", "addx", "adcx"
+            };
+
         private static string[] op_name_str =
             {
-                "aba", "abx", "adca", "adcb", "adda", "addb", "addd", "aim",
-                "anda", "andb", "asl", "asla", "aslb", "asld", "asr", "asra",
-                "asrb", "bcc", "bcs", "beq", "bge", "bgt", "bhi", "bita",
-                "bitb", "ble", "bls", "blt", "bmi", "bne", "bpl", "bra",
-                "brn", "bsr", "bvc", "bvs", "cba", "clc", "cli", "clr",
-                "clra", "clrb", "clv", "cmpa", "cmpb", "cmpx", "com", "coma",
-                "comb", "daa", "dec", "deca", "decb", "des", "dex", "eim",
+                "aba",  "abx",  "adca", "adcb", "adda", "addb", "addd", "aim",
+                "anda", "andb", "asl",  "asla", "aslb", "asld", "asr",  "asra",
+                "asrb", "bcc",  "bcs",  "beq",  "bge",  "bgt",  "bhi",  "bita",
+                "bitb", "ble",  "bls",  "blt",  "bmi",  "bne",  "bpl",  "bra",
+                "brn",  "bsr",  "bvc",  "bvs",  "cba",  "clc",  "cli",  "clr",
+                "clra", "clrb", "clv",  "cmpa", "cmpb", "cpx", "com",  "coma",
+                "comb", "daa",  "dec",  "deca", "decb", "des",  "dex",  "eim",
                 "eora", "eorb", "illegal", "inc", "inca", "incb", "ins", "inx",
-                "jmp", "jsr", "lda", "ldb", "ldd", "lds", "ldx", "lsr",
-                "lsra", "lsrb", "lsrd", "mul", "neg", "nega", "negb", "nop",
-                "oim", "ora", "orb", "psha", "pshb", "pshx", "pula", "pulb",
-                "pulx", "rol", "rola", "rolb", "ror", "rora", "rorb", "rti",
-                "rts", "sba", "sbca", "sbcb", "sec", "sev", "sta", "stb",
-                "std", "sei", "sts", "stx", "suba", "subb", "subd", "swi",
-                "wai", "tab", "tap", "tba", "tim", "tpa", "tst", "tsta",
-                "tstb", "tsx", "txs", "asx1", "asx2", "xgdx", "addx", "adcx"
+                "jmp",  "jsr",  "ldaa",  "ldab",  "ldd",  "lds",  "ldx",  "lsr",
+                "lsra", "lsrb", "lsrd", "mul",  "neg",  "nega", "negb", "nop",
+                "oim",  "oraa", "orab", "psha", "pshb", "pshx", "pula", "pulb",
+                "pulx", "rol",  "rola", "rolb", "ror",  "rora", "rorb", "rti",
+                "rts",  "sba",  "sbca", "sbcb", "sec",  "sev",  "staa",  "stab",
+                "std",  "sei",  "sts",  "stx",  "suba", "subb", "subd", "swi",
+                "wai",  "tab",  "tap",  "tba",  "tim",  "tpa",  "tst",  "tsta",
+                "tstb", "tsx",  "txs",  "asx1", "asx2", "xgdx", "addx", "adcx"
             };
+
 
         /*
          * This table defines the opcodes:
@@ -313,13 +334,13 @@ namespace Sharp6800.Debugger
                     buf += string.Format("#${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
                     return 3 | flags | DASMFLAG_SUPPORTED;
                 case idx:  /* indexed + byte offset */
-                    buf += string.Format("(x+${0:X2})", memory[pc + 1]);
+                    buf += string.Format("${0:X2},x", memory[pc + 1]);
                     return 2 | flags | DASMFLAG_SUPPORTED;
                 case imx:  /* immediate, indexed + byte offset */
                     buf += string.Format("#${0:X2},(x+${1:X2})", memory[pc + 1], memory[pc + 2]);
                     return 3 | flags | DASMFLAG_SUPPORTED;
                 case dir:  /* direct address */
-                    buf += string.Format("${0:X2}", memory[1]);
+                    buf += string.Format("${0:X2}", memory[pc + 1]);
                     return 2 | flags | DASMFLAG_SUPPORTED;
                 case imd:  /* immediate, direct address */
                     buf += string.Format("#${0:X2},${1:X2}", memory[pc + 1], memory[pc + 2]);
