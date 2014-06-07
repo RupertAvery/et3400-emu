@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -162,6 +163,7 @@ namespace Sharp6800.Debugger
         {
             InitializeComponent();
             Application.AddMessageFilter(this);
+            this.Closing += OnClosing;
             MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
             MemoryViewPictureBox.KeyDown += MemoryViewPictureBoxOnKeyDown;
@@ -169,6 +171,12 @@ namespace Sharp6800.Debugger
             _memDisplay = new MemDisplay(MemoryViewPictureBox);
             _dasmDisplay = new DasmDisplay(DasmViewPictureBox);
         }
+
+        private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
+        {
+            Application.RemoveMessageFilter(this);
+        }
+
 
         private void MemoryViewPictureBoxOnKeyDown(object sender, KeyEventArgs keyEventArgs)
         {
