@@ -5,8 +5,16 @@ namespace Core6800
 {
     public partial class Cpu6800
     {
-        public void InterpretOpCode(int opCode)
+        public enum DecodeStatus
         {
+            LEGAL,
+            ILLEGAL,
+            UNDOCUMENTED
+        }
+
+        public DecodeStatus InterpretOpCode(int opCode)
+        {
+            var status = DecodeStatus.LEGAL;
             switch (opCode)
             {
                 /* 0x00 ILLEGAL */
@@ -146,7 +154,15 @@ namespace Core6800
                     //  }
 
 
-                    /* 0x14 ILLEGAL */
+                    /* 0x14 NBA immediate */
+                    break;
+                case 0x14:
+                    {
+                        status = DecodeStatus.UNDOCUMENTED;
+                        State.A &= State.B;
+                        CLR_NZV(); SET_NZ8(State.A);
+                    }
+
 
                     /* 0x15 ILLEGAL */
 
@@ -230,12 +246,12 @@ namespace Core6800
                     }
 
                     /* 0x21 BRN relative ----- */
-                    break;
-                case 0x21:
-                    {
-                        int m6800_brn_t; // hack around GCC 4.6 error because we need the side effects of IMMBYTE
-                        m6800_brn_t = IMMBYTE();
-                    }
+                    //break;
+                    //case 0x21:
+                    //    {
+                    //        int m6800_brn_t; // hack around GCC 4.6 error because we need the side effects of IMMBYTE
+                    //        m6800_brn_t = IMMBYTE();
+                    //    }
 
                     /* 0x22 BHI relative ----- */
                     break;
@@ -408,11 +424,11 @@ namespace Core6800
                     }
 
                     /* 0x38 PULX inherent ----- */
-                    break;
-                case 0x38:
-                    {
-                        State.X = PULLWORD();
-                    }
+                    //    break;
+                    //case 0x38:
+                    //    {
+                    //        State.X = PULLWORD();
+                    //    }
 
                     /* 0x39 RTS inherent ----- */
                     break;
@@ -422,11 +438,11 @@ namespace Core6800
                     }
 
                     /* 0x3a ABX inherent ----- */
-                    break;
-                case 0x3a:
-                    {
-                        State.X += State.B;
-                    }
+                    //    break;
+                    //case 0x3a:
+                    //    {
+                    //        State.X += State.B;
+                    //    }
 
                     /* 0x3b RTI inherent ##### */
                     break;
@@ -442,10 +458,10 @@ namespace Core6800
 
                     /* 0x3c PSHX inherent ----- */
                     break;
-                case 0x3c:
-                    {
-                        PUSHWORD(State.X);
-                    }
+                    //case 0x3c:
+                    //    {
+                    //        PUSHWORD(State.X);
+                    //    }
 
                     /* 0x3d MUL inherent --*-@ */
                     break;
@@ -1110,11 +1126,12 @@ namespace Core6800
                     /* is this State.A legal instruction? */
                     /* 0x87 STA immediate -**0- */
                     break;
-                    //case 0x87:
-                    //    {
-                    //        CLR_NZV(); SET_NZ8(State.A);
-                    //        IMM8(); WriteMem(State.EAD, State.A);
-                    //    }
+                case 0x87:
+                    {
+                        status = DecodeStatus.UNDOCUMENTED;
+                        CLR_NZV(); SET_NZ8(State.A);
+                        IMM8(); WriteMem(State.EAD, State.A);
+                    }
 
                     /* 0x88 EORA immediate -**0- */
                     break;
@@ -1203,6 +1220,7 @@ namespace Core6800
                     break;
                 case 0x8f:
                     {
+                        status = DecodeStatus.UNDOCUMENTED;
                         CLR_NZV();
                         SET_NZ16(State.S);
                         IMM16();
@@ -1366,12 +1384,12 @@ namespace Core6800
 
                     /* 0x9d JSR direct ----- */
                     break;
-                case 0x9d:
-                    {
-                        DIRECT();
-                        PUSHWORD(State.PC);
-                        State.PC = State.EAD;
-                    }
+                    //case 0x9d:
+                    //    {
+                    //        DIRECT();
+                    //        PUSHWORD(State.PC);
+                    //        State.PC = State.EAD;
+                    //    }
 
                     /* 0x9e LDS direct -**0- */
                     break;
@@ -1536,7 +1554,7 @@ namespace Core6800
                         int b;
                         b = IDXWORD();
                         d = State.X;
-                        r = d -b;
+                        r = d - b;
                         CLR_NZV();
                         SET_NZ16(r);
                         SET_V16(d, b, r);
@@ -1856,11 +1874,12 @@ namespace Core6800
                         SET_NZ8(State.B);
                     }
 
-                    /* is this State.A legal instruction? */
+                    /* is this a legal instruction? */
                     /* 0xc7 STB immediate -**0- */
                     break;
                 case 0xc7:
                     {
+                        status = DecodeStatus.UNDOCUMENTED;
                         CLR_NZV();
                         SET_NZ8(State.B);
                         IMM8();
@@ -1948,6 +1967,7 @@ namespace Core6800
                     break;
                 case 0xcf:
                     {
+                        status = DecodeStatus.UNDOCUMENTED;
                         CLR_NZV();
                         SET_NZ16(State.X);
                         IMM16();
@@ -2459,26 +2479,26 @@ namespace Core6800
 
                     /* 0xfc LDD extended -**0- */
                     break;
-                //case 0xfc:
-                //    {
-                //        D = EXTWORD();
-                //        CLR_NZV();
-                //        SET_NZ16(D);
-                //    }
+                    //case 0xfc:
+                    //    {
+                    //        D = EXTWORD();
+                    //        CLR_NZV();
+                    //        SET_NZ16(D);
+                    //    }
 
-                //    /* 0xfc ADDX extended -****    NSC8105 only.  Flags are State.A guess */
-                //    break;
-                case 0xfc:
-                    {
-                        int r, d;
-                        int b;
-                        b= EXTWORD();
-                        d = State.X;
-                        r = d + b;
-                        CLR_NZVC();
-                        SET_FLAGS16(d, b, r);
-                        State.X = r;
-                    }
+                    //    /* 0xfc ADDX extended -****    NSC8105 only.  Flags are State.A guess */
+                    //    break;
+                    //case 0xfc:
+                    //    {
+                    //        int r, d;
+                    //        int b;
+                    //        b = EXTWORD();
+                    //        d = State.X;
+                    //        r = d + b;
+                    //        CLR_NZVC();
+                    //        SET_FLAGS16(d, b, r);
+                    //        State.X = r;
+                    //    }
 
                     /* 0xfd STD extended -**0- */
                     break;
@@ -2510,9 +2530,10 @@ namespace Core6800
                     }
                     break;
                 default:
-
+                    status = DecodeStatus.ILLEGAL;
                     break;
             }
+            return status;
         }
     }
 }
