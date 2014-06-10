@@ -211,7 +211,7 @@ namespace Sharp6800.Debugger
              new int[] {inx, inh,0},new int[] {dex, inh,0},new int[] {clv, inh,0},new int[] {sev, inh,0},
              new int[] {clc, inh,0},new int[] {sec, inh,0},new int[] {cli, inh,0},new int[] {sei, inh,0},
              new int[] {sba, inh,0},new int[] {cba, inh,0},new int[] {asx1,sx1,1},new int[] {asx2,sx1,1},/* 10 */
-             new int[] {nba, inh,0},new int[] {ill, inh,7},new int[] {tab, inh,0},new int[] {tba, inh,0},
+             new int[] {nba, inh,7},new int[] {ill, inh,7},new int[] {tab, inh,0},new int[] {tba, inh,0},
              new int[] {xgdx,inh,3},new int[] {daa, inh,0},new int[] {ill, inh,7},new int[] {aba, inh,0},
              new int[] {ill, inh,7},new int[] {ill, inh,7},new int[] {ill, inh,7},new int[] {ill, inh,7},
              new int[] {bra, rel,0},new int[] {brn, rel,1},new int[] {bhi, rel,0},new int[] {bls, rel,0},/* 20 */
@@ -239,9 +239,9 @@ namespace Sharp6800.Debugger
              new int[] {asl, ext,0},new int[] {rol, ext,0},new int[] {dec, ext,0},new int[] {tim, imd,3},
              new int[] {inc, ext,0},new int[] {tst, ext,0},new int[] {jmp, ext,0},new int[] {clr, ext,0},
              new int[] {suba,imb,0},new int[] {cmpa,imb,0},new int[] {sbca,imb,0},new int[] {subd,imw,1},/* 80 */
-             new int[] {anda,imb,0},new int[] {bita,imb,0},new int[] {lda, imb,0},new int[] {sta, imb,0},
+             new int[] {anda,imb,0},new int[] {bita,imb,0},new int[] {lda, imb,0},new int[] {sta, imb,7},
              new int[] {eora,imb,0},new int[] {adca,imb,0},new int[] {ora, imb,0},new int[] {adda,imb,0},
-             new int[] {cmpx,imw,0},new int[] {bsr, rel,0},new int[] {lds, imw,0},new int[] {sts, imw,0},
+             new int[] {cmpx,imw,0},new int[] {bsr, rel,0},new int[] {lds, imw,0},new int[] {sts, imw,7},
              new int[] {suba,dir,0},new int[] {cmpa,dir,0},new int[] {sbca,dir,0},new int[] {subd,dir,1},/* 90 */
              new int[] {anda,dir,0},new int[] {bita,dir,0},new int[] {lda, dir,0},new int[] {sta, dir,0},
              new int[] {eora,dir,0},new int[] {adca,dir,0},new int[] {ora, dir,0},new int[] {adda,dir,0},
@@ -255,9 +255,9 @@ namespace Sharp6800.Debugger
              new int[] {eora,ext,0},new int[] {adca,ext,0},new int[] {ora, ext,0},new int[] {adda,ext,0},
              new int[] {cmpx,ext,0},new int[] {jsr, ext,0},new int[] {lds, ext,0},new int[] {sts, ext,0},
              new int[] {subb,imb,0},new int[] {cmpb,imb,0},new int[] {sbcb,imb,0},new int[] {addd,imw,1},/* c0 */
-             new int[] {andb,imb,0},new int[] {bitb,imb,0},new int[] {ldb, imb,0},new int[] {stb, imb,0},
+             new int[] {andb,imb,0},new int[] {bitb,imb,0},new int[] {ldb, imb,0},new int[] {stb, imb,7},
              new int[] {eorb,imb,0},new int[] {adcb,imb,0},new int[] {orb, imb,0},new int[] {addb,imb,0},
-             new int[] {ldd, imw,1},new int[] {_std,imw,1},new int[] {ldx, imw,0},new int[] {stx, imw,0},
+             new int[] {ldd, imw,1},new int[] {_std,imw,1},new int[] {ldx, imw,0},new int[] {stx, imw,7},
              new int[] {subb,dir,0},new int[] {cmpb,dir,0},new int[] {sbcb,dir,0},new int[] {addd,dir,1},/* d0 */
              new int[] {andb,dir,0},new int[] {bitb,dir,0},new int[] {ldb, dir,0},new int[] {stb, dir,0},
              new int[] {eorb,dir,0},new int[] {adcb,dir,0},new int[] {orb, dir,0},new int[] {addb,dir,0},
@@ -277,8 +277,19 @@ namespace Sharp6800.Debugger
              new int[] {adcx,imb,0}
          };
 
-
-
+        public bool EnableUndocumentedOpcodes
+        {
+            get { return _enableUndocumentedOpcodes; }
+            set { 
+                _enableUndocumentedOpcodes = value;
+                var patchValue = _enableUndocumentedOpcodes ? 0 : 1;
+                table[0x14][2] = patchValue;
+                table[0x87][2] = patchValue;
+                table[0x8f][2] = patchValue;
+                table[0xc7][2] = patchValue;
+                table[0xcF][2] = patchValue;
+            }
+        }
 
 
         ///* some macros to keep things short */
@@ -381,6 +392,7 @@ namespace Sharp6800.Debugger
             }
         }
 
+        // List of 197 valid opcodes
         private static int[] valid6800opcodes =
             {
                 0x01,
@@ -582,5 +594,6 @@ namespace Sharp6800.Debugger
                 0xFF
             };
 
+        private bool _enableUndocumentedOpcodes;
     }
 }

@@ -59,7 +59,7 @@ namespace Sharp6800
             var buffer = new Bitmap(38, 54);
             int position = 6 - ((loc & 0xF0) >> 4);
             int segment = loc & 0x7;
-            System.Diagnostics.Debug.WriteLine("{0:X4}: {1:X2} {2}", loc, value, segment);
+            //System.Diagnostics.Debug.WriteLine("{0:X4}: {1:X2} {2}", loc, value, segment);
 
             lock (bglock)
             {

@@ -44,7 +44,7 @@
             // 
             this.hScrollBar1.LargeChange = 1;
             this.hScrollBar1.Location = new System.Drawing.Point(28, 37);
-            this.hScrollBar1.Maximum = 9;
+            this.hScrollBar1.Maximum = 7;
             this.hScrollBar1.Name = "hScrollBar1";
             this.hScrollBar1.Size = new System.Drawing.Size(233, 24);
             this.hScrollBar1.TabIndex = 20;
@@ -107,7 +107,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(127, 69);
+            this.label4.Location = new System.Drawing.Point(163, 69);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(40, 13);
             this.label4.TabIndex = 26;

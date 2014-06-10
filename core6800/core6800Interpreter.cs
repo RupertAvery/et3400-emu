@@ -12,6 +12,8 @@ namespace Core6800
             UNDOCUMENTED
         }
 
+        public bool EnableUndocumentedOpcodes { get; set; }
+
         public DecodeStatus InterpretOpCode(int opCode)
         {
             var status = DecodeStatus.LEGAL;
@@ -158,9 +160,17 @@ namespace Core6800
                     break;
                 case 0x14:
                     {
-                        status = DecodeStatus.UNDOCUMENTED;
-                        State.A &= State.B;
-                        CLR_NZV(); SET_NZ8(State.A);
+                        if (EnableUndocumentedOpcodes)
+                        {
+                            status = DecodeStatus.UNDOCUMENTED;
+                            State.A &= State.B;
+                            CLR_NZV(); SET_NZ8(State.A);
+                        }
+                        else
+                        {
+                            status = DecodeStatus.ILLEGAL;
+                        }
+
                     }
 
 
@@ -1128,9 +1138,19 @@ namespace Core6800
                     break;
                 case 0x87:
                     {
-                        status = DecodeStatus.UNDOCUMENTED;
-                        CLR_NZV(); SET_NZ8(State.A);
-                        IMM8(); WriteMem(State.EAD, State.A);
+                        if (EnableUndocumentedOpcodes)
+                        {
+                            status = DecodeStatus.UNDOCUMENTED;
+                            CLR_NZV();
+                            SET_NZ8(State.A);
+                            IMM8();
+                            WriteMem(State.EAD, State.A);
+                        }
+                        else
+                        {
+                            status = DecodeStatus.ILLEGAL;
+                        }
+
                     }
 
                     /* 0x88 EORA immediate -**0- */
@@ -1220,11 +1240,18 @@ namespace Core6800
                     break;
                 case 0x8f:
                     {
-                        status = DecodeStatus.UNDOCUMENTED;
-                        CLR_NZV();
-                        SET_NZ16(State.S);
-                        IMM16();
-                        WM16(State.EAD, State.S);
+                        if (EnableUndocumentedOpcodes)
+                        {
+                            status = DecodeStatus.UNDOCUMENTED;
+                            CLR_NZV();
+                            SET_NZ16(State.S);
+                            IMM16();
+                            WM16(State.EAD, State.S);
+                        }
+                        else
+                        {
+                            status = DecodeStatus.ILLEGAL;
+                        }
                     }
 
                     /* 0x90 SUBA direct ?**** */
@@ -1879,11 +1906,18 @@ namespace Core6800
                     break;
                 case 0xc7:
                     {
-                        status = DecodeStatus.UNDOCUMENTED;
-                        CLR_NZV();
-                        SET_NZ8(State.B);
-                        IMM8();
-                        WriteMem(State.EAD, State.B);
+                        if (EnableUndocumentedOpcodes)
+                        {
+                            status = DecodeStatus.UNDOCUMENTED;
+                            CLR_NZV();
+                            SET_NZ8(State.B);
+                            IMM8();
+                            WriteMem(State.EAD, State.B);
+                        }
+                        else
+                        {
+                            status = DecodeStatus.ILLEGAL;
+                        }
                     }
 
                     /* 0xc8 EORB immediate -**0- */
@@ -1967,11 +2001,19 @@ namespace Core6800
                     break;
                 case 0xcf:
                     {
-                        status = DecodeStatus.UNDOCUMENTED;
-                        CLR_NZV();
-                        SET_NZ16(State.X);
-                        IMM16();
-                        WM16(State.EAD, State.X);
+                        if (EnableUndocumentedOpcodes)
+                        {
+                            status = DecodeStatus.UNDOCUMENTED;
+                            CLR_NZV();
+                            SET_NZ16(State.X);
+                            IMM16();
+                            WM16(State.EAD, State.X);
+                        }
+                        else
+                        {
+                            status = DecodeStatus.ILLEGAL;
+                        }
+
                     }
 
                     /* 0xd0 SUBB direct ?**** */

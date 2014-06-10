@@ -30,32 +30,34 @@ namespace Sharp6800.Trainer
                 {
                     State = State,
 
-                    ReadMem = loc =>
+                    ReadMem = address =>
                         {
-                            loc = loc & 0xFFFF;
+                            address = address & 0xFFFF;
 
-                            return Memory[loc];
+                            return Memory[address];
                         },
 
-                    WriteMem = (loc, value) =>
+                    WriteMem = (address, value) =>
                         {
-                            loc = loc & 0xFFFF;
+                            address = address & 0xFFFF;
 
-                            if (loc >= 0xFC00)
+                            if (address >= 0xFC00)
                             {
+                                // Read-only memory
                                 return;
                             }
 
-                            Memory[loc] = value;
+                            Memory[address] = value;
 
-                            if ((loc & 0xC100) == 0xC100)
+                            // Display memory
+                            if ((address & 0xC177) == address)
                             {
                                 // OUTCH flicker hack
-                                if (Emulator.State.PC == 0xFE46 && (loc & 0x08) == 0x08 && Settings.EnableOUTCHHack)
+                                if (Emulator.State.PC == 0xFE46 && (address & 0x08) == 0x08 && Settings.EnableOUTCHHack)
                                 {
                                     return;
                                 }
-                                _disp.Write(loc, value);
+                                _disp.Write(address, value);
                             }
                         }
                 };
