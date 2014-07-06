@@ -78,7 +78,7 @@ namespace Sharp6800.Trainer
             {
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(SegmentPictureBox);
-                LoadROM("ROM.HEX");
+                LoadROM("ROM\\ROM.HEX");
 
 #if DEBUG
                 Action<int> updateSpeed = delegate(int second)
