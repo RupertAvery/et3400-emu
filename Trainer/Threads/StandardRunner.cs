@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Threading;
 
-namespace Sharp6800.Trainer
+namespace Sharp6800.Trainer.Threads
 {
     /// <summary>
     /// Implements a speed limiter that executes as many instructions in succession as possible
@@ -17,6 +17,7 @@ namespace Sharp6800.Trainer
         }
 
         private int limit = 100;
+        private int referenceLimit = 0;
 
         protected override void CheckSpeed()
         {
@@ -31,9 +32,13 @@ namespace Sharp6800.Trainer
             RaiseTimerEvent();
 
             var delta = (_trainer.Settings.ClockSpeed - CyclesPerSecond) / 1000;
-            Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed , CyclesPerSecond);
+            Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed, CyclesPerSecond);
             limit += delta;
-
+            if (delta == 0)
+            {
+                referenceLimit = limit;
+            }
+            if (limit < 0) limit = 0;
             sleeps = 0;
             //_lastCycles = _cycles;
         }

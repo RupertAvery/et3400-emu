@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using Sharp6800.Common;
 using Timer = System.Threading.Timer;
 
-namespace Sharp6800.Trainer
+namespace Sharp6800.Trainer.Threads
 {
     public abstract class TrainerRunnerBase : ITrainerRunner
     {

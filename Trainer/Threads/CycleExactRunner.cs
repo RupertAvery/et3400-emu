@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace Sharp6800.Trainer
+namespace Sharp6800.Trainer.Threads
 {
     /// <summary>
     /// Attempts to spread out instructions by executing one then sleeping for a quantum 

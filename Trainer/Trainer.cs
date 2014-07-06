@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using Core6800;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
+using Sharp6800.Trainer.Threads;
 
 namespace Sharp6800.Trainer
 {
@@ -47,17 +48,33 @@ namespace Sharp6800.Trainer
                                 return;
                             }
 
+                            // For accurate emulation we should probably NOT write to memory mapped addresses
                             Memory[address] = value;
 
-                            // Display memory
-                            if ((address & 0xC177) == address)
+                            // Check if we're writing to memory-mapped display
+                            // quick test - just check if we are in C100-C17F
+                            if (((address & 0xC17F) == address))
                             {
-                                // OUTCH flicker hack
-                                if (Emulator.State.PC == 0xFE46 && (address & 0x08) == 0x08 && Settings.EnableOUTCHHack)
+                                // OUTCH flicker hack - assumes original OUTCH routine is intact
+                                if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
                                 {
+                                    // don't write to upper bits if in OUTCH routine
                                     return;
                                 }
                                 _disp.Write(address, value);
+
+                                //var displayNo = (address >> 4) & 0xF;
+                                //// Secondary check, make sure we only write to C110-C16F
+                                //if (displayNo >= 1 && displayNo <= 6)
+                                //{
+                                //    // OUTCH flicker hack - assumes original OUTCH routine is intact
+                                //    if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
+                                //    {
+                                //        // don't write to upper bits if in OUTCH routine
+                                //        return;
+                                //    }
+                                //    _disp.Write(address, value);
+                                //}
                             }
                         }
                 };
