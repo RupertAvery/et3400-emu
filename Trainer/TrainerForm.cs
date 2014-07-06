@@ -80,14 +80,19 @@ namespace Sharp6800.Trainer
                 _trainer.SetupDisplay(SegmentPictureBox);
                 LoadROM("ROM.HEX");
 
+#if DEBUG
                 Action<int> updateSpeed = delegate(int second)
                 { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.DefaultClockSpeed) * 100); };
 
                 _trainer.Runner.OnTimer += second => Invoke(updateSpeed, second);
+#endif
 
+#if !DEBUG
+                settingsToolStripMenuItem.Visible = false;
+#endif
 
-                // ensure that the form is completely visible before starting the emulator, otherwise 
-                // the initial segments will be "blank"
+                // delay emulation to ensure that the form is completely visible, otherwise 
+                // some segments will not be lit
                 var timer = new System.Timers.Timer() { Interval = 100 };
                 timer.Elapsed += timer_Elapsed; 
                 this.Shown += (o, args) => timer.Start();
