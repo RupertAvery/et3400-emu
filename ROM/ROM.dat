@@ -1,2 +1,6 @@
-.org FC00
-.data FC06 FC0B
+<memorymap>
+  <start>$FC00</start>
+  <ranges>
+    <range type="data" start="$FC06" end="$FC0B"/>
+  </ranges>
+</memorymap>

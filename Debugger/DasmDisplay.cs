@@ -21,8 +21,6 @@ namespace Sharp6800.Debugger
                 //target.Image = new Bitmap(target.Width, target.Height);
 
                 targetWnd = target.Handle;
-                DataRanges = new List<DataRange>();
-
             }
             catch (Exception)
             {
@@ -32,8 +30,6 @@ namespace Sharp6800.Debugger
         }
 
         public Cpu6800State State { get; set; }
-
-        public IEnumerable<DataRange> DataRanges { get; set; }
 
         public void Display(int[] memory)
         {
@@ -49,11 +45,21 @@ namespace Sharp6800.Debugger
                 string code = "";
                 if (i < memory.Length)
                 {
-                    var inDataRange = DataRanges.FirstOrDefault(range => i >= range.Start && i <= range.End);
-                    if (inDataRange != null)
+
+                    if (MemoryMaps != null)
                     {
-                        i = inDataRange.End + 1;
+                        foreach (var memoryMap in MemoryMaps)
+                        {
+                            var inDataRange = memoryMap.Ranges.FirstOrDefault(range => i >= range.Start && i <= range.End);
+                            if (inDataRange != null)
+                            {
+                                i = inDataRange.End + 1;
+                                break;
+                            }
+                        }
+
                     }
+
                     var ops = Disassembler.Disassemble(memory, i, ref buf) & 0x3;
                     int k;
                     for (k = 0; k < ops; k++)
@@ -94,5 +100,7 @@ namespace Sharp6800.Debugger
         public int Start { get; set; }
 
         public int Offset { get; set; }
+
+        public IEnumerable<MemoryMap> MemoryMaps { get; set; }
     }
 }

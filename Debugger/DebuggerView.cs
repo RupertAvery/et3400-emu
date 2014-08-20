@@ -22,7 +22,7 @@ namespace Sharp6800.Debugger
         private readonly DasmDisplay _dasmDisplay;
         public int[] Memory { get; set; }
         public Cpu6800State State { get; set; }
-        public IEnumerable<DataRange> DataRanges { set { _dasmDisplay.DataRanges = value; } }
+        public IEnumerable<MemoryMap> MemoryMaps { set { _dasmDisplay.MemoryMaps = value; } }
         private Control focusObject;
 
         private const int WM_LBUTTONDOWN = 0x0201;

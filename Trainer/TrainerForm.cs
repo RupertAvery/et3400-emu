@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
 using Timer = System.Threading.Timer;
@@ -16,7 +18,7 @@ namespace Sharp6800.Trainer
         private DebuggerView _debuggerView;
         private Timer _updateTimer;
         private readonly object _lockObject = new object();
-        private IEnumerable<DataRange> _romDataRanges;
+        private readonly List<MemoryMap> memoryMaps = new List<MemoryMap>();
 
         public TrainerForm()
         {
@@ -245,10 +247,15 @@ namespace Sharp6800.Trainer
         private void LoadROM(string path)
         {
             _trainer.LoadROM(path);
-            var datPath = Path.GetFileNameWithoutExtension(path) + ".dat";
+            var datPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".dat");
             if (File.Exists(datPath))
             {
-                _romDataRanges = DatFile.Read(datPath);
+                using (var datfile = new FileStream(datPath, FileMode.Open, FileAccess.Read))
+                {
+                    var dat = new XmlSerializer(typeof(MemoryMap), new XmlRootAttribute("memorymap"));
+                    var map = (MemoryMap)dat.Deserialize(datfile);
+                    memoryMaps.Add(map);
+                }
             }
         }
 
@@ -309,7 +316,7 @@ namespace Sharp6800.Trainer
                 {
                     State = _trainer.State,
                     Memory = _trainer.Memory,
-                    DataRanges = _romDataRanges
+                    MemoryMaps = memoryMaps
                 };
                 _debuggerView.Closing += (o, args) =>
                     {
