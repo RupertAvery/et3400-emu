@@ -121,5 +121,13 @@ namespace UnitTestProject1
             ExpectAToBe(1);
         }
 
+        [TestMethod]
+        public void BLS()
+        {
+            LoadProgram("860081042302860101");
+            RunToNop();
+            ExpectAToBe(0);
+        }
+
     }
 }

@@ -66,16 +66,18 @@ namespace Core6800
                     break;
                 case 0x08:
                     {
-                        ++State.X;
-                        CLR_Z(); SET_Z16(State.X);
+                        var tempX = State.X + 1;
+                        CLR_Z(); SET_Z16(tempX);
+                        State.X = tempX & 0xffff;
                     }
 
                     /* 0x09 DEX inherent --*-- */
                     break;
                 case 0x09:
                     {
-                        --State.X;
-                        CLR_Z(); SET_Z16(State.X);
+                        var tempX = State.X - 1;
+                        CLR_Z(); SET_Z16(tempX);
+                        State.X = tempX & 0xffff;
                     }
 
                     /* 0x0a CLV */
@@ -214,7 +216,7 @@ namespace Core6800
                         var t = cf + State.A;
                         CLR_NZV(); /* keep carry from previous operation */
                         SET_NZ8(t); SET_C8(t);
-                        State.A = t;
+                        State.A = t & 0xff;
                     }
 
                     //  /* 0x1a ILLEGAL */
@@ -235,7 +237,7 @@ namespace Core6800
                         int t;
                         t = State.A + State.B;
                         CLR_HNZVC(); SET_FLAGS8(State.A, State.B, t); SET_H(State.A, State.B, t);
-                        State.A = t;
+                        State.A = t & 0xff;
                     }
 
                     /* 0x1c ILLEGAL */
@@ -268,9 +270,11 @@ namespace Core6800
                 case 0x22:
                     {
                         int t;
-                        var condition = (State.CC & 0x04 >> 2 | State.CC & 0x01) == 0x00;
+                        //var condition = (State.CC & 0x04 >> 2 | State.CC & 0x01) == 0x00;
                         // (State.CC & 0x05) != 0x05;
-                        BRANCH(condition);
+                        // C | Z == 0
+                        BRANCH((State.CC & 0x05) == 0);
+                        //BRANCH(condition);
                     }
 
                     /* 0x23 BLS relative ----- */
@@ -278,7 +282,9 @@ namespace Core6800
                 case 0x23:
                     {
                         int t;
-                        BRANCH((State.CC & 0x05) == 0x05);
+                        // C | Z == 1
+                        BRANCH((State.CC & 0x05) != 0);
+                        //BRANCH((State.CC & 0x05) == 0x05);
                     }
 
                     /* 0x24 BCC relative ----- */
@@ -533,16 +539,20 @@ namespace Core6800
                     break;
                 case 0x43:
                     {
-                        State.A = ~State.A;
-                        CLR_NZV(); SET_NZ8(State.A); SEC();
+                        var tempA = ~State.A;
+                        CLR_NZV(); SET_NZ8(tempA); SEC();
+                        State.A = tempA & 0xff;
                     }
 
                     /* 0x44 LSRA inherent -0*-* */
                     break;
                 case 0x44:
                     {
-                        CLR_NZC(); State.CC |= (State.A & 0x01);
-                        State.A >>= 1; SET_Z8(State.A);
+                        var tempA = State.A;
+                        CLR_NZC(); State.CC |= (tempA & 0x01);
+                        tempA >>= 1; 
+                        SET_Z8(tempA);
+                        State.A = tempA & 0xff;
                     }
 
                     /* 0x45 ILLEGAL */
@@ -562,9 +572,12 @@ namespace Core6800
                     break;
                 case 0x47:
                     {
+                        var tempA = State.A;
                         CLR_NZC(); State.CC |= (State.A & 0x01);
-                        State.A >>= 1; State.A |= ((State.A & 0x40) << 1);
-                        SET_NZ8(State.A);
+                        tempA >>= 1;
+                        tempA |= ((tempA & 0x40) << 1);
+                        SET_NZ8(tempA);
+                        State.A = tempA & 0xff;
                     }
 
                     /* 0x48 ASLA inherent ?**** */
@@ -591,8 +604,9 @@ namespace Core6800
                     break;
                 case 0x4a:
                     {
-                        --State.A;
-                        CLR_NZV(); SET_FLAGS8D(State.A);
+                        var tempA = State.A - 1;
+                        CLR_NZV(); SET_FLAGS8D(tempA);
+                        State.A = tempA & 0xff;
                     }
 
                     /* 0x4b ILLEGAL */
@@ -601,8 +615,9 @@ namespace Core6800
                     break;
                 case 0x4c:
                     {
-                        ++State.A;
-                        CLR_NZV(); SET_FLAGS8I(State.A);
+                        var tempA = State.A + 1;
+                        CLR_NZV(); SET_FLAGS8D(tempA);
+                        State.A = tempA & 0xff;
                     }
 
                     /* 0x4d TSTA inherent -**0- */
@@ -640,16 +655,20 @@ namespace Core6800
                     break;
                 case 0x53:
                     {
-                        State.B = ~State.B;
-                        CLR_NZV(); SET_NZ8(State.B); SEC();
+                        var tempB = ~State.B;
+                        CLR_NZV(); SET_NZ8(tempB); SEC();
+                        State.B = tempB & 0xff;
                     }
 
                     /* 0x54 LSRB inherent -0*-* */
                     break;
                 case 0x54:
                     {
+                        var tempB = State.B;
                         CLR_NZC(); State.CC |= (State.B & 0x01);
-                        State.B >>= 1; SET_Z8(State.B);
+                        tempB >>= 1; 
+                        SET_Z8(tempB);
+                        State.B = tempB & 0xff;
                     }
 
                     /* 0x55 ILLEGAL */
@@ -669,9 +688,12 @@ namespace Core6800
                     break;
                 case 0x57:
                     {
+                        var tempB = State.B;
                         CLR_NZC(); State.CC |= (State.B & 0x01);
-                        State.B >>= 1; State.B |= ((State.B & 0x40) << 1);
-                        SET_NZ8(State.B);
+                        tempB >>= 1; 
+                        tempB |= ((tempB & 0x40) << 1);
+                        SET_NZ8(tempB);
+                        State.B = tempB & 0xff;
                     }
 
                     /* 0x58 ASLB inherent ?**** */
@@ -698,8 +720,9 @@ namespace Core6800
                     break;
                 case 0x5a:
                     {
-                        --State.B;
-                        CLR_NZV(); SET_FLAGS8D(State.B);
+                        var tempB = State.B - 1;
+                        CLR_NZV(); SET_FLAGS8D(tempB);
+                        State.B = tempB & 0xff;
                     }
 
                     /* 0x5b ILLEGAL */
@@ -708,8 +731,10 @@ namespace Core6800
                     break;
                 case 0x5c:
                     {
-                        ++State.B;
-                        CLR_NZV(); SET_FLAGS8I(State.B);
+                        var tempB = State.B + 1;
+                        CLR_NZV(); SET_FLAGS8D(tempB);
+                        State.B = tempB & 0xff;
+
                     }
 
                     /* 0x5d TSTB inherent -**0- */
@@ -938,7 +963,7 @@ namespace Core6800
                         int t;
                         t = EXTBYTE(); t = ~t;
                         CLR_NZV(); SET_NZ8(t); SEC();
-                        WriteMem(State.EAD, t);
+                        WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x74 LSR extended -0*-* */
@@ -951,7 +976,7 @@ namespace Core6800
                         State.CC |= (t & 0x01);
                         t >>= 1;
                         SET_Z8(t);
-                        WriteMem(State.EAD, t);
+                        WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x75 EIM --**0- */
@@ -975,7 +1000,7 @@ namespace Core6800
                         t = EXTBYTE(); r = (State.CC & 0x01) << 7;
                         CLR_NZC(); State.CC |= (t & 0x01);
                         r |= t >> 1; SET_NZ8(r);
-                        WriteMem(State.EAD, r);
+                        WriteMem(State.EAD, r & 0xff);
                     }
 
                     /* 0x77 ASR extended ?**-* */
@@ -986,7 +1011,7 @@ namespace Core6800
                         t = EXTBYTE(); CLR_NZC(); State.CC |= (t & 0x01);
                         t >>= 1; t |= ((t & 0x40) << 1);
                         SET_NZ8(t);
-                        WriteMem(State.EAD, t);
+                        WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x78 ASL extended ?**** */
@@ -996,7 +1021,7 @@ namespace Core6800
                         int t, r;
                         t = EXTBYTE(); r = t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        WriteMem(State.EAD, r);
+                        WriteMem(State.EAD, r & 0xff);
                     }
 
                     /* 0x79 ROL extended -**** */
@@ -1006,7 +1031,7 @@ namespace Core6800
                         int t, r;
                         t = EXTBYTE(); r = State.CC & 0x01; r |= t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        WriteMem(State.EAD, r);
+                        WriteMem(State.EAD, r & 0xff);
                     }
 
                     /* 0x7a DEC extended -***- */
@@ -1016,7 +1041,7 @@ namespace Core6800
                         int t;
                         t = EXTBYTE(); --t;
                         CLR_NZV(); SET_FLAGS8D(t);
-                        WriteMem(State.EAD, t);
+                        WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x7b TIM --**0- */
@@ -1038,7 +1063,7 @@ namespace Core6800
                         int t;
                         t = EXTBYTE(); ++t;
                         CLR_NZV(); SET_FLAGS8I(t);
-                        WriteMem(State.EAD, t);
+                        WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x7d TST extended -**0- */
@@ -1071,7 +1096,7 @@ namespace Core6800
                         int t, r;
                         t = IMMBYTE(); r = State.A - t;
                         CLR_NZVC(); SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x81 CMPA immediate ?**** */
@@ -1090,7 +1115,7 @@ namespace Core6800
                         int t, r;
                         t = IMMBYTE(); r = State.A - t - (State.CC & 0x01);
                         CLR_NZVC(); SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x83 SUBD immediate -**** */
@@ -1169,7 +1194,7 @@ namespace Core6800
                         int t, r;
                         t = IMMBYTE(); r = State.A + t + (State.CC & 0x01);
                         CLR_HNZVC(); SET_FLAGS8(State.A, t, r); SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x8a ORA immediate -**0- */
@@ -1261,7 +1286,7 @@ namespace Core6800
                         int t, r;
                         t = DIRBYTE(); r = State.A - t;
                         CLR_NZVC(); SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x91 CMPA direct ?**** */
@@ -1280,7 +1305,7 @@ namespace Core6800
                         int t, r;
                         t = DIRBYTE(); r = State.A - t - (State.CC & 0x01);
                         CLR_NZVC(); SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x93 SUBD direct -**** */
@@ -1355,7 +1380,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.A, t, r);
                         SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0x9a ORA direct -**0- */
@@ -1446,7 +1471,7 @@ namespace Core6800
                         r = State.A - t;
                         CLR_NZVC();
                         SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xa1 CMPA indexed ?**** */
@@ -1469,7 +1494,7 @@ namespace Core6800
                         r = State.A - t - (State.CC & 0x01);
                         CLR_NZVC();
                         SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xa3 SUBD indexed -**** */
@@ -1546,7 +1571,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.A, t, r);
                         SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xaa ORA indexed -**0- */
@@ -1637,7 +1662,7 @@ namespace Core6800
                         r = State.A - t;
                         CLR_NZVC();
                         SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xb1 CMPA extended ?**** */
@@ -1660,7 +1685,7 @@ namespace Core6800
                         r = State.A - t - (State.CC & 0x01);
                         CLR_NZVC();
                         SET_FLAGS8(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xb3 SUBD extended -**** */
@@ -1739,7 +1764,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.A, t, r);
                         SET_H(State.A, t, r);
-                        State.A = r;
+                        State.A = r & 0xff;
                     }
 
                     /* 0xba ORA extended -**0- */
@@ -1830,7 +1855,7 @@ namespace Core6800
                         r = State.B - t;
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xc1 CMPB immediate ?**** */
@@ -1941,7 +1966,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xca ORB immediate -**0- */
@@ -1965,7 +1990,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xCC LDD immediate -**0- */
@@ -2025,7 +2050,7 @@ namespace Core6800
                         r = State.B - t;
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xd1 CMPB direct ?**** */
@@ -2048,7 +2073,7 @@ namespace Core6800
                         r = State.B - t - (State.CC & 0x01);
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xd3 ADDD direct -**** */
@@ -2127,7 +2152,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xda ORB direct -**0- */
@@ -2151,7 +2176,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xdc LDD direct -**0- */
@@ -2201,7 +2226,7 @@ namespace Core6800
                         r = State.B - t;
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xe1 CMPB indexed ?**** */
@@ -2224,7 +2249,7 @@ namespace Core6800
                         r = State.B - t - (State.CC & 0x01);
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xe3 ADDD indexed -**** */
@@ -2303,7 +2328,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xea ORB indexed -**0- */
@@ -2327,7 +2352,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xec LDD indexed -**0- */
@@ -2390,7 +2415,7 @@ namespace Core6800
                         r = State.B - t;
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xf1 CMPB extended ?**** */
@@ -2413,7 +2438,7 @@ namespace Core6800
                         r = State.B - t - (State.CC & 0x01);
                         CLR_NZVC();
                         SET_FLAGS8(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xf3 ADDD extended -**** */
@@ -2492,7 +2517,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xfa ORB extended -**0- */
@@ -2516,7 +2541,7 @@ namespace Core6800
                         CLR_HNZVC();
                         SET_FLAGS8(State.B, t, r);
                         SET_H(State.B, t, r);
-                        State.B = r;
+                        State.B = r & 0xff;
                     }
 
                     /* 0xfc LDD extended -**0- */
@@ -2575,6 +2600,7 @@ namespace Core6800
                     status = DecodeStatus.ILLEGAL;
                     break;
             }
+
             return status;
         }
     }

@@ -146,6 +146,7 @@
     </Content>
     <Content Include="ROM\ROM.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="sample\samp123a.s19">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

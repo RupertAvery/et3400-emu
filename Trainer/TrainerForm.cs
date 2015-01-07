@@ -90,7 +90,7 @@ namespace Sharp6800.Trainer
 #endif
 
 #if !DEBUG
-                settingsToolStripMenuItem.Visible = false;
+                //settingsToolStripMenuItem.Visible = false;
 #endif
 
                 // delay emulation to ensure that the form is completely visible, otherwise 
