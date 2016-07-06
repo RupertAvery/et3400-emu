@@ -43,17 +43,13 @@ namespace Core6800
         }
 
 
-        private void ONE_MORE_INSN()
+        private int ONE_MORE_INSN()
         {
-            //UINT8 ireg;                             
-            //pPPC = pPC;                             
-            //debugger_instruction_hook(cpustate->device, PCD);                       
-            //ireg=M_RDOP(PCD);                       
+            int fetchCode = ReadMem(State.PC) & 0xff;
             State.PC++;
-            //(*cpustate->insn[ireg])(cpustate);                  
-            //increment_counter(cpustate, cpustate->cycles[ireg]);    
+            InterpretOpCode(fetchCode);
+            return cycles[fetchCode];
         }
-
 
         private int SIGNED(int b)
         {
@@ -180,38 +176,6 @@ namespace Core6800
             WriteMem((Addr + 1) & 0xffff, p & 0xff);
         }
 
-        private void CHECK_IRQ_LINES()
-        {
-            // TODO: IS3 interrupt
-
-            //if (cpustate->nmi_pending)
-            //{
-            //    if(cpustate->wai_state & M6800_SLP)
-            //        cpustate->wai_state &= ~M6800_SLP;
-
-            //    cpustate->nmi_pending = FALSE;
-            //    enter_interrupt(cpustate, "M6800 '%State.S' take NMI\n",0xfffc);
-            //}
-            //else
-            //{
-            //    if( cpustate->irq_state[M6800_IRQ_LINE] != CLEAR_LINE )
-            //    {   /* standard IRQ */
-            //        if(cpustate->wai_state & M6800_SLP)
-            //            cpustate->wai_state &= ~M6800_SLP;
-
-            //        if( !(State.CC & 0x10) )
-            //        {
-            //            enter_interrupt(cpustate, "M6800 '%State.S' take IRQ1\n",0xfff8);
-            //            if( cpustate->irq_callback )
-            //                (void)(*cpustate->irq_callback)(cpustate->device, M6800_IRQ_LINE);
-            //        }
-            //    }
-            //    else
-            //        if( !(State.CC & 0x10) )
-            //            m6800_check_irq2(cpustate);
-            //}
-        }
-
         private int DIRWORD()
         {
             DIRECT();
@@ -259,7 +223,7 @@ namespace Core6800
         private void CLR_C() { State.CC &= 0xfe; }
 
         /* macros for State.CC -- State.CC bits affected should be reset before calling */
-        private void SET_Z(int a) { if ((a & 0xff) == 0)SEZ(); }
+        private void SET_Z(int a) { if ((a & 0xff) == 0) SEZ(); }
         private void SET_Z8(int a) { SET_Z(a); }
         private void SET_Z16(int a) { SET_Z(a); }
         private void SET_N8(int a) { State.CC |= (((a) & 0x80) >> 4); }

@@ -291,18 +291,6 @@ namespace Sharp6800.Trainer
             about.ShowDialog();
         }
 
-        private void startToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //_trainer.AddBreakPoint(0xFDBB);
-            //trainer.SetProgramCounter(1);
-        }
-
-        private void settingsToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            var settings = new SettingsForm { Settings = _trainer.Settings };
-            settings.Show();
-        }
-
         private void breakToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.Break();
@@ -343,5 +331,20 @@ namespace Sharp6800.Trainer
             }
         }
 
+        private void nMIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.NMI();
+        }
+
+        private void iRQToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.IRQ();
+        }
+
+        private void settingsToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            var settings = new SettingsForm { Settings = _trainer.Settings };
+            settings.Show();
+        }
     }
 }
