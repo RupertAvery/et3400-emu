@@ -235,7 +235,7 @@ namespace Sharp6800.Trainer
         /// </summary>
         /// <param name="file"></param>
         /// <param name="offset"></param>
-        public void LoadRAM(string file, int offset = 0)
+        public void LoadRamFile(string file, int offset = 0)
         {
             try
             {
@@ -257,6 +257,11 @@ namespace Sharp6800.Trainer
         {
             try
             {
+                if (file.ToLower().EndsWith(".ram"))
+                {
+                    LoadRamFile(file, 0);
+                    return;
+                }
                 var content = File.ReadAllText(file);
                 var lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
                 foreach (var line in lines)

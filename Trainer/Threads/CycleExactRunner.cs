@@ -22,7 +22,7 @@ namespace Sharp6800.Trainer.Threads
             RaiseTimerEvent();
             spinTime += (CyclesPerSecond - _trainer.Settings.ClockSpeed) / 10;
 
-            if (spinTime > 25000) spinTime = 25000;
+            if (spinTime > 5000) spinTime = 5000;
             if (spinTime < 1) spinTime = 1;
             sleeps = 0;
             _lastCycles = _cycles;
