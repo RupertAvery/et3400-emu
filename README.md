@@ -6,7 +6,7 @@ The kit had the following features:
 
 * [Motorola 6800](http://en.wikipedia.org/wiki/Motorola_6800) 8-bit CPU clocked at 1MHz
 * Six 7-segment LED displays used to display address and data information, and as a visual output device (i.e. screen)
-* 17 push-button switches used as a Hex keypad
+* 17 push-button switches used as a hex keypad
 * 8 LEDs for general purpose visual output
 * 1 8-position DIP switch for data input
 * 1 KB ROM 
@@ -25,16 +25,27 @@ The emulator core for the 6800 CPU is based on the MAME source code.
 
 You can download the trainer's Manual [here](http://archive.org/details/HeathkitManualForTheEt-3400MicroprocessorTrainer). 
 
+The manual mainly details the assembly of the hardware of the kit.
+
+Here is an index of interesting information related to the software that will be useful for emulation:
+
+| PDF Page | Manual Page | Section          | 
+|:--------:|:-----------:|------------------|
+| 47       |     45      | Operation        |
+| 57       |     55      | Sample Programs  |
+| 75       |     74      | Monitor Listing  |
+| 89       |     87      | Meomry Map       |
+| 91       |     89      | Instruction Set  |
+
 ## .RAM file format
 
 The repository contains some files with the .ram extension. These are binary files containing the machine code in plain bytes that will be loaded directly into RAM at address $0000.
 
 The file is headered with 8 bytes that contain the ASCII characters "3400" followed by 4 zero-bytes.
 
-
 ## .S19 file format
 
-The emulator supports S19 format files. Click File > Load and select your S19 OBJ file to load it into memory.  Press D on the keypad to bring up the Do prompt. You will be required to enter a 16-bit hex address in RAM. Usually this will be 0000. The ROM will then execute the program.
+The emulator supports S19 format files. Click File > Load and select your S19 OBJ file to load it into memory.  
 
 The manual contains program listings in assembly/machine code and the ROM listing which can be useful for calling functions such as monitoring the keyboard and displaying text on screen.
 
@@ -55,3 +66,8 @@ The manual contains program listings in assembly/machine code and the ROM listin
 * **DO** - Execute RAM at given address
 * **EXAM** - Start viewing hex at specified address
 * **FWD** - During *EXAM*ine mode, move address forward
+
+# Thanks
+
+I would like to thank Rick Nungester for taking interest in the project and testing the emulator and providing invaluable information for improving the emulator.
+
