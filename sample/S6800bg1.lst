@@ -1,0 +1,26 @@
+0001   0000             ; This 6800 assembly code demonstrates a defect in the Sharp6800
+0002   0000             ; emulator (v1.0.3.0) of the Healthkit ET-3400 Microprocessor
+0003   0000             ; Trainer.  Load the 6 bytes into the emulator (AUTO 0000
+0004   0000             ; 01 39 01 8D FB 39), RESET, then follow the 3 steps below.
+0005   0000             ; After Step 3, the real ET-3400 correctly shows "0000 01",
+0006   0000             ; having Single-Stepped to label SUB1.  The emulator shows
+0007   0000             ; "0100 00".
+0008   0000             
+0009   0000                     .org    $0000
+0010   0000             
+0011   0000 01          SUB1    NOP             ; Step 3: Single-Step (SS) to here.
+0012   0001 39                  RTS
+0013   0002             
+0014   0002 01          MAIN    NOP             ; Step 2: Execute here (DO 0002, see "0003 8D")
+0015   0003 8D FB               BSR     SUB1    ; Step 1: Set a breakpoint here (BR 0003)
+0016   0005 39                  RTS
+0017   0006             
+0018   0006                     .END
+
+
+
+Label        Value      Label        Value      Label        Value
+------------------      ------------------      ------------------
+MAIN          0002      SUB1          0000      
+
+tasm: Number of errors = 0

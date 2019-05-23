@@ -1,0 +1,67 @@
+12/16/09 notes by Rick Nungester, regarding the Heathkit ET-3400 PC
+Emulator program, or "Trainer Simulator Version 1.1" by Bill Lovegrove
+of Pilgrim Works, copyright 1996-1999.
+
+"File, Load" Function
+=====================
+
+I am using MS Windows XP Version 5.1.2600.  With emulator files in
+C:\Documents and Settings\Rick\My Documents\Applications\Trainer\,
+loading a good .s19 object file produced no errors and looks
+successful, but the load does not happen.  Moving all files to
+C:\Trainer\ solved this problem.  The emulator must have some
+older-Windows path name restrictions.
+
+I tried to load the example SREC file found in Wikipedia at
+http://en.wikipedia.org/wiki/SREC_%28file_format%29 and shown here:
+
+S00F000068656C6C6F202020202000003C
+S11F00007C0802A6900100049421FFF07C6C1B787C8C23783C6000003863000026
+S11F001C4BFFFFE5398000007D83637880010014382100107C0803A64E800020E9
+S111003848656C6C6F20776F726C642E0A0042
+S5030003F9
+S9030000FC
+
+The trainer gives no error indications, but doesn't load it.  (The
+second line says "At address 0000 load data 7C 08 02...")  Stripping
+it down to just the 3 "S1" lines, each ending in CR/LF, does load
+correctly:
+
+S11F00007C0802A6900100049421FFF07C6C1B787C8C23783C6000003863000026
+S11F001C4BFFFFE5398000007D83637880010014382100107C0803A64E800020E9
+S111003848656C6C6F20776F726C642E0A0042
+
+So the emulator doesn't seem to recognize all standard SREC records,
+and quietly ignores the whole load command instead of producing an
+error or only reading the records it does understand.
+
+For ease of manual entry, I next tried replacing the checksums at
+the end of each line with 00.  The trainer still loads the file
+correctly, so it doesn't seem to require the checksums:
+
+S11F00007C0802A6900100049421FFF07C6C1B787C8C23783C6000003863000000
+S11F001C4BFFFFE5398000007D83637880010014382100107C0803A64E80002000
+S111003848656C6C6F20776F726C642E0A0000
+
+Now I was able to manually create file sample1.s19 corresponding to
+"Heathkit Manual for the Microprocessor Trainer Model ET-3400" (1977),
+page 55, Sample Programs, Sample 1 -- "Turn on and off each segment
+in sequence beginning at H display.  Uses monitor subroutines REDIS
+and OUTCH.  Note: One DP in each display is active."  File sample1.s19
+contains the following 2 lines, each ending with a carriage return
+and line feed.  The .s19 file should be located in the same directory
+as TRAINER.EXE.  Then doing File, Load in the trainer shows it as
+a load choice.
+
+S11F0000BDFCBC86012007D6F1CB10D7F148BDFE3ACE2F000926FD165D26EC8600
+S10D001C01DEF08CC10F26EA20DA00
+
+Start TRAINER.EXE and see the "6800 Trainer" window with "CPU UP"
+in its LED displays.  File, Load, sample1.s19, Load.  Press E
+(Examine) 0000 (address to start at, see "0000bd", F (Forward)
+repeatedly to examine memory and see bd FC bC...  To run the
+program press D (Do) 0000 (address to start at).  See the display
+LEDs cycle one at a time.
+
+The emulator runs much slower than the real ET-3400 for me, even
+with Settings, Settings, Speed set as fast as possible.

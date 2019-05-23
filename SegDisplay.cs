@@ -25,27 +25,23 @@ namespace Sharp6800
             {
                 width = target.Width;
                 height = target.Height;
-                //target.Image = new Bitmap(target.Width, target.Height);
 
                 targetWnd = target.Handle;
                 target.Paint += (sender, args) => Repaint(args.Graphics);
 
-                //segments[0] = Image.FromFile("display/g.png");
-                //segments[1] = Image.FromFile("display/f.png");
-                //segments[2] = Image.FromFile("display/e.png");
-                //segments[3] = Image.FromFile("display/d.png");
-                //segments[4] = Image.FromFile("display/c.png");
-                //segments[5] = Image.FromFile("display/b.png");
-                //segments[6] = Image.FromFile("display/a.png");
-                //segments[7] = Image.FromFile("display/dp.png");
-                //bg = Image.FromFile("display/bg.png");
+                vt[0] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(SegDisplay).Assembly, "display/vtoff.png"));
+                vt[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(SegDisplay).Assembly, "display/vton.png"));
+                hr[0] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(SegDisplay).Assembly, "display/hroff.png"));
+                hr[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(SegDisplay).Assembly, "display/hron.png"));
+                dp[0] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(SegDisplay).Assembly, "display/dpoff.png"));
+                dp[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(SegDisplay).Assembly, "display/dpon.png"));
 
-                vt[0] = Image.FromFile("display/vtoff.png");
-                vt[1] = Image.FromFile("display/vton.png");
-                hr[0] = Image.FromFile("display/hroff.png");
-                hr[1] = Image.FromFile("display/hron.png");
-                dp[0] = Image.FromFile("display/dpoff.png");
-                dp[1] = Image.FromFile("display/dpon.png");
+                //vt[0] = Image.FromFile("display/vtoff.png");
+                //vt[1] = Image.FromFile("display/vton.png");
+                //hr[0] = Image.FromFile("display/hroff.png");
+                //hr[1] = Image.FromFile("display/hron.png");
+                //dp[0] = Image.FromFile("display/dpoff.png");
+                //dp[1] = Image.FromFile("display/dpon.png");
 
             }
             catch (Exception)

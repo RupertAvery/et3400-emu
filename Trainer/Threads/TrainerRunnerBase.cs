@@ -18,7 +18,7 @@ namespace Sharp6800.Trainer.Threads
 
         protected bool _running;
         protected Timer _timer;
-        private Timer _displayTimer;
+        //private Timer _displayTimer;
         protected readonly object _lockobject = new object();
         protected int _cycles;
         protected int _lastCycles;
@@ -56,10 +56,10 @@ namespace Sharp6800.Trainer.Threads
                 {
                     _timer.Dispose();
                 }
-                if (_displayTimer != null)
-                {
-                    _displayTimer.Dispose();
-                }
+                //if (_displayTimer != null)
+                //{
+                //    _displayTimer.Dispose();
+                //}
             }
         }
 

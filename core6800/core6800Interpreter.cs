@@ -291,7 +291,7 @@ namespace Core6800
                     break;
                 case 0x22:
                     {
-                        int t;
+                        //int t;
                         //var condition = (State.CC & 0x04 >> 2 | State.CC & 0x01) == 0x00;
                         // (State.CC & 0x05) != 0x05;
                         // C | Z == 0
@@ -303,7 +303,7 @@ namespace Core6800
                     break;
                 case 0x23:
                     {
-                        int t;
+                        //int t;
                         // C | Z == 1
                         BRANCH((State.CC & 0x05) != 0);
                         //BRANCH((State.CC & 0x05) == 0x05);
@@ -313,7 +313,7 @@ namespace Core6800
                     break;
                 case 0x24:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x01) != 0x01);
                     }
 
@@ -321,7 +321,7 @@ namespace Core6800
                     break;
                 case 0x25:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x01) == 0x01);
                     }
 
@@ -329,7 +329,7 @@ namespace Core6800
                     break;
                 case 0x26:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x04) != 0x04);
                     }
 
@@ -337,7 +337,7 @@ namespace Core6800
                     break;
                 case 0x27:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x04) == 0x04);
                     }
 
@@ -345,7 +345,7 @@ namespace Core6800
                     break;
                 case 0x28:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x02) != 0x02);
                     }
 
@@ -353,7 +353,7 @@ namespace Core6800
                     break;
                 case 0x29:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x02) == 0x02);
                     }
 
@@ -361,7 +361,7 @@ namespace Core6800
                     break;
                 case 0x2a:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x08) != 0x08);
                     }
 
@@ -369,7 +369,7 @@ namespace Core6800
                     break;
                 case 0x2b:
                     {
-                        int t;
+                        //int t;
                         BRANCH((State.CC & 0x08) == 0x08);
                     }
 
@@ -377,7 +377,7 @@ namespace Core6800
                     break;
                 case 0x2c:
                     {
-                        int t;
+                        //int t;
                         BRANCH(!NXORV());
                     }
 
@@ -385,7 +385,7 @@ namespace Core6800
                     break;
                 case 0x2d:
                     {
-                        int t;
+                        //int t;
                         BRANCH(NXORV());
                     }
 
@@ -393,7 +393,7 @@ namespace Core6800
                     break;
                 case 0x2e:
                     {
-                        int t;
+                        //int t;
                         BRANCH(!(NXORV() || (State.CC & 0x04) == 0x04));
                     }
 
@@ -401,7 +401,7 @@ namespace Core6800
                     break;
                 case 0x2f:
                     {
-                        int t;
+                        //int t;
                         BRANCH(NXORV() || (State.CC & 0x04) == 0x04);
                     }
 
@@ -502,7 +502,7 @@ namespace Core6800
                     //    }
 
                     /* 0x3d MUL inherent --*-@ */
-                    break;
+                    //break;
                     //case 0x3d:
                     //  {
                     //      int t;
@@ -513,7 +513,7 @@ namespace Core6800
                     //  }
 
                     /* 0x3e WAI inherent ----- */
-                    break;
+                    //break;
                 case 0x3e:
                     {
                         /*
@@ -801,7 +801,7 @@ namespace Core6800
 
                     /* 0x62 OIM --**0- */
                     /* HD63701YO only */
-                    break;
+                    //break;
                     //case oim_ix:
                     //    {
                     //        int t, r;
@@ -813,7 +813,7 @@ namespace Core6800
                     //    }
 
                     /* 0x63 COM indexed -**01 */
-                    break;
+                    //break;
                 case 0x63:
                     {
                         int t;
@@ -846,7 +846,7 @@ namespace Core6800
                     //    }
 
                     /* 0x66 ROR indexed -**-* */
-                    break;
+                    //break;
                 case 0x66:
                     {
                         int t, r;
@@ -910,7 +910,7 @@ namespace Core6800
                     //    }
 
                     /* 0x6c INC indexed -***- */
-                    break;
+                    //break;
                 case 0x6c:
                     {
                         int t;
@@ -967,7 +967,7 @@ namespace Core6800
 
                     /* 0x72 OIM --**0- */
                     /* HD63701YO only */
-                    break;
+                    //break;
                     //case oim_di:
                     //    {
                     //        int t, r;
@@ -979,7 +979,7 @@ namespace Core6800
                     //    }
 
                     /* 0x73 COM extended -**01 */
-                    break;
+                    //break;
                 case 0x73:
                     {
                         int t;
@@ -1015,7 +1015,7 @@ namespace Core6800
                     //    }
 
                     /* 0x76 ROR extended -**-* */
-                    break;
+                    //break;
                 case 0x76:
                     {
                         int t, r;
@@ -1079,7 +1079,7 @@ namespace Core6800
                     //    }
 
                     /* 0x7c INC extended -***- */
-                    break;
+                    //break;
                 case 0x7c:
                     {
                         int t;
@@ -1155,7 +1155,7 @@ namespace Core6800
                     //    }
 
                     /* 0x84 ANDA immediate -**0- */
-                    break;
+                    //break;
                 case 0x84:
                     {
                         int t;
@@ -1265,7 +1265,7 @@ namespace Core6800
 
 
                     /* 0x8d BSR ----- */
-                    break;
+                    //break;
                 case 0x8d:
                     {
                         int t;
@@ -1345,7 +1345,7 @@ namespace Core6800
                     //    }
 
                     /* 0x94 ANDA direct -**0- */
-                    break;
+                    //break;
                 case 0x94:
                     {
                         int t;
@@ -1457,7 +1457,7 @@ namespace Core6800
                     //    }
 
                     /* 0x9d JSR direct ----- */
-                    break;
+                    //break;
                     //case 0x9d:
                     //    {
                     //        DIRECT();
@@ -1466,7 +1466,7 @@ namespace Core6800
                     //    }
 
                     /* 0x9e LDS direct -**0- */
-                    break;
+                    //break;
                 case 0x9e:
                     {
                         State.S = DIRWORD();
@@ -1648,7 +1648,7 @@ namespace Core6800
                     //    }
 
                     /* 0xad JSR indexed ----- */
-                    break;
+                    //break;
                 case 0xad:
                     {
                         INDEXED();
@@ -1841,7 +1841,7 @@ namespace Core6800
                     //    }
 
                     /* 0xbd JSR extended ----- */
-                    break;
+                    //break;
                 case 0xbd:
                     {
                         EXTENDED();
@@ -1918,7 +1918,7 @@ namespace Core6800
                     //    }
 
                     /* 0xc4 ANDB immediate -**0- */
-                    break;
+                    //break;
                 case 0xc4:
                     {
                         int t;
@@ -2026,7 +2026,7 @@ namespace Core6800
 
                     /* is this State.A legal instruction? */
                     /* 0xcd STD immediate -**0- */
-                    break;
+                    //break;
                 //case 0xcd:
                 //    {
                 //        IMM16();
@@ -2289,7 +2289,7 @@ namespace Core6800
                     //    }
 
                     /* 0xe4 ANDB indexed -**0- */
-                    break;
+                    //break;
                 case 0xe4:
                     {
                         int t;
@@ -2400,7 +2400,7 @@ namespace Core6800
                     //    }
 
                     /* 0xed STD indexed -**0- */
-                    break;
+                    //break;
                 //case 0xed:
                 //    {
                 //        INDEXED();
@@ -2478,7 +2478,7 @@ namespace Core6800
                     //    }
 
                     /* 0xf4 ANDB extended -**0- */
-                    break;
+                    //break;
                 case 0xf4:
                     {
                         int t;
@@ -2590,7 +2590,7 @@ namespace Core6800
                     //    }
 
                     /* 0xfd STD extended -**0- */
-                    break;
+                    //break;
                 //case 0xfd:
                 //    {
                 //        EXTENDED();

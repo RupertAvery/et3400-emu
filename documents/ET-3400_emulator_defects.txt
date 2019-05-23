@@ -1,0 +1,39 @@
+Defects with the ET-3400 Emulator
+=================================
+
+The emulator is also called "The ET-3400 Simulator" or more correctly,
+the "Trainer Simulator version 1.1" from Pilgrim Works (Bill Lovegrove).
+
+2010-06-16, Rick Nungester, copied from a program I am writing:
+--------------------------------------------------------------------------
+...
+        ASL    FSRVAL+0   ; shift 32-bit FSRVAL left one bit
+
+; There is a bug in the ET-3400 simulator that I am using to develop this
+; program.  The trainer is no longer supported, and the bug is being
+; avoided.  The simulator bug is that "ROL <address>" does not rotate
+; through the Carry bit as it should.  To demonstrate, do the following
+; on the simulator and ET-3400 and see different results.  RESET, AUTO,
+; 0000, 00, 0d, 79, 00, 00, RESET, PC, CHAN, 0001, SS, SS, EXAM, 0000.
+; This clears address $0000 to value $00, enters program "SEC, ROL $0000"
+; at address $0001, then executes the two program steps. SEC sets the
+; Carry Bit. The ROL should rotate this bit into the value at address
+; $0000. The ET-3400 correctly shows "01" at address $0000, but the
+; simulator incorrectly shows "00".
+;       ROL    FSRVAL+1     ; THIS WON'T WORK ON THE SIMULATOR,
+;       ROL    FSRVAL+2
+;       ROL    FSRVAL+3     ; but what follows will.
+
+        LDAA   FSRVAL+1
+        ROLA
+        STAA   FSRVAL+1
+
+        LDAA   FSRVAL+2
+        ROLA
+        STAA   FSRVAL+2
+
+        LDAA   FSRVAL+3
+        ROLA
+        STAA   FSRVAL+3
+...
+---------------------------------------------------------------------------

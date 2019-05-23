@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sharp6800</RootNamespace>
     <AssemblyName>Sharp6800</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -65,8 +67,16 @@
     </Compile>
     <Compile Include="Debugger\Disassembler.cs" />
     <Compile Include="Debugger\MemDisplay.cs" />
+    <Compile Include="Address.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Address.Designer.cs">
+      <DependentUpon>Address.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourceHelper.cs" />
+    <Compile Include="Trainer\S19Reader.cs" />
     <Compile Include="Trainer\Threads\CycleExactRunner.cs" />
     <Compile Include="Trainer\Threads\ITrainerRunner.cs" />
     <Compile Include="Trainer\Threads\StandardRunner.cs" />
@@ -79,11 +89,21 @@
       <DependentUpon>TrainerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Trainer\TrainerSettings.cs" />
+    <None Include="Resources\vton.bmp" />
+    <None Include="Resources\dpon.png" />
+    <None Include="Resources\hroff.png" />
+    <None Include="Resources\hron.png" />
+    <None Include="Resources\vtoff.png" />
+    <None Include="Resources\vton.png" />
+    <None Include="Resources\dpoff.png" />
     <Content Include="sample\README.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Address.resx">
+      <DependentUpon>Address.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Debugger\DebuggerView.resx">
       <DependentUpon>DebuggerView.cs</DependentUpon>
@@ -106,6 +126,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -123,29 +146,14 @@
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SrecFile.cs" />
-    <Content Include="display\dpoff.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="display\dpon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="display\hroff.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="display\hron.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="display\vtoff.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="display\vton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ROM\ROM.HEX">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="display\dpoff.png" />
+    <EmbeddedResource Include="display\dpon.png" />
+    <EmbeddedResource Include="display\hroff.png" />
+    <EmbeddedResource Include="display\hron.png" />
+    <EmbeddedResource Include="display\vtoff.png" />
+    <EmbeddedResource Include="display\vton.png" />
+    <EmbeddedResource Include="ROM\ROM.HEX" />
     <Content Include="ROM\ROM.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
     <Content Include="sample\samp123a.s19">
@@ -166,12 +174,11 @@
     <Content Include="sample\samp6b.s19">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ROM\zenith.hex">
+    <EmbeddedResource Include="ROM\zenith.hex" />
+    <Content Include="ROM\zenith.rom" />
+    <None Include="README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ROM\zenith.rom">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\0.bmp" />

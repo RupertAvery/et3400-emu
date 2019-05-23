@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Sharp6800.Common;
@@ -75,15 +73,16 @@ namespace Sharp6800.Trainer
         private void Form1_Load(object sender, EventArgs e)
         {
             InitKeys();
+            UpdateState(false);
 
             try
             {
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(SegmentPictureBox);
-                LoadROM("ROM\\ROM.HEX");
+                _trainer.LoadRom(ResourceHelper.GetEmbeddedResource(typeof(Trainer).Assembly, "ROM/ROM.HEX"));
 
 #if DEBUG
-                Action<int> updateSpeed = delegate(int second)
+                Action<int> updateSpeed = delegate (int second)
                 { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.DefaultClockSpeed) * 100); };
 
                 _trainer.Runner.OnTimer += second => Invoke(updateSpeed, second);
@@ -96,7 +95,7 @@ namespace Sharp6800.Trainer
                 // delay emulation to ensure that the form is completely visible, otherwise 
                 // some segments will not be lit
                 var timer = new System.Timers.Timer() { Interval = 100 };
-                timer.Elapsed += timer_Elapsed; 
+                timer.Elapsed += timer_Elapsed;
                 this.Shown += (o, args) => timer.Start();
 
             }
@@ -109,10 +108,11 @@ namespace Sharp6800.Trainer
 
         void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            var timer = (System.Timers.Timer) sender;
+            var timer = (System.Timers.Timer)sender;
             timer.Stop();
             timer.Elapsed -= timer_Elapsed;
-            _trainer.Initialize();
+            _trainer.Restart();
+            UpdateState(true);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -219,7 +219,33 @@ namespace Sharp6800.Trainer
             Close();
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LoadRam(string file)
+        {
+            try
+            {
+                var bytes = 0;
+                if (file.ToLower().EndsWith(".ram"))
+                {
+                    byte[] ram = File.ReadAllBytes(file);
+                    _trainer.LoadRam(ram, 0);
+                    bytes = ram.Length;
+                }
+                else
+                {
+                    var content = File.ReadAllText(file);
+                    bytes = _trainer.LoadS19Obj(content);
+                }
+
+                MessageBox.Show($"Loaded {bytes} bytes", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occured while loading the OBJ file " + file + ".", ex);
+            }
+        }
+
+        private void LoadRAMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -230,24 +256,37 @@ namespace Sharp6800.Trainer
                     _trainer.Stop();
                     try
                     {
-                        _trainer.LoadRam(openFileDialog.FileName);
+                        LoadRam(openFileDialog.FileName);
                     }
                     finally
                     {
-                        _trainer.Initialize();
+                        _trainer.Restart();
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog.FileName)), "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Error loading file {Path.GetFileName(openFileDialog.FileName)}\n\n{ex.Message}", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
 
+
         private void LoadROM(string path)
         {
-            _trainer.LoadROM(path);
+            var ext = Path.GetExtension(path).ToLower();
+            if (ext == ".rom")
+            {
+                byte[] rom = File.ReadAllBytes(path);
+                _trainer.LoadRom(rom);
+            }
+            else if (ext == ".hex")
+            {
+                var content = File.ReadAllText(path);
+                _trainer.LoadRom(content);
+            }
+
             var datPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".dat");
+
             if (File.Exists(datPath))
             {
                 using (var datfile = new FileStream(datPath, FileMode.Open, FileAccess.Read))
@@ -271,17 +310,17 @@ namespace Sharp6800.Trainer
                     try
                     {
                         LoadROM(openFileDialog.FileName);
+                
                     }
                     finally
                     {
-                        _trainer.Initialize();
+                        _trainer.Restart();
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show(string.Format("File to load file {0}", Path.GetFileName(openFileDialog.FileName)),
-                                "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Error loading file {Path.GetFileName(openFileDialog.FileName)}\n\n{ex.Message}", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
 
@@ -331,12 +370,12 @@ namespace Sharp6800.Trainer
             }
         }
 
-        private void nMIToolStripMenuItem_Click(object sender, EventArgs e)
+        private void NMIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.NMI();
         }
 
-        private void iRQToolStripMenuItem_Click(object sender, EventArgs e)
+        private void IRQToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.IRQ();
         }
@@ -345,6 +384,72 @@ namespace Sharp6800.Trainer
         {
             var settings = new SettingsForm { Settings = _trainer.Settings };
             settings.Show();
+        }
+
+        private void ResetROMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.Stop();
+            _trainer.LoadRom(ResourceHelper.GetEmbeddedResource(typeof(Trainer).Assembly, "ROM/ROM.HEX"));
+            _trainer.Restart();
+        }
+
+        private void StartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.Start();
+            UpdateState(true);
+        }
+
+        private void StopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.Stop();
+            UpdateState(false);
+        }
+
+        private void ResetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.Reset();
+        }
+
+        private void UpdateState(bool isRunning)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke((Action<bool>)UpdateState, new object[] { isRunning });
+            }
+            else
+            {
+                stopToolStripMenuItem.Enabled = isRunning;
+                resetToolStripMenuItem.Enabled = isRunning;
+                startToolStripMenuItem.Enabled = !isRunning;
+            }
+        }
+
+        private void SaveRAMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var addressDialog = new Address();
+            addressDialog.ShowDialog();
+            if (addressDialog.DialogResult == DialogResult.Cancel)
+            {
+                return;
+            }
+
+            saveFileDialog.Filter = "S19 format files|*.obj;*.s19|All files|*.*";
+
+            var result = saveFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                _trainer.Stop();
+                try
+                {
+                    var file = saveFileDialog.FileName;
+                    var data = _trainer.GetS19Obj(addressDialog.StartAddress, addressDialog.EndAddress - addressDialog.StartAddress);
+                    File.WriteAllText(file, data);
+                }
+                finally
+                {
+                    _trainer.Restart();
+                }
+            }
         }
     }
 }

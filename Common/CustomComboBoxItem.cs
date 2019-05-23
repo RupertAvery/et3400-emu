@@ -18,7 +18,7 @@ namespace Sharp6800.Common
         {
             get
             {
-                int value;
+                //int value;
                 if (_source.Text == "") _source.Text = "0000";
                 try
                 {

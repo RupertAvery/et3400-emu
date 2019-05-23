@@ -32,12 +32,17 @@ namespace Sharp6800.Trainer
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveRAMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debuggerToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.emulatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.interruptsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nMIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.iRQToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,6 +70,7 @@ namespace Sharp6800.Trainer
             this.buttonReset = new System.Windows.Forms.PictureBox();
             this.button0 = new System.Windows.Forms.PictureBox();
             this.SegmentPictureBox = new System.Windows.Forms.PictureBox();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.buttonF)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.buttonE)).BeginInit();
@@ -103,7 +109,9 @@ namespace Sharp6800.Trainer
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
+            this.saveRAMToolStripMenuItem,
             this.loadROMToolStripMenuItem,
+            this.resetROMToolStripMenuItem,
             this.toolStripMenuItem1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -113,26 +121,42 @@ namespace Sharp6800.Trainer
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
-            this.openToolStripMenuItem.Text = "&Load";
-            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Text = "&Load RAM";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.LoadRAMToolStripMenuItem_Click);
+            // 
+            // saveRAMToolStripMenuItem
+            // 
+            this.saveRAMToolStripMenuItem.Name = "saveRAMToolStripMenuItem";
+            this.saveRAMToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveRAMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveRAMToolStripMenuItem.Text = "&Save RAM";
+            this.saveRAMToolStripMenuItem.Click += new System.EventHandler(this.SaveRAMToolStripMenuItem_Click);
             // 
             // loadROMToolStripMenuItem
             // 
             this.loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
-            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadROMToolStripMenuItem.Text = "Load &ROM";
             this.loadROMToolStripMenuItem.Click += new System.EventHandler(this.loadROMToolStripMenuItem_Click);
+            // 
+            // resetROMToolStripMenuItem
+            // 
+            this.resetROMToolStripMenuItem.Name = "resetROMToolStripMenuItem";
+            this.resetROMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.resetROMToolStripMenuItem.Text = "Reset ROM";
+            this.resetROMToolStripMenuItem.Click += new System.EventHandler(this.ResetROMToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(127, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -147,13 +171,17 @@ namespace Sharp6800.Trainer
             // debuggerToolStripMenuItem1
             // 
             this.debuggerToolStripMenuItem1.Name = "debuggerToolStripMenuItem1";
-            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(126, 22);
+            this.debuggerToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
+            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(168, 22);
             this.debuggerToolStripMenuItem1.Text = "Debugger";
             this.debuggerToolStripMenuItem1.Click += new System.EventHandler(this.debuggerToolStripMenuItem1_Click);
             // 
             // emulatorToolStripMenuItem
             // 
             this.emulatorToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.startToolStripMenuItem,
+            this.stopToolStripMenuItem,
+            this.resetToolStripMenuItem,
             this.interruptsToolStripMenuItem,
             this.toolStripMenuItem2,
             this.settingsToolStripMenuItem2});
@@ -161,39 +189,66 @@ namespace Sharp6800.Trainer
             this.emulatorToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
             this.emulatorToolStripMenuItem.Text = "Emulator";
             // 
+            // startToolStripMenuItem
+            // 
+            this.startToolStripMenuItem.Name = "startToolStripMenuItem";
+            this.startToolStripMenuItem.ShortcutKeyDisplayString = "";
+            this.startToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.startToolStripMenuItem.Text = "Start";
+            this.startToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
+            // 
+            // stopToolStripMenuItem
+            // 
+            this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
+            this.stopToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.stopToolStripMenuItem.Text = "Stop";
+            this.stopToolStripMenuItem.Click += new System.EventHandler(this.StopToolStripMenuItem_Click);
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.ShortcutKeyDisplayString = "ESC";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.resetToolStripMenuItem.Text = "&Reset";
+            this.resetToolStripMenuItem.Click += new System.EventHandler(this.ResetToolStripMenuItem_Click);
+            // 
             // interruptsToolStripMenuItem
             // 
             this.interruptsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.nMIToolStripMenuItem,
             this.iRQToolStripMenuItem});
             this.interruptsToolStripMenuItem.Name = "interruptsToolStripMenuItem";
-            this.interruptsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.interruptsToolStripMenuItem.Text = "Interrupts";
+            this.interruptsToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.interruptsToolStripMenuItem.Text = "&Interrupts";
             // 
             // nMIToolStripMenuItem
             // 
             this.nMIToolStripMenuItem.Name = "nMIToolStripMenuItem";
-            this.nMIToolStripMenuItem.Size = new System.Drawing.Size(97, 22);
+            this.nMIToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.nMIToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.nMIToolStripMenuItem.Text = "NMI";
-            this.nMIToolStripMenuItem.Click += new System.EventHandler(this.nMIToolStripMenuItem_Click);
+            this.nMIToolStripMenuItem.Click += new System.EventHandler(this.NMIToolStripMenuItem_Click);
             // 
             // iRQToolStripMenuItem
             // 
             this.iRQToolStripMenuItem.Name = "iRQToolStripMenuItem";
-            this.iRQToolStripMenuItem.Size = new System.Drawing.Size(97, 22);
+            this.iRQToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
+            this.iRQToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.iRQToolStripMenuItem.Text = "IRQ";
-            this.iRQToolStripMenuItem.Click += new System.EventHandler(this.iRQToolStripMenuItem_Click);
+            this.iRQToolStripMenuItem.Click += new System.EventHandler(this.IRQToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(126, 6);
             // 
             // settingsToolStripMenuItem2
             // 
             this.settingsToolStripMenuItem2.Name = "settingsToolStripMenuItem2";
-            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
-            this.settingsToolStripMenuItem2.Text = "Settings";
+            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(129, 22);
+            this.settingsToolStripMenuItem2.Text = "&Settings";
             this.settingsToolStripMenuItem2.Click += new System.EventHandler(this.settingsToolStripMenuItem2_Click);
             // 
             // helpToolStripMenuItem
@@ -207,7 +262,8 @@ namespace Sharp6800.Trainer
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -379,7 +435,7 @@ namespace Sharp6800.Trainer
             this.SegmentPictureBox.Size = new System.Drawing.Size(307, 84);
             this.SegmentPictureBox.TabIndex = 0;
             this.SegmentPictureBox.TabStop = false;
-            // 
+             // 
             // TrainerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -474,6 +530,12 @@ namespace Sharp6800.Trainer
         private System.Windows.Forms.ToolStripMenuItem iRQToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem resetROMToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stopToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveRAMToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
 

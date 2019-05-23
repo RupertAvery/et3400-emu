@@ -50,7 +50,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(261, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "©2013-2014, David Khristepher Santos (RupertAvery)";
+            this.label2.Text = "©2013-2019, David Khristepher Santos (RupertAvery)";
             // 
             // buttonClose
             // 
@@ -67,9 +67,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(77, 95);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(157, 13);
+            this.label3.Size = new System.Drawing.Size(214, 13);
             this.label3.TabIndex = 4;
-            this.label3.Text = "http://sharp6800.codeplex.com";
+            this.label3.Text = "https://github.com/RupertAvery/sharp6800";
             // 
             // About
             // 

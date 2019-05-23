@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Windows.Forms;
 using Core6800;
 using Sharp6800.Common;
@@ -106,7 +105,17 @@ namespace Sharp6800.Trainer
             Emulator.IRQ();
         }
 
-        public void Initialize()
+        public void Reset()
+        {
+            Emulator.BootStrap();
+        }
+
+        public void Start()
+        {
+            Runner.Continue();
+        }
+
+        public void Restart()
         {
             Emulator.BootStrap();
             Runner.Continue();
@@ -196,132 +205,103 @@ namespace Sharp6800.Trainer
 
 
         /// <summary>
-        /// Loads the specified binary file into the upper end of memory
+        /// Loads a rom from a byte array
         /// </summary>
-        /// <param name="file"></param>
-        public void LoadROM(string file)
+        /// <param name="data"></param>
+        public void LoadRom(byte[] data)
         {
-            try
+            int offset = 65536 - data.Length;
+            for (var i = 0; i < data.Length; i++)
             {
-                var ext = Path.GetExtension(file).ToLower();
-                if (ext == ".rom")
-                {
-                    byte[] rom = File.ReadAllBytes(file);
-                    int offset = 65536 - rom.Length;
-                    for (var i = 0; i < rom.Length; i++)
-                    {
-                        Memory[offset + i] = rom[i];
-                    }
-                }
-                else if (ext == ".hex")
-                {
-                    var content = File.ReadAllText(file);
-                    var lines = content.Trim().Split(new string[] { "\r\n" }, StringSplitOptions.None);
-                    var rom = new byte[lines.Length * 32];
-
-                    var j = 0;
-                    foreach (var line in lines)
-                    {
-                        for (var i = 0; i < 32; i++)
-                        {
-                            rom[j * 32 + i] = (byte)Convert.ToInt32(line.Substring(i * 2, 2), 16);
-                        }
-                        j++;
-                    }
-
-                    var offset = 65536 - rom.Length;
-                    for (var i = 0; i < rom.Length; i++)
-                    {
-                        Memory[offset + i] = rom[i];
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occured while loading the ROM file " + file + ".", ex);
+                Memory[offset + i] = data[i];
             }
         }
+
+        /// <summary>
+        /// Loads a rom from a text hex dump
+        /// </summary>
+        /// <param name="data"></param>
+        public int LoadRom(string data)
+        {
+            var lines = data.Trim().Split(new string[] { "\r\n" }, StringSplitOptions.None);
+            var rom = new byte[lines.Length * 32];
+
+            var j = 0;
+            foreach (var line in lines)
+            {
+                for (var i = 0; i < 32; i++)
+                {
+                    rom[j * 32 + i] = (byte)Convert.ToInt32(line.Substring(i * 2, 2), 16);
+                }
+                j++;
+            }
+
+
+            LoadRom(rom);
+
+            return rom.Length;
+        }
+
 
         /// <summary>
         /// Load binary file into RAM area at the specified offset
         /// </summary>
         /// <param name="file"></param>
         /// <param name="offset"></param>
-        public void LoadRamFile(string file, int offset = 0)
+        public void LoadRam(byte[] ram, int offset = 0)
         {
-            try
+            for (var i = 8; i < ram.Length; i++)
             {
-                byte[] ram = File.ReadAllBytes(file);
-                for (var i = 8; i < ram.Length; i++)
-                {
-                    Memory[offset + i - 8] = ram[i];
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occured while loading the RAM file " + file + ".", ex);
-            }
-
-        }
-
-
-        public void LoadRam(string file)
-        {
-            try
-            {
-                if (file.ToLower().EndsWith(".ram"))
-                {
-                    LoadRamFile(file, 0);
-                    return;
-                }
-                var content = File.ReadAllText(file);
-                var lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-                foreach (var line in lines)
-                {
-                    if (line.Length > 0)
-                    {
-                        var bytecount = Convert.ToInt32(line.Substring(2, 2), 16);
-                        string addr;
-                        string data;
-                        string checksum;
-                        switch (line.Substring(0, 2))
-                        {
-                            case "S1":
-                                addr = line.Substring(4, 4);
-                                data = line.Substring(8, bytecount * 2 - 6);
-                                Write(addr, data);
-                                checksum = line.Substring(bytecount * 2 + 2, 2);
-                                break;
-                            case "S2":
-                                break;
-                            case "S3":
-                                break;
-                            case "S7":
-                                break;
-                            case "S8":
-                                break;
-                            case "S9":
-                                break;
-                        }
-                    }
-
-
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occured while loading the OBJ file " + file + ".", ex);
+                Memory[offset + i - 8] = ram[i];
             }
         }
 
-        public void Write(string addr, string data)
+        public int LoadS19Obj(string content)
         {
-            var baseAddr = Convert.ToInt32(addr, 16);
+            var reader = new S19Reader(this);
+            return reader.Read(content);
+        }
+
+        public string GetS19Obj(int address, int length)
+        {
+            var reader = new S19Reader(this);
+            return reader.Write(address, length);
+        }
+
+        public int Write(string address, string data)
+        {
+            var bytes = 0;
+            var baseAddr = Convert.ToInt32(address, 16);
+
             for (var p = 0; p < data.Length; p += 2)
             {
                 Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
+                bytes++;
+            }
+
+            return bytes;
+        }
+
+        public void Write(int address, byte[] data)
+        {
+            for (var i = 0; i < data.Length; i++)
+            {
+                Memory[address + i] = data[i];
             }
         }
+
+        public byte[] Read(int address, int length)
+        {
+            var data = new byte[length];
+
+            for (var i = 0; i < data.Length; i++)
+            {
+                data[i] = (byte)Memory[address + i];
+            }
+
+            return data;
+        }
+
 
         public void SetProgramCounter(int i)
         {

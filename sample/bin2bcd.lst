@@ -1,0 +1,114 @@
+0001   0000             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002   0000             ; 6800 assembly code to convert binary to BCD, by Rick Nungester 1/6/15.
+0003   0000             ; Input value n is limited to the range [0,255].  The "Double Dabble"
+0004   0000             ; algorithm is explained at en.wikipedia.org/wiki/Double_dabble.  This
+0005   0000             ; program is intended to be entered and stepped through on the Heathkit
+0006   0000             ; ET-3400 Microprocessor Trainer or its "Sharp6800.codeplex.com" emulator.
+0007   0000             
+0008   0000             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0009   0000             ; ET-3400 constants
+0010   0000             
+0011   0000             USRRAML .equ    $0000   ; first byte of user RAM
+0012   0000             USRRAMH .equ    $00C4   ; last byte of user RAM (197 bytes total)
+0013   0000             
+0014   0000             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0015   0000             ; Variables
+0016   0000             
+0017   00BF                     .org  USRRAMH-5 ; put vars at the end of user RAM
+0018   00BF             
+0019   00BF             BCDIN   .block  1       ; BIN2BCD input value (0-255)
+0020   00C0             BCD100S .block  1       ; BIN2BCD 100s output digit (0-2)
+0021   00C1             BCD10S  .block  1       ; BIN2BCD 10s output digit (0-9)
+0022   00C2             BCD1S   .block  1       ; BIN2BCD 10s output digit (0-9)
+0023   00C3             BCD10_1 .block  1       ; BIN2BCD mid-routine 10s (MS nibbble) & 1s digit
+0024   00C4             BCDIDX  .block  1       ; BIN2BCD loop counter
+0025   00C5             
+0026   00C5             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0027   00C5             ; Main program
+0028   00C5             
+0029   0000                     .org    USRRAML ; put code at the start of user RAM
+0030   0000             
+0031   0000 86 F3       MAIN    LDAA    #243    ; Test case (as used in the Wikipedia article)
+0032   0002 8D 01               BSR     BIN2BCD
+0033   0004 39                  RTS
+0034   0005             
+0035   0005             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0036   0005             ; BIN2BCD converts the value in ACC A (0 to 255) to BCD in variables
+0037   0005             ; BCD100S, BCD10S and BCD1S.  See en.wikipedia.org/wiki/Double_dabble
+0038   0005             ; for the "Double Dabble" algorithm being used.
+0039   0005             
+0040   0005 97 BF       BIN2BCD STAA    BCDIN   ; Initialization. BCDIN = binary value to convert.
+0041   0007 4F                  CLRA
+0042   0008 97 C0               STAA    BCD100S ; BCD 100s digit = 0
+0043   000A 97 C3               STAA    BCD10_1 ; BCD 10s digit (MS nibble) and 1s digits = 0
+0044   000C 86 08               LDAA    #8
+0045   000E 97 C4               STAA    BCDIDX  ; Loop counter = 8 (8-bit unsigned input)
+0046   0010             
+0047   0010             ; Top of main loop.  Test each of the 3 BCD digits and if > 4, add 3.
+0048   0010             ; REVISIT: Avoid the Sharp6800 v1.0.3.0 defect that BLS is mis-implemented.
+0049   0010             ; Instead of testing for <= 4 (BLS), test for < 5 (BCS).
+0050   0010             
+0051   0010 96 C0       BIN01   LDAA    BCD100S
+0052   0012 81 05               CMPA    #5
+0053   0014 25 06               BCS     BIN02   ; branch if BCD 100s digit < 5
+0054   0016             
+0055   0016 86 03               LDAA    #3      ; BCD 100s digit > 4 so add 3
+0056   0018 9B C0               ADDA    BCD100S
+0057   001A 97 C0               STAA    BCD100S
+0058   001C             
+0059   001C 96 C3       BIN02   LDAA    BCD10_1
+0060   001E 84 F0               ANDA    #$F0    ; ACCA = BCD 10s digit (in MS nibble)
+0061   0020 81 50               CMPA    #$50
+0062   0022 25 06               BCS     BIN03   ; branch if BCD 10s digit < 5
+0063   0024             
+0064   0024 86 30               LDAA    #$30    ; BCD 10s digit > 4 so add 3
+0065   0026 9B C3               ADDA    BCD10_1
+0066   0028 97 C3               STAA    BCD10_1
+0067   002A             
+0068   002A 96 C3       BIN03   LDAA    BCD10_1
+0069   002C 84 0F               ANDA    #$0F    ; ACCA = BCD 1s digit (in LS nibble)
+0070   002E 81 05               CMPA    #5
+0071   0030 25 06               BCS     BIN04   ; branch if BCD 1s digit < 5
+0072   0032             
+0073   0032 86 03               LDAA    #3      ; BCD 1s digit > 4 so add 3
+0074   0034 9B C3               ADDA    BCD10_1
+0075   0036 97 C3               STAA    BCD10_1
+0076   0038             
+0077   0038 78 00 BF    BIN04   ASL     BCDIN   ; left-shift BCD100S:BCD10_1:BCDIN (3 bytes)
+0078   003B 79 00 C3            ROL     BCD10_1
+0079   003E 79 00 C0            ROL     BCD100S
+0080   0041             
+0081   0041 7A 00 C4            DEC     BCDIDX  ; Done with 8 passes?
+0082   0044 26 CA               BNE     BIN01   ; If not, branch up and do another
+0083   0046             
+0084   0046             ; Split BCD10_1 into separate BCD10S and BCD1S digits.
+0085   0046             
+0086   0046 96 C3               LDAA    BCD10_1
+0087   0048 84 0F               ANDA    #$0F
+0088   004A 97 C2               STAA    BCD1S   ; BCD1S = final BCD 1s digit
+0089   004C                     
+0090   004C 96 C3               LDAA    BCD10_1 ; REVISIT: ACCA = $43 (good)
+0091   004E 44                  LSRA            ; REVISIT: ACCA = $21 (good)
+0092   004F 44                  LSRA            ; REVISIT: ACCA = $90 (BAD, should be $10)
+0093   0050 44                  LSRA            ; REVISIT: ACCA = $48 (BAD, should be $80)
+0094   0051 44                  LSRA            ; REVISIT: ACCA = $24 (BAD, should be $40)
+0095   0052 97 C1               STAA    BCD10S  ; BCD10S = final BCD 10s digit
+0096   0054                     
+0097   0054 39                  RTS             ; Done
+0098   0055             
+0099   0055             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0100   0055             ; Required TASM assembler directive
+0101   0055             
+0102   0055                     .END            ; required TASM assembler directive
+
+
+
+Label        Value      Label        Value      Label        Value
+------------------      ------------------      ------------------
+BCDIN         00BF      BCD100S       00C0      BCD10S        00C1      
+BCD1S         00C2      BCD10_1       00C3      BCDIDX        00C4      
+BIN2BCD       0005      BIN01         0010      BIN02         001C      
+BIN03         002A      BIN04         0038      MAIN          0000      
+USRRAML       0000      USRRAMH       00C4      
+
+tasm: Number of errors = 0
