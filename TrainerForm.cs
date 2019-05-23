@@ -80,6 +80,8 @@ namespace Sharp6800.Trainer
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(SegmentPictureBox);
                 _trainer.LoadRom(ResourceHelper.GetEmbeddedResource(typeof(Trainer).Assembly, "ROM/ROM.HEX"));
+                _trainer.OnStop += (o, args) => UpdateState(false);
+                _trainer.OnStart += (o, args) => UpdateState(true);
 
 #if DEBUG
                 Action<int> updateSpeed = delegate (int second)
@@ -112,7 +114,6 @@ namespace Sharp6800.Trainer
             timer.Stop();
             timer.Elapsed -= timer_Elapsed;
             _trainer.Restart();
-            UpdateState(true);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -310,7 +311,7 @@ namespace Sharp6800.Trainer
                     try
                     {
                         LoadROM(openFileDialog.FileName);
-                
+
                     }
                     finally
                     {
@@ -339,9 +340,10 @@ namespace Sharp6800.Trainer
         {
             if (_debuggerView == null)
             {
-                _debuggerView = new DebuggerView
+                _debuggerView = new DebuggerView(_trainer)
                 {
                     State = _trainer.State,
+                    Breakpoints = _trainer.Breakpoints,
                     Memory = _trainer.Memory,
                     MemoryMaps = memoryMaps
                 };
@@ -396,13 +398,11 @@ namespace Sharp6800.Trainer
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.Start();
-            UpdateState(true);
         }
 
         private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.Stop();
-            UpdateState(false);
         }
 
         private void ResetToolStripMenuItem_Click(object sender, EventArgs e)
@@ -420,6 +420,7 @@ namespace Sharp6800.Trainer
             {
                 stopToolStripMenuItem.Enabled = isRunning;
                 resetToolStripMenuItem.Enabled = isRunning;
+                stepToolStripMenuItem.Enabled = !isRunning;
                 startToolStripMenuItem.Enabled = !isRunning;
             }
         }
@@ -450,6 +451,22 @@ namespace Sharp6800.Trainer
                     _trainer.Restart();
                 }
             }
+        }
+
+        private void StepToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.Step();
+            _debuggerView?.UpdateDebuggerState();
+        }
+
+        private void TrainerForm_Activated(object sender, EventArgs e)
+        {
+        //    if (_debuggerView != null && !_debuggerView.IsDisposed)
+        //    {
+        //        _debuggerView.BringToFront();
+        //    }
+
+        //    Focus();
         }
     }
 }

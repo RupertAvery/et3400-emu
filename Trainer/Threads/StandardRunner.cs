@@ -51,18 +51,24 @@ namespace Sharp6800.Trainer.Threads
             while (_running)
             {
                 int cycles = _trainer.Emulator.Execute();
+
                 loopCycles += cycles;
                 lock (lockCycles)
                 {
                     _cycles += cycles;
                 }
 
-
                 if (loopCycles > limit)
                 {
                     loopCycles = 0;
                     Thread.Sleep(1);
                     sleeps++;
+                }
+
+                if (_trainer.AtBreakPoint)
+                {
+                    Quit();
+                    _trainer.StopExternal();
                 }
             }
         }

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.DummyButton = new System.Windows.Forms.Button();
             this.MemoryViewComboBox = new System.Windows.Forms.ComboBox();
             this.MemAddrTextBox = new System.Windows.Forms.TextBox();
             this.MemoryViewScrollBar = new System.Windows.Forms.VScrollBar();
@@ -38,7 +39,16 @@
             this.DasmAddrTextBox = new System.Windows.Forms.TextBox();
             this.DasmViewScrollBar = new System.Windows.Forms.VScrollBar();
             this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
-            this.DummyButton = new System.Windows.Forms.Button();
+            this.PCTextBox = new System.Windows.Forms.TextBox();
+            this.ACCATextBox = new System.Windows.Forms.TextBox();
+            this.ACCBTextBox = new System.Windows.Forms.TextBox();
+            this.SPTextBox = new System.Windows.Forms.TextBox();
+            this.IXTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -58,6 +68,15 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Memory";
+            // 
+            // DummyButton
+            // 
+            this.DummyButton.Location = new System.Drawing.Point(-100, -100);
+            this.DummyButton.Name = "DummyButton";
+            this.DummyButton.Size = new System.Drawing.Size(75, 23);
+            this.DummyButton.TabIndex = 2;
+            this.DummyButton.Text = "button1";
+            this.DummyButton.UseVisualStyleBackColor = true;
             // 
             // MemoryViewComboBox
             // 
@@ -149,24 +168,112 @@
             this.DasmViewPictureBox.TabIndex = 7;
             this.DasmViewPictureBox.TabStop = false;
             this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
+            this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
             // 
-            // DummyButton
+            // PCTextBox
             // 
-            this.DummyButton.Location = new System.Drawing.Point(-100, -100);
-            this.DummyButton.Name = "DummyButton";
-            this.DummyButton.Size = new System.Drawing.Size(75, 23);
-            this.DummyButton.TabIndex = 2;
-            this.DummyButton.Text = "button1";
-            this.DummyButton.UseVisualStyleBackColor = true;
+            this.PCTextBox.Location = new System.Drawing.Point(63, 450);
+            this.PCTextBox.Name = "PCTextBox";
+            this.PCTextBox.Size = new System.Drawing.Size(100, 20);
+            this.PCTextBox.TabIndex = 2;
+            this.PCTextBox.TextChanged += new System.EventHandler(this.TextBox1_TextChanged);
+            // 
+            // ACCATextBox
+            // 
+            this.ACCATextBox.Location = new System.Drawing.Point(63, 494);
+            this.ACCATextBox.Name = "ACCATextBox";
+            this.ACCATextBox.Size = new System.Drawing.Size(100, 20);
+            this.ACCATextBox.TabIndex = 3;
+            // 
+            // ACCBTextBox
+            // 
+            this.ACCBTextBox.Location = new System.Drawing.Point(249, 494);
+            this.ACCBTextBox.Name = "ACCBTextBox";
+            this.ACCBTextBox.Size = new System.Drawing.Size(100, 20);
+            this.ACCBTextBox.TabIndex = 4;
+            // 
+            // SPTextBox
+            // 
+            this.SPTextBox.Location = new System.Drawing.Point(249, 450);
+            this.SPTextBox.Name = "SPTextBox";
+            this.SPTextBox.Size = new System.Drawing.Size(100, 20);
+            this.SPTextBox.TabIndex = 5;
+            // 
+            // IXTextBox
+            // 
+            this.IXTextBox.Location = new System.Drawing.Point(433, 450);
+            this.IXTextBox.Name = "IXTextBox";
+            this.IXTextBox.Size = new System.Drawing.Size(100, 20);
+            this.IXTextBox.TabIndex = 6;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(36, 453);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(21, 13);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "PC";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(222, 453);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(21, 13);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "SP";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(410, 453);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(17, 13);
+            this.label3.TabIndex = 9;
+            this.label3.Text = "IX";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(22, 497);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(35, 13);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "ACCA";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(208, 497);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(35, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "ACCB";
+            this.label5.Click += new System.EventHandler(this.Label5_Click);
             // 
             // DebuggerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(743, 444);
+            this.ClientSize = new System.Drawing.Size(743, 541);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.IXTextBox);
+            this.Controls.Add(this.SPTextBox);
+            this.Controls.Add(this.ACCBTextBox);
+            this.Controls.Add(this.ACCATextBox);
+            this.Controls.Add(this.PCTextBox);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "DebuggerView";
+            this.ShowIcon = false;
             this.Text = "DebuggerView";
             this.Load += new System.EventHandler(this.DebuggerView_Load);
             this.groupBox1.ResumeLayout(false);
@@ -176,6 +283,7 @@
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -192,6 +300,15 @@
         private System.Windows.Forms.VScrollBar DasmViewScrollBar;
         private System.Windows.Forms.PictureBox DasmViewPictureBox;
         private System.Windows.Forms.Button DummyButton;
-
+        private System.Windows.Forms.TextBox PCTextBox;
+        private System.Windows.Forms.TextBox ACCATextBox;
+        private System.Windows.Forms.TextBox ACCBTextBox;
+        private System.Windows.Forms.TextBox SPTextBox;
+        private System.Windows.Forms.TextBox IXTextBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
     }
 }

@@ -12,6 +12,8 @@ namespace Sharp6800.Debugger
 
     public partial class DebuggerView : Form, IMessageFilter
     {
+        private readonly Trainer.Trainer _trainer;
+
         // P/Invoke declarations
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(Point pt);
@@ -23,16 +25,35 @@ namespace Sharp6800.Debugger
         public int[] Memory { get; set; }
         public Cpu6800State State { get; set; }
         public IEnumerable<MemoryMap> MemoryMaps { set { _dasmDisplay.MemoryMaps = value; } }
+        public List<int> Breakpoints { get; set; }
+
         private Control focusObject;
 
         private const int WM_LBUTTONDOWN = 0x0201;
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_MOUSEWHEEL = 0x20a;
+        private const int WM_SYSKEYDOWN = 0x104;
 
         public bool PreFilterMessage(ref Message m)
         {
             switch (m.Msg)
             {
+                case WM_SYSKEYDOWN:
+                    {
+                        // Extract the keys being pressed
+                        Keys keys = ((Keys)((int)m.WParam.ToInt64()));
+                        switch (keys)
+                        {
+                            case Keys.F10:
+                                if (!_trainer.Running)
+                                {
+                                    _trainer.Step();
+                                    UpdateDebuggerState();
+                                }
+                                return true; // Prevent message reaching destination
+                        }
+                    }
+                    break;
                 case WM_MOUSEWHEEL:
                     {
                         // WM_MOUSEWHEEL, find the control at screen position m.LParam
@@ -149,6 +170,18 @@ namespace Sharp6800.Debugger
                                         DasmViewScrollBar.Value = oldValue - 16;
                                     }
                                     break;
+
+                                case Keys.F5:
+                                    if (!_trainer.Running)
+                                    {
+                                        _trainer.Start();
+                                    }
+
+                                    break;
+
+                                case Keys.F9:
+                                    _trainer.ToggleBreakPoint(_dasmDisplay.SelectedAddress);
+                                    break;
                             }
                             return true; // Prevent message reaching destination
 
@@ -159,7 +192,7 @@ namespace Sharp6800.Debugger
             return false;
         }
 
-        public DebuggerView()
+        public DebuggerView(Trainer.Trainer trainer)
         {
             InitializeComponent();
             Application.AddMessageFilter(this);
@@ -170,6 +203,7 @@ namespace Sharp6800.Debugger
             DasmViewPictureBox.KeyDown += DasmViewPictureBoxOnKeyDown;
             _memDisplay = new MemDisplay(MemoryViewPictureBox);
             _dasmDisplay = new DasmDisplay(DasmViewPictureBox);
+            _trainer = trainer;
         }
 
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
@@ -199,24 +233,47 @@ namespace Sharp6800.Debugger
             }
         }
 
+        public void UpdateDebuggerState()
+        {
+            if (State.PC > _dasmDisplay.LastAddress)
+            {
+                var offset = _dasmDisplay.GetOffsetFromAddress(Memory, State.PC);
+                if (offset < DasmViewScrollBar.Maximum)
+                {
+                    DasmViewScrollBar.Value = offset;
+                }
+            }
+
+            if (_dasmDisplay.GetOffsetFromAddress(Memory, State.PC) < _dasmDisplay.Offset)
+            {
+                var offset = _dasmDisplay.GetOffsetFromAddress(Memory, State.PC);
+                if (offset < DasmViewScrollBar.Maximum)
+                {
+                    DasmViewScrollBar.Value = offset;
+                }
+            }
+        }
+
         public void UpdateDisplay()
         {
+
+            _dasmDisplay.Display(Memory, State, Breakpoints);
             _memDisplay.Display(Memory);
-            _dasmDisplay.Display(Memory);
-            //Invoke(new MethodInvoker(() =>
-            //{
-            //    PCTextBox.Text = String.Format("{0:X4}", State.PC);
-            //    IXTextBox.Text = String.Format("{0:X4}", State.X);
-            //    SPTextBox.Text = String.Format("{0:X4}", State.S);
-            //    ACCATextBox.Text = String.Format("{0:X2}", State.A);
-            //    ACCBTextBox.Text = String.Format("{0:X2}", State.B);
-            //    CCHTextBox.Text = String.Format("{0}", (State.CC & 0x20) >> 5);
-            //    CCITextBox.Text = String.Format("{0}", (State.CC & 0x10) >> 4);
-            //    CCNTextBox.Text = String.Format("{0}", (State.CC & 0x08) >> 3);
-            //    CCZTextBox.Text = String.Format("{0}", (State.CC & 0x04) >> 2);
-            //    CCVTextBox.Text = String.Format("{0}", (State.CC & 0x02) >> 1);
-            //    CCCTextBox.Text = String.Format("{0}", State.CC & 0x01);
-            //}));
+
+            Invoke(new MethodInvoker(() =>
+            {
+                PCTextBox.Text = String.Format("{0:X4}", State.PC);
+                IXTextBox.Text = String.Format("{0:X4}", State.X);
+                SPTextBox.Text = String.Format("{0:X4}", State.S);
+                ACCATextBox.Text = String.Format("{0:X2}", State.A);
+                ACCBTextBox.Text = String.Format("{0:X2}", State.B);
+                //CCHTextBox.Text = String.Format("{0}", (State.CC & 0x20) >> 5);
+                //CCITextBox.Text = String.Format("{0}", (State.CC & 0x10) >> 4);
+                //CCNTextBox.Text = String.Format("{0}", (State.CC & 0x08) >> 3);
+                //CCZTextBox.Text = String.Format("{0}", (State.CC & 0x04) >> 2);
+                //CCVTextBox.Text = String.Format("{0}", (State.CC & 0x02) >> 1);
+                //CCCTextBox.Text = String.Format("{0}", State.CC & 0x01);
+            }));
         }
 
 
@@ -229,13 +286,13 @@ namespace Sharp6800.Debugger
             }
             else
                 if (DasmViewScrollBar.Value - delta > 1000)
-                {
-                    DasmViewScrollBar.Value = 1000;
-                }
-                else
-                {
-                    DasmViewScrollBar.Value -= delta;
-                }
+            {
+                DasmViewScrollBar.Value = 1000;
+            }
+            else
+            {
+                DasmViewScrollBar.Value -= delta;
+            }
         }
 
         private void MemoryViewPictureBoxOnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
@@ -247,13 +304,13 @@ namespace Sharp6800.Debugger
             }
             else
                 if (MemoryViewScrollBar.Value - delta > 1000)
-                {
-                    MemoryViewScrollBar.Value = 1000;
-                }
-                else
-                {
-                    MemoryViewScrollBar.Value -= delta;
-                }
+            {
+                MemoryViewScrollBar.Value = 1000;
+            }
+            else
+            {
+                MemoryViewScrollBar.Value -= delta;
+            }
         }
 
         private void DebuggerView_Load(object sender, EventArgs e)
@@ -365,5 +422,20 @@ namespace Sharp6800.Debugger
 
         }
 
+        private void TextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DasmViewPictureBox_MouseClick(object sender, MouseEventArgs e)
+        {
+            _dasmDisplay.SelectOffset(_dasmDisplay.Offset + e.Y / 20);
+
+        }
     }
 }

@@ -7,8 +7,6 @@ namespace Core6800
         // Registers
         public Cpu6800State State;
 
-        // housekeeping
-        public List<int> Breakpoint = new List<int>();
 
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Core6800;
 using Sharp6800.Common;
@@ -14,11 +15,18 @@ namespace Sharp6800.Trainer
     {
         private SegDisplay _disp;
 
+        public List<int> Breakpoints = new List<int>();
+
+        public EventHandler OnStop { get; set; }
+        public EventHandler OnStart { get; set; }
+
         public ITrainerRunner Runner { get; private set; }
         public Cpu6800 Emulator { get; private set; }
         public int[] Memory = new int[65536];
         public TrainerSettings Settings { get; set; }
         public Cpu6800State State { get; set; }
+
+        public bool Running { get; private set; }
 
         public Trainer()
         {
@@ -78,9 +86,17 @@ namespace Sharp6800.Trainer
             Memory[0xC006] = 0xFF;
         }
 
-        public void AddBreakPoint(int address)
+        public void ToggleBreakPoint(int address)
         {
-            Emulator.Breakpoint.Add(address);
+            var index = Breakpoints.IndexOf(address);
+            if (index > -1)
+            {
+                Breakpoints.RemoveAt(index);
+            }
+            else
+            {
+                Breakpoints.Add(address);
+            }
         }
 
         public void SetupDisplay(PictureBox target)
@@ -91,14 +107,20 @@ namespace Sharp6800.Trainer
         public void Stop()
         {
             Runner.Quit();
+            Running = false;
+            OnStop?.Invoke(this, EventArgs.Empty);
         }
 
+        public void StopExternal()
+        {
+            Running = false;
+            OnStop?.Invoke(this, EventArgs.Empty);
+        }
 
         public void NMI()
         {
             Emulator.NMI();
         }
-
 
         public void IRQ()
         {
@@ -113,12 +135,16 @@ namespace Sharp6800.Trainer
         public void Start()
         {
             Runner.Continue();
+            Running = true;
+            OnStart?.Invoke(this, EventArgs.Empty);
         }
 
         public void Restart()
         {
             Emulator.BootStrap();
             Runner.Continue();
+            Running = true;
+            OnStart?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -314,11 +340,17 @@ namespace Sharp6800.Trainer
         }
 
         public bool IsInBreak { get; set; }
+        public bool BreakpointsEnabled { get; set; }
 
         public void Break()
         {
             Runner.Quit();
             IsInBreak = true;
+        }
+
+        public void Step()
+        {
+            Emulator.Execute();
         }
 
         public void StepOver()
@@ -342,6 +374,10 @@ namespace Sharp6800.Trainer
             return Disassembler.IsSubroutine(nextOpCode);
         }
 
+        public bool AtBreakPoint
+        {
+            get { return Breakpoints.Contains(State.PC); }
+        }
     }
 
 }

@@ -44,14 +44,14 @@ namespace Sharp6800.Trainer.Threads
 
             lock (_lockobject)
             {
-                if (_runner != null)
-                {
-                    while (_runner.IsAlive)
-                    {
-                        Thread.Sleep(50);
-                        Application.DoEvents();
-                    }
-                }
+                //if (_runner != null)
+                //{
+                //    while (_runner.IsAlive)
+                //    {
+                //        Thread.Sleep(50);
+                //        Application.DoEvents();
+                //    }
+                //}
                 if (_timer != null)
                 {
                     _timer.Dispose();
@@ -61,6 +61,7 @@ namespace Sharp6800.Trainer.Threads
                 //    _displayTimer.Dispose();
                 //}
             }
+
         }
 
         public void Continue()

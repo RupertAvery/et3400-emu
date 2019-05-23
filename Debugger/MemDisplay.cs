@@ -55,9 +55,14 @@ namespace Sharp6800.Debugger
                 s.Append(" " + string.Format("{0:X2}", memory[start + k] & 0xff));
                 k++;
             }
-            var font = new Font("Courier New", 12, FontStyle.Regular);
-            var brush = new SolidBrush(Color.Black);
-            g.DrawString(s.ToString(), font, brush, x, y);
+ 
+            using (var brush = new SolidBrush(Color.Black))
+            {
+                using (var font = new Font("Courier New", 12, FontStyle.Regular))
+                {
+                    g.DrawString(s.ToString(), font, brush, x, y);
+                }
+            }
         }
     }
 }
