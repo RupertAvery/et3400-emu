@@ -16,7 +16,7 @@ namespace Core6800
 
         public bool SWI;
         public bool WAI;
-        
+         
         public int NonMaskableInterrupt { get; set; }
         public int InterruptRequest { get; set; }
         public int Reset { get; set; }
@@ -29,6 +29,5 @@ namespace Core6800
         public int ValidMemoryAddress { get; set; }
         public int ReadWrite { get; set; }
 
-        public int ITemp { get; set; }
     }
 }

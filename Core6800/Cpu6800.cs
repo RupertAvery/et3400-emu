@@ -16,11 +16,13 @@ namespace Core6800
                 State.PC = RM16(0xFFFE);
                 State.CC = 0xC0;
                 SEI();
+                State.WAI = false;
                 State.NonMaskableInterrupt = 1;
                 State.InterruptRequest = 1;
                 State.ValidMemoryAddress = 0;
                 State.BusAvailable = 0;
                 State.ReadWrite = 1;
+                State.Reset = 1;
             }
 
             if (_isHalted)
@@ -44,17 +46,8 @@ namespace Core6800
                 }
             }
 
-            if (State.NonMaskableInterrupt == 0)
-            {
-                CheckInterrupts();
-                return 5;
-            }
+            CheckInterrupts();
 
-            if (State.InterruptRequest == 0 && (State.CC & 0x10) == 0x10)
-            {
-                CheckInterrupts();
-                return 5;
-            }
 
             // State.ITemp 
 
@@ -79,38 +72,70 @@ namespace Core6800
             //    System.Diagnostics.Debug.WriteLine(string.Format("PC:{0,4:X} A:{1,2:X} B:{2,2:X} IX:{3,4:X} SP:{4,4:X} CC:{5, 6}", PC, A, B, X, S, Convert.ToString(CC, 2)));
             //}
 
-            int fetchCode = ReadMem(State.PC) & 0xff;
-            State.PC++;
-            InterpretOpCode(fetchCode);
+            if (State.WAI)
+            {
+                return 5;
+            }
+            else
+            {
+                int fetchCode = ReadMem(State.PC) & 0xff;
+                State.PC++;
+                InterpretOpCode(fetchCode);
 
-            return cycles[fetchCode];
+                return cycles[fetchCode];
+            }
         }
 
         private void CheckInterrupts()
         {
-            State.CC |= State.ITemp << 4;
+            if (State.NonMaskableInterrupt == 0)
+            {
+                PUSHWORD(State.PC);
+                PUSHWORD(State.X);
+                PUSHBYTE(State.A);
+                PUSHBYTE(State.B);
+                PUSHBYTE(State.CC);
 
-            PUSHWORD(State.PC);
-            PUSHWORD(State.X);
-            PUSHBYTE(State.A);
-            PUSHBYTE(State.B);
-            PUSHBYTE(State.CC);
+                State.BusAvailable = 0;
+                State.NonMaskableInterrupt = 1;
+                State.WAI = false;
+                SEI();
+                State.PC = RM16(0xFFFC);
+            }
+            else if (State.SWI)
+            {
+                PUSHWORD(State.PC);
+                PUSHWORD(State.X);
+                PUSHBYTE(State.A);
+                PUSHBYTE(State.B);
+                PUSHBYTE(State.CC);
+                State.SWI = false;
+                SEI();
+                State.PC = RM16(0xFFFA);
+            }
+            else if (State.InterruptRequest == 0 && (State.CC & 0x10) != 0x10)
+            {
+                PUSHWORD(State.PC);
+                PUSHWORD(State.X);
+                PUSHBYTE(State.A);
+                PUSHBYTE(State.B);
+                PUSHBYTE(State.CC);
+                State.InterruptRequest = 1;
+                State.PC = RM16(0xFFF8);
+                State.BusAvailable = 0;
+                SEI();
+                State.WAI = false;
+            }
+        }
 
-            //if (!State.SWI)
-            //{
-            //    if (State.NonMaskableInterrupt == 1)
-            //    {
-            //        if(State.InterruptRequest == 0 && )
-            //    }
-            //}
+        public void NMI()
+        {
+            State.NonMaskableInterrupt = 0;
+        }
 
-            State.BusAvailable = 0;
-            State.ITemp = 1;
-            SEI();
-
-            if (State.NonMaskableInterrupt == 0) State.PC = RM16(0xFFFC);
-            else if (State.SWI) State.PC = RM16(0xFFFA);
-            else if (State.InterruptRequest == 0) State.PC = RM16(0xFFF8);
+        public void IRQ()
+        {
+            State.InterruptRequest = 0;
         }
 
         /// <summary>
@@ -120,7 +145,6 @@ namespace Core6800
         {
             State.Reset = 0;
             Execute();
-            State.Reset = 1;
         }
 
     }

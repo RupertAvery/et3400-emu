@@ -28,47 +28,47 @@ namespace Sharp6800.Trainer
             State = new Cpu6800State();
 
             Emulator = new Cpu6800
-                {
-                    State = State,
+            {
+                State = State,
 
-                    ReadMem = address =>
+                ReadMem = address =>
+                    {
+                        address = address & 0xFFFF;
+
+                        return Memory[address];
+                    },
+
+                WriteMem = (address, value) =>
+                    {
+                        address = address & 0xFFFF;
+
+                        if (address >= 0xFC00)
                         {
-                            address = address & 0xFFFF;
+                            // Prevent writing to ROM-mapped space
+                            return;
+                        }
 
-                            return Memory[address];
-                        },
+                        // For accurate emulation we should probably NOT write to memory mapped addresses
+                        Memory[address] = value;
 
-                    WriteMem = (address, value) =>
+                        // Check if we're writing to memory-mapped display
+                        // quick test - just check if we are in C100-C1FF
+                        if ((address & 0xC100) == 0xC100)
                         {
-                            address = address & 0xFFFF;
-
-                            if (address >= 0xFC00)
+                            var displayNo = (address & 0xF0) >> 4;
+                            if (displayNo >= 1 && displayNo <= 6)
                             {
-                                // Prevent writing to ROM-mapped space
-                                return;
-                            }
-
-                            // For accurate emulation we should probably NOT write to memory mapped addresses
-                            Memory[address] = value;
-
-                            // Check if we're writing to memory-mapped display
-                            // quick test - just check if we are in C100-C1FF
-                            if ((address & 0xC100) == 0xC100)
-                            {
-                                var displayNo = (address & 0xF0) >> 4;
-                                if (displayNo >= 1 && displayNo <= 6)
+                                // OUTCH flicker hack - assumes original OUTCH routine is intact
+                                if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
                                 {
-                                    // OUTCH flicker hack - assumes original OUTCH routine is intact
-                                    if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
-                                    {
-                                        // don't write to upper bits if in OUTCH routine
-                                        return;
-                                    }
-                                    _disp.Write(address, value);
+                                    // don't write to upper bits if in OUTCH routine
+                                    return;
                                 }
+                                _disp.Write(address, value);
                             }
                         }
-                };
+                    }
+            };
 
             Runner = new StandardRunner(this);
             //Runner = new CycleExactRunner(this);
@@ -92,6 +92,18 @@ namespace Sharp6800.Trainer
         public void Stop()
         {
             Runner.Quit();
+        }
+
+
+        public void NMI()
+        {
+            Emulator.NMI();
+        }
+
+
+        public void IRQ()
+        {
+            Emulator.IRQ();
         }
 
         public void Initialize()

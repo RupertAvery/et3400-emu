@@ -33,6 +33,7 @@ namespace Core6800
             UNDOCUMENTED
         }
 
+        //private int m_icount;
         public bool EnableUndocumentedOpcodes { get; set; }
 
         public DecodeStatus InterpretOpCode(int opCode)
@@ -134,8 +135,8 @@ namespace Core6800
                 case 0x0e:
                     {
                         CLI();
-                        ONE_MORE_INSN();
-                        CHECK_IRQ_LINES(); /* HJB 990417 */
+                        //ONE_MORE_INSN();
+                        //CHECK_IRQ_LINES(); /* HJB 990417 */
                     }
 
                     /* 0x0f SEI */
@@ -143,8 +144,8 @@ namespace Core6800
                 case 0x0f:
                     {
                         SEI();
-                        ONE_MORE_INSN();
-                        CHECK_IRQ_LINES(); /* HJB 990417 */
+                        //ONE_MORE_INSN();
+                        //CHECK_IRQ_LINES(); /* HJB 990417 */
                     }
 
                     /* 0x10 SBA inherent -**** */
@@ -490,7 +491,7 @@ namespace Core6800
                         State.A = PULLBYTE();
                         State.X = PULLWORD();
                         State.PC = PULLWORD();
-                        CHECK_IRQ_LINES(); /* HJB 990417 */
+                        //CHECK_IRQ_LINES(); /* HJB 990417 */
                     }
 
                     /* 0x3c PSHX inherent ----- */
@@ -519,27 +520,27 @@ namespace Core6800
                          * WAI stacks the entire machine state on the
                          * hardware stack, then waits for an interrupt.
                          */
-                        //cpustate->wai_state |= M6800_WAI;
-                        PUSHWORD(State.PC);
-                        PUSHWORD(State.X);
-                        PUSHBYTE(State.A);
-                        PUSHBYTE(State.B);
-                        PUSHBYTE(State.CC);
-                        CHECK_IRQ_LINES();
-                        //if (cpustate->wai_state & M6800_WAI) EAT_CYCLES;
+                        State.WAI = true;
+                        //PUSHWORD(State.PC);
+                        //PUSHWORD(State.X);
+                        //PUSHBYTE(State.A);
+                        //PUSHBYTE(State.B);
+                        //PUSHBYTE(State.CC);
+                        //State.PC = RM16(0xfff8);
                     }
 
                     /* 0x3f SWI absolute indirect ----- */
                     break;
                 case 0x3f:
                     {
-                        PUSHWORD(State.PC);
-                        PUSHWORD(State.X);
-                        PUSHBYTE(State.A);
-                        PUSHBYTE(State.B);
-                        PUSHBYTE(State.CC);
-                        SEI();
-                        State.PC = RM16(0xfffa);
+                        State.SWI = true;
+                        //PUSHWORD(State.PC);
+                        //PUSHWORD(State.X);
+                        //PUSHBYTE(State.A);
+                        //PUSHBYTE(State.B);
+                        //PUSHBYTE(State.CC);
+                        //SEI();
+                        //State.PC = RM16(0xfffa);
                     }
 
                     /* 0x40 NEGA inherent ?**** */
@@ -571,7 +572,7 @@ namespace Core6800
                     {
                         var tempA = State.A;
                         CLR_NZC(); State.CC |= (tempA & 0x01);
-                        tempA >>= 1; 
+                        tempA >>= 1;
                         SET_Z8(tempA);
                         State.A = tempA & 0xff;
                     }
@@ -687,7 +688,7 @@ namespace Core6800
                     {
                         var tempB = State.B;
                         CLR_NZC(); State.CC |= (State.B & 0x01);
-                        tempB >>= 1; 
+                        tempB >>= 1;
                         SET_Z8(tempB);
                         State.B = tempB & 0xff;
                     }
@@ -711,7 +712,7 @@ namespace Core6800
                     {
                         var tempB = State.B;
                         CLR_NZC(); State.CC |= (State.B & 0x01);
-                        tempB >>= 1; 
+                        tempB >>= 1;
                         tempB |= ((tempB & 0x40) << 1);
                         SET_NZ8(tempB);
                         State.B = tempB & 0xff;
