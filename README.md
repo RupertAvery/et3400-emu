@@ -31,7 +31,6 @@ The manual mainly details the assembly of the hardware of the kit.
 
 Here is an index of interesting information related to the software that will be useful for emulation:
 
-```
 | PDF Page | Manual Page | Section          | 
 |:--------:|:-----------:|------------------|
 | 47       |     45      | Operation        |
@@ -39,7 +38,6 @@ Here is an index of interesting information related to the software that will be
 | 75       |     74      | Monitor Listing  |
 | 89       |     87      | Meomry Map       |
 | 91       |     89      | Instruction Set  |
-```
 
 # Debugger
 
