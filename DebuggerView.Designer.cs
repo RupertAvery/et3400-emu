@@ -49,6 +49,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.CCTextBox = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -172,38 +175,43 @@
             // 
             // PCTextBox
             // 
+            this.PCTextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PCTextBox.Location = new System.Drawing.Point(63, 450);
             this.PCTextBox.Name = "PCTextBox";
-            this.PCTextBox.Size = new System.Drawing.Size(100, 20);
+            this.PCTextBox.Size = new System.Drawing.Size(100, 21);
             this.PCTextBox.TabIndex = 2;
             this.PCTextBox.TextChanged += new System.EventHandler(this.TextBox1_TextChanged);
             // 
             // ACCATextBox
             // 
+            this.ACCATextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ACCATextBox.Location = new System.Drawing.Point(63, 494);
             this.ACCATextBox.Name = "ACCATextBox";
-            this.ACCATextBox.Size = new System.Drawing.Size(100, 20);
+            this.ACCATextBox.Size = new System.Drawing.Size(100, 21);
             this.ACCATextBox.TabIndex = 3;
             // 
             // ACCBTextBox
             // 
+            this.ACCBTextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ACCBTextBox.Location = new System.Drawing.Point(249, 494);
             this.ACCBTextBox.Name = "ACCBTextBox";
-            this.ACCBTextBox.Size = new System.Drawing.Size(100, 20);
+            this.ACCBTextBox.Size = new System.Drawing.Size(100, 21);
             this.ACCBTextBox.TabIndex = 4;
             // 
             // SPTextBox
             // 
+            this.SPTextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SPTextBox.Location = new System.Drawing.Point(249, 450);
             this.SPTextBox.Name = "SPTextBox";
-            this.SPTextBox.Size = new System.Drawing.Size(100, 20);
+            this.SPTextBox.Size = new System.Drawing.Size(100, 21);
             this.SPTextBox.TabIndex = 5;
             // 
             // IXTextBox
             // 
+            this.IXTextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.IXTextBox.Location = new System.Drawing.Point(433, 450);
             this.IXTextBox.Name = "IXTextBox";
-            this.IXTextBox.Size = new System.Drawing.Size(100, 20);
+            this.IXTextBox.Size = new System.Drawing.Size(100, 21);
             this.IXTextBox.TabIndex = 6;
             // 
             // label1
@@ -252,11 +260,42 @@
             this.label5.Text = "ACCB";
             this.label5.Click += new System.EventHandler(this.Label5_Click);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(406, 497);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(21, 13);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "CC";
+            // 
+            // CCTextBox
+            // 
+            this.CCTextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CCTextBox.Location = new System.Drawing.Point(433, 494);
+            this.CCTextBox.Name = "CCTextBox";
+            this.CCTextBox.Size = new System.Drawing.Size(100, 21);
+            this.CCTextBox.TabIndex = 12;
+            this.CCTextBox.Text = "00000000";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(432, 478);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(63, 14);
+            this.label7.TabIndex = 14;
+            this.label7.Text = "__HINZVC";
+            // 
             // DebuggerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(743, 541);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.CCTextBox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -310,5 +349,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox CCTextBox;
+        private System.Windows.Forms.Label label7;
     }
 }

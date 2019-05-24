@@ -43,6 +43,8 @@ namespace Sharp6800.Trainer.Threads
             //_lastCycles = _cycles;
         }
 
+        private int lastBreakPointPC = -1;
+
         protected override void EmuThread()
         {
             _running = true;
@@ -50,7 +52,24 @@ namespace Sharp6800.Trainer.Threads
 
             while (_running)
             {
-                int cycles = _trainer.Emulator.Execute();
+                int cycles = _trainer.Emulator.PreExecute();
+                
+                if (_trainer.BreakpointsEnabled && _trainer.AtBreakPoint && lastBreakPointPC != _trainer.State.PC)
+                {
+                    Quit();
+                    _trainer.StopExternal();
+                    lastBreakPointPC = _trainer.State.PC;
+                    break;
+                }
+                else
+                {
+                    lastBreakPointPC = -1;
+                }
+
+                if (cycles == 0)
+                {
+                    cycles = _trainer.Emulator.PostExecute();
+                }
 
                 loopCycles += cycles;
                 lock (lockCycles)
@@ -65,11 +84,6 @@ namespace Sharp6800.Trainer.Threads
                     sleeps++;
                 }
 
-                if (_trainer.AtBreakPoint)
-                {
-                    Quit();
-                    _trainer.StopExternal();
-                }
             }
         }
     }

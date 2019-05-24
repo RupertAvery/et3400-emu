@@ -14,6 +14,14 @@ namespace Sharp6800.Debugger
 
     public class MemoryMap
     {
+        public int Start { get; set; }
+        public int End { get; set; }
+        public RangeType Type { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class MemoryMapOld
+    {
         [XmlElement("start")]
         public string Start { get; set; }
         [XmlArray("ranges")]

@@ -7,14 +7,16 @@ namespace Sharp6800.Debugger
 {
     public class MemDisplay
     {
+        private readonly Trainer.Trainer _trainer;
         private readonly IntPtr targetWnd;
         private readonly int width, height;
 
         public int Start { get; set; }
         public int Lines { get; set; }
 
-        public MemDisplay(PictureBox target)
+        public MemDisplay(PictureBox target, Trainer.Trainer trainer)
         {
+            _trainer = trainer;
             width = target.Width;
             height = target.Height;
             targetWnd = target.Handle;
@@ -22,7 +24,7 @@ namespace Sharp6800.Debugger
         }
 
 
-        public void Display(int[] memory)
+        public void Display()
         {
             var buffer = new Bitmap(width, height);
             using (var g = Graphics.FromImage(buffer))
@@ -32,7 +34,7 @@ namespace Sharp6800.Debugger
                 var j = 0;
                 for (var i = Start; i <= Start + 8 * Lines; i += 8)
                 {
-                    DrawHex(g, 10, 20 * j, i, memory);
+                    DrawHex(g, 10, 20 * j, i, _trainer.Memory);
                     j++;
                 }
             }

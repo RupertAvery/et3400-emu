@@ -17,9 +17,11 @@ The ROM contained a program allowing the user to (tediously, i.e. byte-by-byte) 
 
 This project simulates the ET-3400 by emulating the 6800 CPU and memory-mapped access to simulated 7-segment displays and keypad for I/O. The ROM program is included.
 
-The emulator core and 7 segment display are written from scratch in 100% C#, I only got the basic idea of how an emulator should run from Marat Fayzullin's page [How To Write a Computer Emulator](http://fms.komkon.org/EMUL8/HOWTO.html). It was originally implemented in Visual Basic 6, ported to C++, then finally C#.
+# History
 
-The emulator core for the 6800 CPU is based on the MAME source code.
+This emulator is inspired by a lot of previous works, notably Marat Fayzullin's [How To Write a Computer Emulator](http://fms.komkon.org/EMUL8/HOWTO.html). It was originally written in Visual Basic 6, ported to C++, and C#.
+
+The C# emulator core was originally written from scratch, but after some hard-to-fix bugs, it was rewritten using MAME 6800 emulator source as reference.
 
 # Usage
 
@@ -29,6 +31,7 @@ The manual mainly details the assembly of the hardware of the kit.
 
 Here is an index of interesting information related to the software that will be useful for emulation:
 
+```
 | PDF Page | Manual Page | Section          | 
 |:--------:|:-----------:|------------------|
 | 47       |     45      | Operation        |
@@ -36,18 +39,27 @@ Here is an index of interesting information related to the software that will be
 | 75       |     74      | Monitor Listing  |
 | 89       |     87      | Meomry Map       |
 | 91       |     89      | Instruction Set  |
+```
 
-## .RAM file format
+# Debugger
 
-The repository contains some files with the .ram extension. These are binary files containing the machine code in plain bytes that will be loaded directly into RAM at address $0000.
+A rudimentary debugger is implemented.  Press `CTRL-D` or click `View` > `Debugger` to bring up the debugger.
 
-The file is headered with 8 bytes that contain the ASCII characters "3400" followed by 4 zero-bytes.
+The debugger has a raw memory display and a disassembly display. Status registers are displayed at the bottom.
 
-## .S19 file format
+When the main window has focus, you can halt execution by pressing `F4`. You can step through statements by pressing `F10` when execution is halted. You may resume execution by pressing `F5`.
 
-The emulator supports S19 format files. Click File > Load and select your S19 OBJ file to load it into memory.  
+You can set breakpoints by selecting disassembly statements and pressing `F9`.  The emulator will halt once the breakpoint is hit.  
 
-The manual contains program listings in assembly/machine code and the ROM listing which can be useful for calling functions such as monitoring the keyboard and displaying text on screen.
+Click on `Emulator` > `Enable Breakpoints` to toggle whether execution will stop on breakpoints. It is enabled by default. 
+
+`F4`, `F5` and `F10` will also work when the disassembly pane has focus.
+
+# SREC (.OBJ) file format
+
+The emulator supports SREC (S19) format files. Click `File` > `Load RAM` and select your .OBJ file to load it into memory.  
+
+You can also save RAM (or any memory range) to SREC format by clicking `File` > `Save RAM`. You will be prompted for a memory range, and then prompted for a location to save the file.
 
 ## Quick ET-3400 Guide
 

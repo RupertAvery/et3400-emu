@@ -51,18 +51,18 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
-    <Compile Include="Common\ComboBoxItem.cs" />
-    <Compile Include="Common\CustomComboBoxItem.cs" />
+    <Compile Include="Common\MemoryRange.cs" />
+    <Compile Include="Common\CustomMemoryRange.cs" />
     <Compile Include="Common\EmulationModes.cs" />
     <Compile Include="Common\OnTimerDelegate.cs" />
     <Compile Include="Common\OnUpdateDelegate.cs" />
     <Compile Include="Common\TrainerKeys.cs" />
     <Compile Include="Debugger\DasmDisplay.cs" />
     <Compile Include="Debugger\DataRange.cs" />
-    <Compile Include="Debugger\DebuggerView.cs">
+    <Compile Include="DebuggerView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Debugger\DebuggerView.Designer.cs">
+    <Compile Include="DebuggerView.Designer.cs">
       <DependentUpon>DebuggerView.cs</DependentUpon>
     </Compile>
     <Compile Include="Debugger\Disassembler.cs" />
@@ -105,7 +105,7 @@
     <EmbeddedResource Include="Address.resx">
       <DependentUpon>Address.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Debugger\DebuggerView.resx">
+    <EmbeddedResource Include="DebuggerView.resx">
       <DependentUpon>DebuggerView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -179,6 +179,7 @@
     <None Include="README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Include="ROM\ROM.map" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\0.bmp" />

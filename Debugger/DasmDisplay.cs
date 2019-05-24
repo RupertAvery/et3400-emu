@@ -9,12 +9,13 @@ namespace Sharp6800.Debugger
 {
     public class DasmDisplay
     {
+        private readonly Trainer.Trainer _trainer;
         private readonly IntPtr targetWnd;
         private readonly int width, height;
-        private int _selectedOffset;
 
-        public DasmDisplay(PictureBox target)
+        public DasmDisplay(PictureBox target, Trainer.Trainer trainer)
         {
+            _trainer = trainer;
             try
             {
                 width = target.Width;
@@ -34,12 +35,12 @@ namespace Sharp6800.Debugger
         public int FirstAddress { get; private set; }
 
 
-        public int GetOffsetFromAddress(int[] memory, int address)
+        public int GetOffsetFromAddress(int address)
         {
-            for (int i = Start, offset = 0; i < memory.Length; offset++)
+            for (int i = Start, offset = 0; i < _trainer.Memory.Length; offset++)
             {
                 string buf = "";
-                var ops = Disassembler.Disassemble(memory, i, ref buf) & 0x3;
+                var ops = Disassembler.Disassemble(_trainer.Memory, i, ref buf) & 0x3;
                 if (address == i)
                 {
                     return offset;
@@ -50,7 +51,7 @@ namespace Sharp6800.Debugger
             return 0;
         }
 
-        public void Display(int[] memory, Cpu6800State state, List<int> breakpoints)
+        public void Display()
         {
             var buffer = new Bitmap(width, height);
             var g = Graphics.FromImage(buffer);
@@ -62,60 +63,97 @@ namespace Sharp6800.Debugger
             {
                 string buf = "";
                 string code = "";
-                if (i < memory.Length)
-                {
+                var ops = 0;
 
-                    if (MemoryMaps != null)
+                if (i < _trainer.Memory.Length)
+                {
+                    var inDataRange = false;
+
+                    if (_trainer.MemoryMaps != null)
                     {
-                        foreach (var memoryMap in MemoryMaps)
+                        foreach (var memoryMap in _trainer.MemoryMaps)
                         {
-                            var inDataRange = memoryMap.Ranges.FirstOrDefault(range => i >= range.Start && i <= range.End);
-                            if (inDataRange != null)
+                            inDataRange = i >= memoryMap.Start && i <= memoryMap.End;
+                            if (inDataRange)
                             {
-                                i = inDataRange.End + 1;
+                                ops = memoryMap.End - memoryMap.Start + 1;
+
+                                if (ops > 8)
+                                {
+                                    ops = 8;
+                                }
+
                                 break;
                             }
                         }
-
                     }
 
-                    var ops = Disassembler.Disassemble(memory, i, ref buf) & 0x3;
-                    int k;
-
-                    for (k = 0; k < ops; k++)
+                    if (!inDataRange)
                     {
-                        code = code + string.Format("{0:X2}", memory[i + k]) + " ";
+                        ops = Disassembler.Disassemble(_trainer.Memory, i, ref buf) & 0x3;
                     }
 
+                    for (var k = 0; k < ops; k++)
+                    {
+                        if (i + k < _trainer.Memory.Length)
+                        {
+                            code = code + string.Format("{0:X2}", _trainer.Memory[i + k]) + " ";
+                        }
+                    }
 
                     if (offset >= Offset)
                     {
-                        if (offset == _selectedOffset)
+                        var isAtBreakPoint = _trainer.Breakpoints.Contains(i);
+                        var isSelected = false;
+                        var isCurrentPC = (!_trainer.Running && i == _trainer.State.PC);
+
+                        if (offset == SelectedOffset)
                         {
                             SelectedAddress = i;
-                            using (var brush = new SolidBrush(Color.Blue))
-                            {
-                                g.FillRectangle(brush, 2, 20 * j, width - 2, 20);
-                            }
+                            isSelected = true;
                         }
 
-                        if (breakpoints.Contains(i))
+
+                        if (isAtBreakPoint || isSelected || isCurrentPC)
                         {
-                            using (var brush = new SolidBrush(Color.DarkRed))
+                            Color highlightColor = Color.White;
+
+                            if (isAtBreakPoint && isSelected && isCurrentPC)
+                            {
+                                highlightColor = Color.DodgerBlue;
+                            }
+                            else if (isSelected && isCurrentPC)
+                            {
+                                highlightColor = Color.DodgerBlue;
+                            }
+                            else if (isAtBreakPoint && isSelected)
+                            {
+                                highlightColor = Color.DodgerBlue;
+                            }
+                            else if (isAtBreakPoint && isCurrentPC)
+                            {
+                                highlightColor = Color.Orange;
+                            }
+                            else if (isAtBreakPoint)
+                            {
+                                highlightColor = Color.DarkRed;
+                            }
+                            else if (isSelected)
+                            {
+                                highlightColor = Color.Blue;
+                            }
+                            else if (isCurrentPC)
+                            {
+                                highlightColor = Color.Yellow;
+                            }
+
+                            using (var brush = new SolidBrush(highlightColor))
                             {
                                 g.FillRectangle(brush, 2, 20 * j, width - 2, 20);
                             }
                         }
 
-                        if (i == state.PC)
-                        {
-                            using (var brush = new SolidBrush(Color.Yellow))
-                            {
-                                g.FillRectangle(brush, 2, 20 * j, width - 2, 20);
-                            }
-                        }
-
-                        DrawHex(g, 10, 20 * j, string.Format("{0:X4} {1,-9} {2}", i, code, buf.ToUpper()));
+                        DrawHex(g, 10, 20 * j, string.Format("{0:X4} {1,-9} {2}", i, code, buf.ToUpper()), isAtBreakPoint);
                         j++;
                     }
 
@@ -137,30 +175,23 @@ namespace Sharp6800.Debugger
             p.Dispose();
         }
 
-        private void DrawHex(Graphics g, int x, int y, string asm)
+        private void DrawHex(Graphics g, int x, int y, string asm, bool isAtBreakPoint)
         {
-            using (var brush = new SolidBrush(Color.Black))
+            using (var brush = new SolidBrush(isAtBreakPoint ? Color.White : Color.Black))
             {
                 using (var font = new Font("Courier New", 12, FontStyle.Regular))
                 {
                     g.DrawString(asm, font, brush, x, y);
-
                 }
             }
         }
 
         public int SelectedAddress { get; private set; }
+        public int SelectedOffset { get; set; }
 
 
         public int Start { get; set; }
-
         public int Offset { get; set; }
 
-        public IEnumerable<MemoryMap> MemoryMaps { get; set; }
-
-        public void SelectOffset(int selectedOffset)
-        {
-            _selectedOffset = selectedOffset;
-        }
     }
 }

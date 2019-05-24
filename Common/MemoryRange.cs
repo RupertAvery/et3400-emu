@@ -1,6 +1,6 @@
 namespace Sharp6800.Common
 {
-    public class ComboBoxItem
+    public class MemoryRange
     {
         public virtual string Description { get; set; }
         public virtual int Start { get; set; }

@@ -129,7 +129,7 @@ namespace Sharp6800.Trainer
 
         public void Reset()
         {
-            Emulator.BootStrap();
+            Emulator.Reset();
         }
 
         public void Start()
@@ -141,7 +141,7 @@ namespace Sharp6800.Trainer
 
         public void Restart()
         {
-            Emulator.BootStrap();
+            Emulator.Reset();
             Runner.Continue();
             Running = true;
             OnStart?.Invoke(this, EventArgs.Empty);
@@ -241,6 +241,36 @@ namespace Sharp6800.Trainer
             {
                 Memory[offset + i] = data[i];
             }
+        }
+
+        public IEnumerable<MemoryMap> MemoryMaps { get; set; }
+
+        public void LoadMemoryMap(string data)
+        {
+            var maps = new List<MemoryMap>();
+
+            var lines = data.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(new[] { ',' });
+                if (parts.Length == 0) continue;
+                if (parts.Length == 4)
+                {
+                    maps.Add(new MemoryMap()
+                    {
+                        Start = Convert.ToInt32(parts[0], 16),
+                        End = Convert.ToInt32(parts[1], 16),
+                        Type = parts[2] == "CODE" ? RangeType.Code : RangeType.Data,
+                        Description = parts[3],
+                    });
+                }
+                else
+                {
+                    throw new Exception("Error reading map file");
+                }
+            }
+
+            MemoryMaps = maps;
         }
 
         /// <summary>

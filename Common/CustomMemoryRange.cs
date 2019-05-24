@@ -3,12 +3,12 @@ using System.Windows.Forms;
 
 namespace Sharp6800.Common
 {
-    public class CustomComboBoxItem : ComboBoxItem
+    public class CustomMemoryRange : MemoryRange
     {
         private TextBox _source;
         private int _lastValue;
 
-        public CustomComboBoxItem(TextBox source)
+        public CustomMemoryRange(TextBox source)
         {
             _source = source;
         }

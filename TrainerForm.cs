@@ -15,8 +15,6 @@ namespace Sharp6800.Trainer
         private Trainer _trainer;
         private DebuggerView _debuggerView;
         private Timer _updateTimer;
-        private readonly object _lockObject = new object();
-        private readonly List<MemoryMap> memoryMaps = new List<MemoryMap>();
 
         public TrainerForm()
         {
@@ -80,8 +78,10 @@ namespace Sharp6800.Trainer
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(SegmentPictureBox);
                 _trainer.LoadRom(ResourceHelper.GetEmbeddedResource(typeof(Trainer).Assembly, "ROM/ROM.HEX"));
+                _trainer.LoadMemoryMap(ResourceHelper.GetEmbeddedResource(typeof(Trainer).Assembly, "ROM/ROM.map"));
                 _trainer.OnStop += (o, args) => UpdateState(false);
                 _trainer.OnStart += (o, args) => UpdateState(true);
+                _trainer.BreakpointsEnabled = true;
 
 #if DEBUG
                 Action<int> updateSpeed = delegate (int second)
@@ -286,17 +286,17 @@ namespace Sharp6800.Trainer
                 _trainer.LoadRom(content);
             }
 
-            var datPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".dat");
+            //var datPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".dat");
 
-            if (File.Exists(datPath))
-            {
-                using (var datfile = new FileStream(datPath, FileMode.Open, FileAccess.Read))
-                {
-                    var dat = new XmlSerializer(typeof(MemoryMap), new XmlRootAttribute("memorymap"));
-                    var map = (MemoryMap)dat.Deserialize(datfile);
-                    memoryMaps.Add(map);
-                }
-            }
+            //if (File.Exists(datPath))
+            //{
+            //    using (var datfile = new FileStream(datPath, FileMode.Open, FileAccess.Read))
+            //    {
+            //        var dat = new XmlSerializer(typeof(MemoryMap), new XmlRootAttribute("memorymap"));
+            //        var map = (MemoryMap)dat.Deserialize(datfile);
+            //        memoryMaps.Add(map);
+            //    }
+            //}
         }
 
         private void loadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -340,35 +340,35 @@ namespace Sharp6800.Trainer
         {
             if (_debuggerView == null)
             {
-                _debuggerView = new DebuggerView(_trainer)
-                {
-                    State = _trainer.State,
-                    Breakpoints = _trainer.Breakpoints,
-                    Memory = _trainer.Memory,
-                    MemoryMaps = memoryMaps
-                };
+                _debuggerView = new DebuggerView(_trainer);
+
                 _debuggerView.Closing += (o, args) =>
                     {
-                        lock (_lockObject)
-                        {
-                            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                            _updateTimer.Dispose();
-                            _updateTimer = null;
-                            _debuggerView = null;
-                        }
+                        //lock (_lockObject)
+                        //{
+                        _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                        _updateTimer.Dispose();
+                        _updateTimer = null;
+                        _debuggerView = null;
+                        //}
                     };
+
                 _updateTimer = new Timer(state =>
                 {
-                    lock (_lockObject)
+                    //lock (_lockObject)
+                    //{
+                    if (_debuggerView != null)
                     {
-                        if (_debuggerView != null)
-                        {
-                            _debuggerView.UpdateDisplay();
-                        }
+                        _debuggerView.UpdateDisplay();
                     }
+                    //}
                 }, null, 0, 100);
 
                 _debuggerView.Show();
+            }
+            else
+            {
+                _debuggerView.BringToFront();
             }
         }
 
@@ -461,12 +461,22 @@ namespace Sharp6800.Trainer
 
         private void TrainerForm_Activated(object sender, EventArgs e)
         {
-        //    if (_debuggerView != null && !_debuggerView.IsDisposed)
-        //    {
-        //        _debuggerView.BringToFront();
-        //    }
+            //    if (_debuggerView != null && !_debuggerView.IsDisposed)
+            //    {
+            //        _debuggerView.BringToFront();
+            //    }
 
-        //    Focus();
+            //    Focus();
+        }
+
+        private void ButtonReset_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void HaltOnBreakpointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.BreakpointsEnabled = haltOnBreakpointsToolStripMenuItem.Checked;
         }
     }
 }

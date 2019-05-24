@@ -9,7 +9,22 @@ namespace Core6800
             Initialize();
         }
 
-        public int Execute()
+        public int PostExecute()
+        {
+            if (State.WAI)
+            {
+                return 5;
+            }
+            else
+            {
+                int fetchCode = ReadMem(State.PC) & 0xff;
+                State.PC++;
+                InterpretOpCode(fetchCode);
+                return cycles[fetchCode];
+            }
+        } 
+
+        public int PreExecute()
         {
             if (State.Reset == 0)
             {
@@ -48,42 +63,14 @@ namespace Core6800
 
             CheckInterrupts();
 
+            return 0;
+        }
 
-            // State.ITemp 
-
-            //if (Breakpoint.Contains(State.PC))
-            //{
-            //    var x = 1;
-            //    // Do something for a hardware breaskpoint
-            //    // Log stuff
-
-            //}
-
-            //if (State.PC == 0xFDC2 && State.A == 0xF7)
-            //{
-            //    var x = 1;
-            //    // Do something for a hardware breaskpoint
-            //    // Log stuff
-
-            //}
-
-            //if (!((PC >= 0xFE3A) && (PC <= 0xFE4F))) // Ignore OUTCH
-            //{
-            //    System.Diagnostics.Debug.WriteLine(string.Format("PC:{0,4:X} A:{1,2:X} B:{2,2:X} IX:{3,4:X} SP:{4,4:X} CC:{5, 6}", PC, A, B, X, S, Convert.ToString(CC, 2)));
-            //}
-
-            if (State.WAI)
-            {
-                return 5;
-            }
-            else
-            {
-                int fetchCode = ReadMem(State.PC) & 0xff;
-                State.PC++;
-                InterpretOpCode(fetchCode);
-
-                return cycles[fetchCode];
-            }
+        public int Execute()
+        {
+            var preExecute = PreExecute();
+            if (preExecute > 0) return preExecute;
+            return PostExecute();
         }
 
         private void CheckInterrupts()
@@ -138,13 +125,9 @@ namespace Core6800
             State.InterruptRequest = 0;
         }
 
-        /// <summary>
-        /// Initiates power-on sequence
-        /// </summary>
-        public void BootStrap()
+        public void Reset()
         {
             State.Reset = 0;
-            Execute();
         }
 
     }
