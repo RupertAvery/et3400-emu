@@ -14,6 +14,7 @@ namespace Sharp6800
     {
         public int StartAddress { get; private set; }
         public int EndAddress { get; private set; }
+
         public Address()
         {
             InitializeComponent();
@@ -54,15 +55,29 @@ namespace Sharp6800
 
                 if (StartAddress > EndAddress || StartAddress == EndAddress)
                 {
-                    throw new Exception("The end address must be larger than the start address");
+                    MessageBox.Show("The end address must be larger than the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
+
+                if (StartAddress < 0)
+                {
+                    MessageBox.Show("The start address must be greater than 0", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (EndAddress < 0)
+                {
+                    MessageBox.Show("The start address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
 
                 DialogResult = DialogResult.OK;
                 Close();
             }
             catch (Exception exception)
             {
-                MessageBox.Show(exception.Message, "Error");
+                MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
         }

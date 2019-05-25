@@ -6,41 +6,25 @@ using Sharp6800.Debugger;
 
 namespace Sharp6800
 {
-    class DatFile
-    {
-        public static IEnumerable<DataRange> Read(string path)
-        {
-            var dataRanges = new List<DataRange>();
-            if (File.Exists(path))
-            {
-                var content = File.ReadAllText(path);
-                var lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-                dataRanges.AddRange(from line in lines where line.StartsWith(".data") select line.Split(new char[] { ' ' }) into ranges select new DataRange() { Start = Convert.ToInt32(ranges[1], 16), End = Convert.ToInt32(ranges[2], 16) });
-            }
-            return dataRanges;
-        }
 
-
-    }
-
-    class HexFile
-    {
-        public static void Write(string file, int[] data)
-        {
-            using (var fs = new StreamWriter(file))
-            {
-                int j = 0;
-                foreach (var b in data)
-                {
-                    fs.Write(string.Format("{0:X2}", b));
-                    j++;
-                    if (j != 32) continue;
-                    fs.Write("\r\n");
-                    j = 0;
-                }
-            }
-        }
-    }
+    //class HexFile
+    //{
+    //    public static void Write(string file, int[] data)
+    //    {
+    //        using (var fs = new StreamWriter(file))
+    //        {
+    //            int j = 0;
+    //            foreach (var b in data)
+    //            {
+    //                fs.Write(string.Format("{0:X2}", b));
+    //                j++;
+    //                if (j != 32) continue;
+    //                fs.Write("\r\n");
+    //                j = 0;
+    //            }
+    //        }
+    //    }
+    //}
 
     class DataBlock
     {

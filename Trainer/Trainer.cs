@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.Layout;
 using Core6800;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
@@ -11,18 +13,20 @@ namespace Sharp6800.Trainer
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
-    public class Trainer
+    public class Trainer : ITrainer
     {
         private SegDisplay _disp;
 
-        public List<int> Breakpoints = new List<int>();
+        public List<int> Breakpoints { get; }
 
         public EventHandler OnStop { get; set; }
         public EventHandler OnStart { get; set; }
 
         public ITrainerRunner Runner { get; private set; }
         public Cpu6800 Emulator { get; private set; }
-        public int[] Memory = new int[65536];
+
+        public int[] Memory { get; }
+
         public TrainerSettings Settings { get; set; }
         public Cpu6800State State { get; set; }
 
@@ -30,6 +34,8 @@ namespace Sharp6800.Trainer
 
         public Trainer()
         {
+            Memory = new int[65536];
+            Breakpoints = new List<int>();
             Settings = new TrainerSettings();
 
             State = new Cpu6800State();
@@ -230,31 +236,86 @@ namespace Sharp6800.Trainer
         }
 
 
-        /// <summary>
-        /// Loads a rom from a byte array
-        /// </summary>
-        /// <param name="data"></param>
-        public void LoadRom(byte[] data)
+
+        public void AddMemoryMap(int startAddress, int endAddress, RangeType rangeType, string description)
         {
-            int offset = 65536 - data.Length;
-            for (var i = 0; i < data.Length; i++)
+            MemoryMaps.Add(new MemoryMap()
             {
-                Memory[offset + i] = data[i];
-            }
+                Start = startAddress,
+                End = endAddress,
+                Type = rangeType,
+                Description = description
+            });
         }
 
-        public IEnumerable<MemoryMap> MemoryMaps { get; set; }
+        public MemoryMap GetMemoryMap(int startAddress)
+        {
+            return MemoryMaps.FirstOrDefault(map => map.Start <= startAddress && map.End >= startAddress);
+        }
+
+        public void RemoveMemoryMap(MemoryMap memoryMap)
+        {
+            MemoryMaps.Remove(memoryMap);
+        }
+
+        //public void RemoveMemoryMap(int startAddress)
+        //{
+        //    var mmap = MemoryMaps.FirstOrDefault(map => map.Start == startAddress);
+        //    if (mmap != null)
+        //    {
+        //        MemoryMaps.Remove(mmap);
+        //    }
+        //}
+
+        public List<MemoryMap> MemoryMaps { get; private set; }
 
         public void LoadMemoryMap(string data)
         {
             var maps = new List<MemoryMap>();
 
             var lines = data.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            char[] buffer = new char[256];
+
             foreach (var line in lines)
             {
-                var parts = line.Split(new[] { ',' });
-                if (parts.Length == 0) continue;
-                if (parts.Length == 4)
+                var ptr = 0;
+                var parts = new List<string>();
+                var inQuotes = false;
+                var bufferPtr = 0;
+                var quoteCount = 0;
+                while (ptr < line.Length)
+                {
+                    var chr = line[ptr];
+                    if (chr == ',' && !inQuotes)
+                    {
+                        parts.Add(new string(buffer, 0, bufferPtr));
+                        bufferPtr = 0;
+                        quoteCount = 0;
+                    }
+                    else
+                    {
+                        if (chr == '"')
+                        {
+                            if (quoteCount == 0)
+                            {
+                                bufferPtr = 0;
+                            }
+                            inQuotes = !inQuotes;
+                            quoteCount++;
+                        }
+                        else
+                        {
+                            buffer[bufferPtr] = chr;
+                            bufferPtr++;
+                        }
+                    }
+                    ptr++;
+                }
+                if (inQuotes) { throw new Exception("Unterminated quote"); }
+                parts.Add(new string(buffer, 0, bufferPtr));
+
+                if (parts.Count == 0) continue;
+                if (parts.Count == 4)
                 {
                     maps.Add(new MemoryMap()
                     {
@@ -298,6 +359,18 @@ namespace Sharp6800.Trainer
             return rom.Length;
         }
 
+        /// <summary>
+        /// Loads a rom from a byte array
+        /// </summary>
+        /// <param name="data"></param>
+        public void LoadRom(byte[] data)
+        {
+            int offset = 65536 - data.Length;
+            for (var i = 0; i < data.Length; i++)
+            {
+                Memory[offset + i] = data[i];
+            }
+        }
 
         /// <summary>
         /// Load binary file into RAM area at the specified offset

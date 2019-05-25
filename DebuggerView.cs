@@ -20,8 +20,8 @@ namespace Sharp6800.Debugger
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
 
-        private readonly MemDisplay _memDisplay;
-        private readonly DasmDisplay _dasmDisplay;
+        private readonly MemoryDisplay _memoryDisplay;
+        private readonly DisassemberDisplay _disassemberDisplay;
 
         private Control focusObject;
 
@@ -30,8 +30,115 @@ namespace Sharp6800.Debugger
         private const int WM_MOUSEWHEEL = 0x20a;
         private const int WM_SYSKEYDOWN = 0x104;
 
+        public bool IsDisposing { get; private set; }
+
+        private bool hasFocus = true;
+
+        private bool MemoryViewScrollBar_HandleKeyDown(Keys keys)
+        {
+            var oldValue = MemoryViewScrollBar.Value;
+
+            switch (keys)
+            {
+                case Keys.Down:
+                    if (oldValue + 1 > MemoryViewScrollBar.Maximum)
+                    {
+                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
+                    }
+                    else
+                    {
+                        MemoryViewScrollBar.Value = oldValue + 1;
+                    }
+                    break;
+                case Keys.Up:
+                    if (oldValue - 1 < 0) return true;
+                    MemoryViewScrollBar.Value = oldValue - 1;
+                    break;
+                case Keys.PageDown:
+                    if (oldValue + 16 > MemoryViewScrollBar.Maximum)
+                    {
+                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
+                    }
+                    else
+                    {
+                        MemoryViewScrollBar.Value = oldValue + 16;
+                    }
+                    break;
+                case Keys.PageUp:
+                    if (oldValue - 16 < 0)
+                    {
+                        MemoryViewScrollBar.Value = 0;
+                    }
+                    else
+                    {
+                        MemoryViewScrollBar.Value = oldValue - 16;
+                    }
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool DasmViewPictureBox_HandleKeyDown(Keys keys)
+        {
+            switch (keys)
+            {
+
+                case Keys.Up:
+                    _disassemberDisplay.MoveUp();
+                    break;
+
+                case Keys.Down:
+                    _disassemberDisplay.MoveDown();
+                    break;
+
+                case Keys.PageUp:
+                    _disassemberDisplay.PageUp();
+                    break;
+
+                case Keys.PageDown:
+                    _disassemberDisplay.PageDown();
+
+                    break;
+
+                case Keys.F4:
+                    if (_trainer.Running)
+                    {
+                        _trainer.Stop();
+                    }
+
+                    break;
+
+                case Keys.F5:
+                    if (!_trainer.Running)
+                    {
+                        _trainer.Start();
+                    }
+
+                    break;
+
+                case Keys.F9:
+                    if (_disassemberDisplay.SelectedLine.HasValue)
+                    {
+                        _trainer.ToggleBreakPoint(_disassemberDisplay.SelectedLine.Value.Address);
+                    }
+                    break;
+            }
+
+            return true;
+        }
+
         public bool PreFilterMessage(ref Message m)
         {
+            //Control control = Control.FromChildHandle(m.HWnd);
+
+            //if (control != MemoryViewPictureBox || control != DasmViewPictureBox)
+            //{
+            //    return false;
+            //}
+
+            if (!hasFocus) return false;
+
             switch (m.Msg)
             {
                 case WM_SYSKEYDOWN:
@@ -65,12 +172,15 @@ namespace Sharp6800.Debugger
                 case WM_LBUTTONDOWN:
                     {
                         var lParam = ((int)m.LParam.ToInt64());
+
                         var pos = new Point()
                         {
                             X = lParam & 0xFFFF,
                             Y = (lParam >> 0x10) & 0xFFFF,
                         };
+
                         focusObject = FindControlAtPoint(this);
+
                         if (focusObject == MemoryViewPictureBox || focusObject == DasmViewPictureBox)
                         {
                             var x = DummyButton.Focus();
@@ -85,120 +195,13 @@ namespace Sharp6800.Debugger
 
                         if (focusObject == MemoryViewPictureBox)
                         {
-                            var oldValue = MemoryViewScrollBar.Value;
-                            ;
-                            switch (keys)
-                            {
-                                case Keys.Down:
-                                    if (oldValue + 1 > MemoryViewScrollBar.Maximum)
-                                    {
-                                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
-                                    }
-                                    else
-                                    {
-                                        MemoryViewScrollBar.Value = oldValue + 1;
-                                    }
-                                    break;
-                                case Keys.Up:
-                                    if (oldValue - 1 < 0) return true;
-                                    MemoryViewScrollBar.Value = oldValue - 1;
-                                    break;
-                                case Keys.PageDown:
-                                    if (oldValue + 16 > MemoryViewScrollBar.Maximum)
-                                    {
-                                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
-                                    }
-                                    else
-                                    {
-                                        MemoryViewScrollBar.Value = oldValue + 16;
-                                    }
-                                    break;
-                                case Keys.PageUp:
-                                    if (oldValue - 16 < 0)
-                                    {
-                                        MemoryViewScrollBar.Value = 0;
-                                    }
-                                    else
-                                    {
-                                        MemoryViewScrollBar.Value = oldValue - 16;
-                                    }
-                                    break;
-                            }
-
+                            return MemoryViewScrollBar_HandleKeyDown(keys);
                         }
                         else if (focusObject == DasmViewPictureBox)
                         {
-                            var oldValue = DasmViewScrollBar.Value;
-                            ;
-                            switch (keys)
-                            {
-                                case Keys.Down:
-                                    if (_dasmDisplay.SelectedOffset < 0xFFFF)
-                                    {
-                                        _dasmDisplay.SelectedOffset++;
-                                        if (_dasmDisplay.SelectedOffset > _dasmDisplay.Offset + 16)
-                                        {
-                                            DasmViewScrollBar.Value++;
-                                        }
-                                    }
-                                    break;
-                                case Keys.Up:
-                                    if (_dasmDisplay.SelectedOffset > 0)
-                                    {
-                                        _dasmDisplay.SelectedOffset--;
-                                        if (_dasmDisplay.SelectedOffset < _dasmDisplay.Offset)
-                                        {
-                                            DasmViewScrollBar.Value--;
-                                        }
-                                    }
-                                    break;
-                                case Keys.PageDown:
-                                    if (oldValue + 16 > DasmViewScrollBar.Maximum)
-                                    {
-                                        DasmViewScrollBar.Value = DasmViewScrollBar.Maximum;
-                                    }
-                                    else
-                                    {
-                                        DasmViewScrollBar.Value = oldValue + 16;
-                                    }
-
-                                    _dasmDisplay.SelectedOffset = DasmViewScrollBar.Value;
-                                    break;
-                                case Keys.PageUp:
-                                    if (oldValue - 16 < 0)
-                                    {
-                                        DasmViewScrollBar.Value = 0;
-                                    }
-                                    else
-                                    {
-                                        DasmViewScrollBar.Value = oldValue - 16;
-                                    }
-                                    _dasmDisplay.SelectedOffset = DasmViewScrollBar.Value;
-                                    break;
-
-                                case Keys.F4:
-                                    if (_trainer.Running)
-                                    {
-                                        _trainer.Stop();
-                                    }
-
-                                    break;
-
-                                case Keys.F5:
-                                    if (!_trainer.Running)
-                                    {
-                                        _trainer.Start();
-                                    }
-
-                                    break;
-
-                                case Keys.F9:
-                                    _trainer.ToggleBreakPoint(_dasmDisplay.SelectedAddress);
-                                    break;
-                            }
-                            return true; // Prevent message reaching destination
-
+                            return DasmViewPictureBox_HandleKeyDown(keys);
                         }
+
                         return false;
                     }
             }
@@ -214,15 +217,22 @@ namespace Sharp6800.Debugger
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
             MemoryViewPictureBox.KeyDown += MemoryViewPictureBoxOnKeyDown;
             DasmViewPictureBox.KeyDown += DasmViewPictureBoxOnKeyDown;
-            _memDisplay = new MemDisplay(MemoryViewPictureBox, trainer);
-            _dasmDisplay = new DasmDisplay(DasmViewPictureBox, trainer);
+
+            _memoryDisplay = new MemoryDisplay(MemoryViewPictureBox, trainer);
+            _disassemberDisplay = new DisassemberDisplay(DasmViewPictureBox, DasmViewScrollBar, trainer);
             _trainer = trainer;
+
             _trainer.OnStop += (sender, args) => UpdateDebuggerState();
         }
 
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             Application.RemoveMessageFilter(this);
+
+            IsDisposing = true;
+
+            _memoryDisplay.Dispose();
+            _disassemberDisplay.Dispose();
         }
 
 
@@ -259,54 +269,34 @@ namespace Sharp6800.Debugger
                 {
                     DasmViewComboBox.SelectedItem = DasmViewComboBox.Items[1];
                 }
-                if (_trainer.State.PC < 0xFC00)
+                else if (_trainer.State.PC < 0xFC00)
                 {
                     DasmViewComboBox.SelectedItem = DasmViewComboBox.Items[0];
                 }
 
-                if (_trainer.State.PC > _dasmDisplay.LastAddress)
-                {
-                    var offset = _dasmDisplay.GetOffsetFromAddress(_trainer.State.PC);
-                    if (offset < DasmViewScrollBar.Maximum)
-                    {
-                        DasmViewScrollBar.Value = offset;
-                    }
-                }
-
-                if (_dasmDisplay.GetOffsetFromAddress(_trainer.State.PC) < _dasmDisplay.Offset)
-                {
-                    var offset = _dasmDisplay.GetOffsetFromAddress(_trainer.State.PC);
-                    if (offset < DasmViewScrollBar.Maximum)
-                    {
-                        DasmViewScrollBar.Value = offset;
-                    }
-                }
+                _disassemberDisplay.EnsureVisble(_trainer.State.PC);
+                _disassemberDisplay.SelectAddress(_trainer.State.PC);
             }
         }
 
         public void UpdateDisplay()
         {
-
-            _dasmDisplay.Display();
-            _memDisplay.Display();
-
-            Invoke(new MethodInvoker(() =>
+            if (!IsDisposing)
             {
-                PCTextBox.Text = String.Format("{0:X4}", _trainer.State.PC);
-                IXTextBox.Text = String.Format("{0:X4}", _trainer.State.X);
-                SPTextBox.Text = String.Format("{0:X4}", _trainer.State.S);
-                ACCATextBox.Text = String.Format("{0:X2}", _trainer.State.A);
-                ACCBTextBox.Text = String.Format("{0:X2}", _trainer.State.B);
-                var ccText = Convert.ToString(_trainer.State.CC, 2);
+                _disassemberDisplay.UpdateDisplay();
+                _memoryDisplay.UpdateDisplay();
 
-                CCTextBox.Text = new String('0', 8 - ccText.Length) + ccText;
-                //CCHTextBox.Text = String.Format("{0}", (_trainer.State.CC & 0x20) >> 5);
-                //CCITextBox.Text = String.Format("{0}", (_trainer.State.CC & 0x10) >> 4);
-                //CCNTextBox.Text = String.Format("{0}", (_trainer.State.CC & 0x08) >> 3);
-                //CCZTextBox.Text = String.Format("{0}", (_trainer.State.CC & 0x04) >> 2);
-                //CCVTextBox.Text = String.Format("{0}", (_trainer.State.CC & 0x02) >> 1);
-                //CCCTextBox.Text = String.Format("{0}", _trainer.State.CC & 0x01);
-            }));
+                Invoke(new MethodInvoker(() =>
+                {
+                    PCTextBox.Text = String.Format("{0:X4}", _trainer.State.PC);
+                    IXTextBox.Text = String.Format("{0:X4}", _trainer.State.X);
+                    SPTextBox.Text = String.Format("{0:X4}", _trainer.State.S);
+                    ACCATextBox.Text = String.Format("{0:X2}", _trainer.State.A);
+                    ACCBTextBox.Text = String.Format("{0:X2}", _trainer.State.B);
+                    var ccText = Convert.ToString(_trainer.State.CC, 2);
+                    CCTextBox.Text = new String('0', 8 - ccText.Length) + ccText;
+                }));
+            }
         }
 
 
@@ -348,53 +338,64 @@ namespace Sharp6800.Debugger
 
         private void DebuggerView_Load(object sender, EventArgs e)
         {
-            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "RAM ($0000)", Start = 0x0000, End = 1024 });
-            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "Keypad ($C003)", Start = 0xC003, End = 0xC003 + 1024 });
-            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "Display ($C110)", Start = 0xC110, End = 0xC110 + 1024 });
-            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "ROM ($FC00)", Start = 0xFC00, End = 0xFFFF });
+            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "RAM", 0x0000, 1024));
+            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "Keypad", 0xC003, 0xC013));
+            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "Display", 0xC110, 0xC21F));
+            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));
+
+            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 1024 });
+            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "Keypad", Start = 0xC003, End = 0xC003 + 1024 });
+            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "Display", Start = 0xC110, End = 0xC110 + 1024 });
+            MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "ROM", Start = 0xFC00, End = 0xFFFF });
             MemoryViewComboBox.Items.Add(new CustomMemoryRange(MemAddrTextBox));
             MemoryViewComboBox.SelectedItem = MemoryViewComboBox.Items[0];
 
-            DasmViewComboBox.Items.Add(new MemoryRange() { Description = "RAM ($0000)", Start = 0x0000, End = 1024 });
-            DasmViewComboBox.Items.Add(new MemoryRange() { Description = "ROM ($FC00)", Start = 0xFC00, End = 0xFFFF });
-            DasmViewComboBox.Items.Add(new CustomMemoryRange(DasmAddrTextBox));
+            //DasmViewComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 1024 });
+            //DasmViewComboBox.Items.Add(new MemoryRange() { Description = "ROM", Start = 0xFC00, End = 0xFFFF });
+
+            DasmViewComboBox.Items.Add(new DisassemblyView(_trainer, "RAM", 0x0000, 1024));
+            DasmViewComboBox.Items.Add(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));
+            //DasmViewComboBox.Items.Add(new CustomMemoryRange(DasmAddrTextBox));
+
             DasmViewComboBox.SelectedItem = DasmViewComboBox.Items[0];
         }
 
         private void MemoryViewComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             MemAddrTextBox.Text = "";
-            _memDisplay.Start = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start;
+            _memoryDisplay.MemoryOffset = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start;
             MemoryViewScrollBar.Value = 0;
         }
 
         private void MemoryViewScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
-            _memDisplay.Start = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
+            _memoryDisplay.MemoryOffset = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
         }
 
         private void DasmViewComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             DasmAddrTextBox.Text = "";
-            var memoryRange = ((MemoryRange)DasmViewComboBox.SelectedItem);
+            var view = (DisassemblyView)DasmViewComboBox.SelectedItem;
+            _disassemberDisplay.CurrentView = view;
+            //_disassemberDisplay.MemoryOffset = view.Start;
+            DasmViewScrollBar.Maximum = view.LineCount - _disassemberDisplay.VisibleItems / 2;
+
             DasmViewScrollBar.Value = 0;
-            _dasmDisplay.Start = memoryRange.Start;
-            DasmViewScrollBar.Maximum = memoryRange.End - memoryRange.Start - 16;
         }
 
         private void DasmViewScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
-            _dasmDisplay.Offset = DasmViewScrollBar.Value;
+            _disassemberDisplay.ViewOffset = DasmViewScrollBar.Value;
         }
 
         private void MemoryViewScrollBar_ValueChanged(object sender, EventArgs e)
         {
-            _memDisplay.Start = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
+            _memoryDisplay.MemoryOffset = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
         }
 
         private void DasmViewScrollBar_ValueChanged(object sender, EventArgs e)
         {
-            _dasmDisplay.Offset = DasmViewScrollBar.Value;
+            _disassemberDisplay.ViewOffset = DasmViewScrollBar.Value;
         }
 
         private void DasmAddrTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -402,8 +403,7 @@ namespace Sharp6800.Debugger
             if (e.KeyCode == Keys.Enter)
             {
                 DasmViewComboBox.SelectedItem = DasmViewComboBox.Items[2];
-                _dasmDisplay.Start = ((MemoryRange)DasmViewComboBox.SelectedItem).Start;
-                _dasmDisplay.Offset = 0;
+                _disassemberDisplay.ViewOffset = 0;
             }
         }
 
@@ -412,21 +412,10 @@ namespace Sharp6800.Debugger
             if (e.KeyCode == Keys.Enter)
             {
                 MemoryViewComboBox.SelectedItem = MemoryViewComboBox.Items[4];
-                _memDisplay.Start = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
+                _memoryDisplay.MemoryOffset = ((MemoryRange)MemoryViewComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
 
             }
         }
-
-        private void DasmViewPictureBox_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void DasmViewPictureBox_MouseDown(object sender, MouseEventArgs e)
-        {
-
-        }
-
 
         public static Control FindControlAtPoint(Control container, Point pos)
         {
@@ -452,24 +441,76 @@ namespace Sharp6800.Debugger
             return null;
         }
 
-        private void MemoryViewPictureBox_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TextBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Label5_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void DasmViewPictureBox_MouseClick(object sender, MouseEventArgs e)
         {
-            _dasmDisplay.SelectedOffset = _dasmDisplay.Offset + e.Y / 20;
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    _disassemberDisplay.SelectLine(e.X, e.Y);
+
+                    break;
+                case MouseButtons.Right:
+                    _disassemberDisplay.SelectLine(e.X, e.Y);
+
+                    if (_disassemberDisplay.SelectedLine.HasValue)
+                    {
+                        var memoryMap = _trainer.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
+                        if (memoryMap == null)
+                        {
+                            addRangeToolStripMenuItem.Enabled = true;
+                            removeRangeToolStripMenuItem.Enabled = false;
+                        }
+                        else
+                        {
+                            addRangeToolStripMenuItem.Enabled = false;
+                            removeRangeToolStripMenuItem.Enabled = true;
+                        }
+                        disassemblerContextMenuStrip.Show(Cursor.Position);
+                    }
+
+
+                    break;
+            }
+        }
+
+        private void AddRangeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            hasFocus = false;
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var addRangeDialog = new AddRange(_disassemberDisplay.SelectedLine.Value.Address, _disassemberDisplay.SelectedLine.Value.Address + 1);
+                //addRangeDialog.Parent = this;
+                addRangeDialog.StartPosition = FormStartPosition.CenterParent;
+                var result = addRangeDialog.ShowDialog(this);
+                if (result == DialogResult.OK)
+                {
+                    _trainer.AddMemoryMap(addRangeDialog.StartAddress, addRangeDialog.EndAddress, addRangeDialog.RangeType, addRangeDialog.Description);
+                }
+            }
+            hasFocus = true;
+        }
+
+        private void RemoveRangeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            hasFocus = false;
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var memoryMap = _trainer.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
+
+                if (memoryMap != null)
+                {
+                    if (MessageBox.Show($"Are you sure you want to remove the map {memoryMap.Description}?",
+                            "Remove Memory Map", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        _trainer.RemoveMemoryMap(memoryMap);
+                    }
+                }
+            }
+            hasFocus = true;
+        }
+
+        private void DasmViewPictureBox_Click(object sender, EventArgs e)
+        {
 
         }
     }

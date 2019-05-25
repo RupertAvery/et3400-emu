@@ -365,6 +365,17 @@ namespace Sharp6800.Trainer
                 }, null, 0, 100);
 
                 _debuggerView.Show();
+
+                _debuggerView.Top = this.Top;
+
+                if (this.Left + this.Width + _debuggerView.Width > Screen.FromControl(this).Bounds.Width)
+                {
+                    _debuggerView.Left = this.Left - _debuggerView.Width;
+                }
+                else
+                {
+                    _debuggerView.Left = this.Left + this.Width;
+                }
             }
             else
             {

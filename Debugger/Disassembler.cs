@@ -11,6 +11,15 @@ namespace Sharp6800.Debugger
         public byte[] Bytes { get; set; }
     }
 
+    public struct DasmResult
+    {
+        public bool Illegal { get; set; }
+        public string Operand { get; set; }
+        public string Arguments { get; set; }
+        public int Flags { get; set; }
+        public int ByteLength { get; set; }
+    }
+
     public class Disassembler
     {
         private const int inh = 1; /* inherent */
@@ -280,7 +289,8 @@ namespace Sharp6800.Debugger
         public bool EnableUndocumentedOpcodes
         {
             get { return _enableUndocumentedOpcodes; }
-            set { 
+            set
+            {
                 _enableUndocumentedOpcodes = value;
                 var patchValue = _enableUndocumentedOpcodes ? 0 : 1;
                 table[0x14][2] = patchValue;
@@ -314,6 +324,92 @@ namespace Sharp6800.Debugger
         public static bool IsReturn(int opcode)
         {
             return opcode == rti || opcode == rts;
+        }
+
+        public static DasmResult Disassemble(int[] memory, int pc)
+        {
+            int flags = 0;
+            int invalid_mask;
+            int code = memory[pc] & 0xff;
+            int opcode, args, invalid;
+
+            invalid_mask = 1;
+
+            opcode = table[code][0];
+            args = table[code][1];
+            invalid = table[code][2];
+
+            if (IsSubroutine(opcode))
+                flags = DASMFLAG_STEP_OVER;
+            else if (IsReturn(opcode))
+                flags = DASMFLAG_STEP_OUT;
+
+
+            if ((invalid & invalid_mask) == invalid_mask)   /* invalid for this cpu type ? */
+            {
+                return new DasmResult()
+                {
+                    Illegal = true,
+                    ByteLength = 1,
+                    Flags = flags | DASMFLAG_SUPPORTED
+                };
+            }
+
+            string buf = "";
+
+            buf += string.Format("{0,-4} ", op_name_str[opcode]);
+
+            int byteLength = 0;
+
+            switch (args)
+            {
+                case rel:  /* relative */
+                    buf += string.Format("${0:X4}", pc + SIGNED(memory[pc + 1]) + 2);
+                    byteLength = 2;
+                    break;
+                case imb:  /* immediate (byte) */
+                    buf += string.Format("#${0:X2}", memory[pc + 1]);
+                    byteLength = 2;
+                    break;
+                case imw:  /* immediate (word) */
+                    buf += string.Format("#${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
+                    byteLength = 3;
+                    break;
+                case idx:  /* indexed + byte offset */
+                    buf += string.Format("${0:X2},x", memory[pc + 1]);
+                    byteLength = 2;
+                    break;
+                case imx:  /* immediate, indexed + byte offset */
+                    buf += string.Format("#${0:X2},(x+${1:X2})", memory[pc + 1], memory[pc + 2]);
+                    byteLength = 3;
+                    break;
+                case dir:  /* direct address */
+                    buf += string.Format("${0:X2}", memory[pc + 1]);
+                    byteLength = 2;
+                    break;
+                case imd:  /* immediate, direct address */
+                    buf += string.Format("#${0:X2},${1:X2}", memory[pc + 1], memory[pc + 2]);
+                    byteLength = 3;
+                    break;
+                case ext:  /* extended address */
+                    buf += string.Format("${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
+                    byteLength = 3;
+                    break;
+                case sx1:  /* byte from address (s + 1) */
+                    buf += string.Format("(s+1)");
+                    byteLength = 1;
+                    break;
+                default:
+                    byteLength = 1;
+                    break;
+            }
+
+            return new DasmResult()
+            {
+                Operand = buf,
+                ByteLength = byteLength,
+                Flags = flags | DASMFLAG_SUPPORTED
+            };
         }
 
         public static int Disassemble(int[] memory, int pc, ref string buf)
@@ -378,16 +474,16 @@ namespace Sharp6800.Debugger
 
         public static void SelfTest()
         {
-            for(int i = 0; i < table.Length;i++)
+            for (int i = 0; i < table.Length; i++)
             {
                 var entry = table[i];
                 //if ((entry[2] & 1) == entry[2])
                 //{
-                    if (!((IList) valid6800opcodes).Contains(i))
-                    {
-                        // this is an invalid opcode
-                        Debug.WriteLine("{0:X2}: {1}",i, entry[2]);
-                    }
+                if (!((IList)valid6800opcodes).Contains(i))
+                {
+                    // this is an invalid opcode
+                    Debug.WriteLine("{0:X2}: {1}", i, entry[2]);
+                }
                 //}
             }
         }

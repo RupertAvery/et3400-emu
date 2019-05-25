@@ -1,6 +1,0 @@
-<memorymap>
-  <start>$FC00</start>
-  <ranges>
-    <range type="data" start="$FC06" end="$FC0B"/>
-  </ranges>
-</memorymap>
