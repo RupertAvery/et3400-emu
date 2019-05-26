@@ -83,9 +83,14 @@ namespace Sharp6800.Trainer
                 _trainer.OnStart += (o, args) => UpdateState(true);
                 _trainer.BreakpointsEnabled = true;
 
+                this.Closing += (o, args) =>
+                {
+                    _trainer.Dispose();
+                };
+
 #if DEBUG
-                Action<int> updateSpeed = delegate (int second)
-                { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)second / (float)_trainer.DefaultClockSpeed) * 100); };
+                Action<int> updateSpeed = delegate (int cyclesPerSecond)
+                { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)cyclesPerSecond / (float)_trainer.DefaultClockSpeed) * 100); };
 
                 _trainer.Runner.OnTimer += second => Invoke(updateSpeed, second);
 #endif
@@ -94,11 +99,13 @@ namespace Sharp6800.Trainer
                 //settingsToolStripMenuItem.Visible = false;
 #endif
 
+                _trainer.Restart();
                 // delay emulation to ensure that the form is completely visible, otherwise 
                 // some segments will not be lit
-                var timer = new System.Timers.Timer() { Interval = 100 };
-                timer.Elapsed += timer_Elapsed;
-                this.Shown += (o, args) => timer.Start();
+
+                //var timer = new System.Timers.Timer() { Interval = 100 };
+                //timer.Elapsed += timer_Elapsed;
+                //this.Shown += (o, args) => timer.Start();
 
             }
             catch (Exception ex)
@@ -114,11 +121,6 @@ namespace Sharp6800.Trainer
             timer.Stop();
             timer.Elapsed -= timer_Elapsed;
             _trainer.Restart();
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            _trainer.Runner.Quit();
         }
 
         private void PressKey(object sender, EventArgs args)
@@ -185,7 +187,7 @@ namespace Sharp6800.Trainer
                 _trainer.PressKey(TrainerKeys.KeyReset);
 
             else if (keyargs.KeyCode == Keys.F5 && _trainer.IsInBreak)
-                _trainer.Runner.Continue();
+                _trainer.Runner.Start();
 
             else if (keyargs.KeyCode == Keys.F10 && _trainer.IsInBreak)
                 _trainer.StepOver();
@@ -338,44 +340,23 @@ namespace Sharp6800.Trainer
 
         private void debuggerToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            if (_debuggerView == null)
+            if (_debuggerView == null || _debuggerView.IsDisposed)
             {
                 _debuggerView = new DebuggerView(_trainer);
-
-                _debuggerView.Closing += (o, args) =>
-                    {
-                        //lock (_lockObject)
-                        //{
-                        _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                        _updateTimer.Dispose();
-                        _updateTimer = null;
-                        _debuggerView = null;
-                        //}
-                    };
-
-                _updateTimer = new Timer(state =>
+                _debuggerView.Load += (o, args) =>
                 {
-                    //lock (_lockObject)
-                    //{
-                    if (_debuggerView != null)
+                    _debuggerView.Top = this.Top;
+                    if (this.Left + this.Width + _debuggerView.Width > Screen.FromControl(this).Bounds.Width)
                     {
-                        _debuggerView.UpdateDisplay();
+                        _debuggerView.Left = this.Left - _debuggerView.Width;
                     }
-                    //}
-                }, null, 0, 100);
+                    else
+                    {
+                        _debuggerView.Left = this.Left + this.Width;
+                    }
+                };
 
                 _debuggerView.Show();
-
-                _debuggerView.Top = this.Top;
-
-                if (this.Left + this.Width + _debuggerView.Width > Screen.FromControl(this).Bounds.Width)
-                {
-                    _debuggerView.Left = this.Left - _debuggerView.Width;
-                }
-                else
-                {
-                    _debuggerView.Left = this.Left + this.Width;
-                }
             }
             else
             {

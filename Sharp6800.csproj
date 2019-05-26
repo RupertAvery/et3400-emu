@@ -108,6 +108,9 @@
       <DependentUpon>TrainerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Trainer\TrainerSettings.cs" />
+    <Compile Include="DebuggerView.MessageFilter.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <None Include="Resources\vton.bmp" />
     <None Include="Resources\dpon.png" />
     <None Include="Resources\hroff.png" />

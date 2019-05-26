@@ -488,7 +488,6 @@ namespace Sharp6800.Trainer
             this.Name = "TrainerForm";
             this.Text = "ET-3400 Emulator";
             this.Activated += new System.EventHandler(this.TrainerForm_Activated);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

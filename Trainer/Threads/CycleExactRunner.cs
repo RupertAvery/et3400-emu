@@ -16,7 +16,7 @@ namespace Sharp6800.Trainer.Threads
 
         private int spinTime = 100;
 
-        protected override void CheckSpeed()
+        protected void CheckSpeed()
         {
             CyclesPerSecond = _cycles - _lastCycles;
             RaiseTimerEvent();
@@ -28,11 +28,11 @@ namespace Sharp6800.Trainer.Threads
             _lastCycles = _cycles;
         }
 
-        protected override void EmuThread()
+        protected override void Run()
         {
-            _running = true;
+            Running = true;
 
-            while (_running)
+            while (Running)
             {
                 _cycles += _trainer.Emulator.Execute();
                 Thread.SpinWait(spinTime);

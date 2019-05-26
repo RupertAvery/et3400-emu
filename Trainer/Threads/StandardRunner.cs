@@ -1,3 +1,5 @@
+using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 
@@ -10,6 +12,7 @@ namespace Sharp6800.Trainer.Threads
     public class StandardRunner : TrainerRunnerBase
     {
         private object lockCycles = new object();
+        protected Timer _timer;
 
         public StandardRunner(Trainer trainer)
             : base(trainer)
@@ -19,8 +22,10 @@ namespace Sharp6800.Trainer.Threads
         private int limit = 100;
         private int referenceLimit = 0;
 
-        protected override void CheckSpeed()
+        protected void CheckSpeed()
         {
+            if(!Running) return;
+
             lock (lockCycles)
             {
                 CyclesPerSecond = _cycles;
@@ -34,29 +39,55 @@ namespace Sharp6800.Trainer.Threads
             var delta = (_trainer.Settings.ClockSpeed - CyclesPerSecond) / 1000;
             Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed, CyclesPerSecond);
             limit += delta;
-            if (delta == 0)
+            var ratio = CyclesPerSecond / (float) _trainer.Settings.ClockSpeed;
+
+            if (Math.Abs(ratio - 1.0) <= 0.02)
             {
                 referenceLimit = limit;
+                _timer?.Dispose();
             }
             if (limit < 0) limit = 0;
             sleeps = 0;
             //_lastCycles = _cycles;
         }
 
+        protected override void Init()
+        {
+            if (referenceLimit == 0)
+            {
+                _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
+            }
+        }
+
+        public override void Recalibrate()
+        {
+            if (referenceLimit != 0)
+            {
+                referenceLimit = 0;
+                Init();
+            }
+        }
+
         private int lastBreakPointPC = -1;
 
-        protected override void EmuThread()
+        public override void Dispose()
         {
-            _running = true;
+            _timer?.Dispose();
+            base.Dispose();
+        }
+
+        protected override void Run()
+        {
+            //Running = true;
             var loopCycles = 0;
 
-            while (_running)
+            while (Running)
             {
                 int cycles = _trainer.Emulator.PreExecute();
                 
                 if (_trainer.BreakpointsEnabled && _trainer.AtBreakPoint && lastBreakPointPC != _trainer.State.PC)
                 {
-                    Quit();
+                    Stop();
                     _trainer.StopExternal();
                     lastBreakPointPC = _trainer.State.PC;
                     break;
@@ -83,8 +114,8 @@ namespace Sharp6800.Trainer.Threads
                     Thread.Sleep(1);
                     sleeps++;
                 }
-
             }
+            //resetEvent.Set();
         }
     }
 }

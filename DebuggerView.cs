@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using Core6800;
 using Sharp6800.Common;
+using Timer = System.Threading.Timer;
 
 namespace Sharp6800.Debugger
 {
-
-    public partial class DebuggerView : Form, IMessageFilter
+    public partial class DebuggerView : Form
     {
         private readonly Trainer.Trainer _trainer;
 
@@ -30,183 +31,8 @@ namespace Sharp6800.Debugger
         private const int WM_MOUSEWHEEL = 0x20a;
         private const int WM_SYSKEYDOWN = 0x104;
 
-        public bool IsDisposing { get; private set; }
-
         private bool hasFocus = true;
-
-        private bool MemoryViewScrollBar_HandleKeyDown(Keys keys)
-        {
-            var oldValue = MemoryViewScrollBar.Value;
-
-            switch (keys)
-            {
-                case Keys.Down:
-                    if (oldValue + 1 > MemoryViewScrollBar.Maximum)
-                    {
-                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
-                    }
-                    else
-                    {
-                        MemoryViewScrollBar.Value = oldValue + 1;
-                    }
-                    break;
-                case Keys.Up:
-                    if (oldValue - 1 < 0) return true;
-                    MemoryViewScrollBar.Value = oldValue - 1;
-                    break;
-                case Keys.PageDown:
-                    if (oldValue + 16 > MemoryViewScrollBar.Maximum)
-                    {
-                        MemoryViewScrollBar.Value = MemoryViewScrollBar.Maximum;
-                    }
-                    else
-                    {
-                        MemoryViewScrollBar.Value = oldValue + 16;
-                    }
-                    break;
-                case Keys.PageUp:
-                    if (oldValue - 16 < 0)
-                    {
-                        MemoryViewScrollBar.Value = 0;
-                    }
-                    else
-                    {
-                        MemoryViewScrollBar.Value = oldValue - 16;
-                    }
-                    break;
-            }
-
-            return false;
-        }
-
-        private bool DasmViewPictureBox_HandleKeyDown(Keys keys)
-        {
-            switch (keys)
-            {
-
-                case Keys.Up:
-                    _disassemberDisplay.MoveUp();
-                    break;
-
-                case Keys.Down:
-                    _disassemberDisplay.MoveDown();
-                    break;
-
-                case Keys.PageUp:
-                    _disassemberDisplay.PageUp();
-                    break;
-
-                case Keys.PageDown:
-                    _disassemberDisplay.PageDown();
-
-                    break;
-
-                case Keys.F4:
-                    if (_trainer.Running)
-                    {
-                        _trainer.Stop();
-                    }
-
-                    break;
-
-                case Keys.F5:
-                    if (!_trainer.Running)
-                    {
-                        _trainer.Start();
-                    }
-
-                    break;
-
-                case Keys.F9:
-                    if (_disassemberDisplay.SelectedLine.HasValue)
-                    {
-                        _trainer.ToggleBreakPoint(_disassemberDisplay.SelectedLine.Value.Address);
-                    }
-                    break;
-            }
-
-            return true;
-        }
-
-        public bool PreFilterMessage(ref Message m)
-        {
-            //Control control = Control.FromChildHandle(m.HWnd);
-
-            //if (control != MemoryViewPictureBox || control != DasmViewPictureBox)
-            //{
-            //    return false;
-            //}
-
-            if (!hasFocus) return false;
-
-            switch (m.Msg)
-            {
-                case WM_SYSKEYDOWN:
-                    {
-                        // Extract the keys being pressed
-                        Keys keys = ((Keys)((int)m.WParam.ToInt64()));
-                        switch (keys)
-                        {
-                            case Keys.F10:
-                                if (!_trainer.Running)
-                                {
-                                    _trainer.Step();
-                                    UpdateDebuggerState();
-                                }
-                                return true; // Prevent message reaching destination
-                        }
-                    }
-                    break;
-                case WM_MOUSEWHEEL:
-                    {
-                        // WM_MOUSEWHEEL, find the control at screen position m.LParam
-                        Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
-                        IntPtr hWnd = WindowFromPoint(pos);
-                        if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
-                        {
-                            SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
-                            return true;
-                        }
-                    }
-                    break;
-                case WM_LBUTTONDOWN:
-                    {
-                        var lParam = ((int)m.LParam.ToInt64());
-
-                        var pos = new Point()
-                        {
-                            X = lParam & 0xFFFF,
-                            Y = (lParam >> 0x10) & 0xFFFF,
-                        };
-
-                        focusObject = FindControlAtPoint(this);
-
-                        if (focusObject == MemoryViewPictureBox || focusObject == DasmViewPictureBox)
-                        {
-                            var x = DummyButton.Focus();
-                        }
-                    }
-
-                    break;
-                case WM_KEYDOWN:
-                    {
-                        // Extract the keys being pressed
-                        Keys keys = ((Keys)((int)m.WParam.ToInt64()));
-
-                        if (focusObject == MemoryViewPictureBox)
-                        {
-                            return MemoryViewScrollBar_HandleKeyDown(keys);
-                        }
-                        else if (focusObject == DasmViewPictureBox)
-                        {
-                            return DasmViewPictureBox_HandleKeyDown(keys);
-                        }
-
-                        return false;
-                    }
-            }
-            return false;
-        }
+        private Timer _updateTimer;
 
         public DebuggerView(Trainer.Trainer trainer)
         {
@@ -223,14 +49,17 @@ namespace Sharp6800.Debugger
             _trainer = trainer;
 
             _trainer.OnStop += (sender, args) => UpdateDebuggerState();
+
+            _updateTimer = new System.Threading.Timer(state =>
+            {
+                UpdateDisplay();
+            }, null, 0, 100);
         }
 
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             Application.RemoveMessageFilter(this);
-
-            IsDisposing = true;
-
+            _updateTimer.Dispose();
             _memoryDisplay.Dispose();
             _disassemberDisplay.Dispose();
         }
@@ -274,18 +103,18 @@ namespace Sharp6800.Debugger
                     DasmViewComboBox.SelectedItem = DasmViewComboBox.Items[0];
                 }
 
-                _disassemberDisplay.EnsureVisble(_trainer.State.PC);
-                _disassemberDisplay.SelectAddress(_trainer.State.PC);
+                var line = _disassemberDisplay.SelectAddress(_trainer.State.PC);
+                _disassemberDisplay.EnsureVisble(line, +1);
             }
         }
 
         public void UpdateDisplay()
         {
-            if (!IsDisposing)
-            {
-                _disassemberDisplay.UpdateDisplay();
-                _memoryDisplay.UpdateDisplay();
+            _disassemberDisplay.UpdateDisplay();
+            _memoryDisplay.UpdateDisplay();
 
+            try
+            {
                 Invoke(new MethodInvoker(() =>
                 {
                     PCTextBox.Text = String.Format("{0:X4}", _trainer.State.PC);
@@ -296,6 +125,10 @@ namespace Sharp6800.Debugger
                     var ccText = Convert.ToString(_trainer.State.CC, 2);
                     CCTextBox.Text = new String('0', 8 - ccText.Length) + ccText;
                 }));
+            }
+            catch(Exception ex)
+            {
+
             }
         }
 
@@ -338,20 +171,12 @@ namespace Sharp6800.Debugger
 
         private void DebuggerView_Load(object sender, EventArgs e)
         {
-            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "RAM", 0x0000, 1024));
-            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "Keypad", 0xC003, 0xC013));
-            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "Display", 0xC110, 0xC21F));
-            //_disassemberDisplay.AddDisassemblyView(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));
-
             MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 1024 });
             MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "Keypad", Start = 0xC003, End = 0xC003 + 1024 });
             MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "Display", Start = 0xC110, End = 0xC110 + 1024 });
             MemoryViewComboBox.Items.Add(new MemoryRange() { Description = "ROM", Start = 0xFC00, End = 0xFFFF });
             MemoryViewComboBox.Items.Add(new CustomMemoryRange(MemAddrTextBox));
             MemoryViewComboBox.SelectedItem = MemoryViewComboBox.Items[0];
-
-            //DasmViewComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 1024 });
-            //DasmViewComboBox.Items.Add(new MemoryRange() { Description = "ROM", Start = 0xFC00, End = 0xFFFF });
 
             DasmViewComboBox.Items.Add(new DisassemblyView(_trainer, "RAM", 0x0000, 1024));
             DasmViewComboBox.Items.Add(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));

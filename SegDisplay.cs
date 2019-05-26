@@ -1,12 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
+using Sharp6800.Trainer;
 
 namespace Sharp6800
 {
-    class SegDisplay
+    public class SegDisplay : IDisposable
     {
+        private readonly IMemory _trainer;
         readonly IntPtr targetWnd;
         readonly int width, height;
         //readonly Image[] segments = new Image[8];
@@ -15,12 +18,19 @@ namespace Sharp6800
         readonly Image[] dp = new Image[2];
         //readonly Image bg;
         private object bglock = new object();
+        private string[] flags = { "H", "I", "N", "Z", "V", "C" };
+        private System.Threading.Timer _updateTimer;
 
 
-        public int[] Memory { get; set; }
-
-        public SegDisplay(PictureBox target)
+        public SegDisplay(PictureBox target, IMemory trainer)
         {
+            _trainer = trainer;
+
+            _updateTimer = new System.Threading.Timer(state =>
+            {
+                Redraw();
+            }, null, 0, 16);
+
             try
             {
                 width = target.Width;
@@ -50,59 +60,73 @@ namespace Sharp6800
             }
         }
 
-        public void Write(int loc, int value)
+        public void Write(int address, int data)
         {
-            var buffer = new Bitmap(38, 54);
-            int position = 6 - ((loc & 0xF0) >> 4);
-            int segment = loc & 0x7;
-            //System.Diagnostics.Debug.WriteLine("{0:X4}: {1:X2} {2}", loc, value, segment);
+            //var buffer = new Bitmap(38, 54);
+            //int position = 6 - ((loc & 0xF0) >> 4);
+            //int segment = loc & 0x7;
+            ////System.Diagnostics.Debug.WriteLine("{0:X4}: {1:X2} {2}", loc, value, segment);
 
-            lock (bglock)
-            {
-                var g = Graphics.FromImage(buffer);
-                //g.DrawImage(bg, 0, 5, 38, 54);
-                //DrawSegData(g, 0, 5, value);
-                DrawSingleSegData(g, 0, 5, segment, value);
-                g.Dispose();
-            }
+            //lock (bglock)
+            //{
+            //    var g = Graphics.FromImage(buffer);
+            //    //g.DrawImage(bg, 0, 5, 38, 54);
+            //    //DrawSegData(g, 0, 5, value);
+            //    DrawSingleSegData(g, 0, 5, segment, value);
+            //    g.Dispose();
+            //}
 
-            var graphics = Graphics.FromHwnd(targetWnd);
-            graphics.DrawImage(buffer, 20 + position * 45, 5);
-            graphics.Dispose();
+            //var graphics = Graphics.FromHwnd(targetWnd);
+            //graphics.DrawImage(buffer, 20 + position * 45, 5);
+            //graphics.Dispose();
         }
 
-        public void Write(int loc, int value, Graphics graphics)
+        private void Write(int address, int data, Graphics graphics)
         {
-            var buffer = new Bitmap(38, 54);
-            int position = 6 - ((loc & 0xF0) >> 4);
-            int segment = loc & 0x7;
-
-
-            lock (bglock)
+            using (var buffer = new Bitmap(38, 54))
             {
-                var g = Graphics.FromImage(buffer);
-                //g.DrawImage(bg, 0, 5, 38, 54);
-                //DrawSegData(g, 0, 5, value);
-                DrawSingleSegData(g, 0, 5, segment, value);
-                g.Dispose();
-            }
+                int position = 6 - ((address & 0xF0) >> 4);
+                int segment = address & 0x7;
 
-            graphics.DrawImage(buffer, 20 + position * 45, 5);
+                using (var g = Graphics.FromImage(buffer))
+                {
+                    DrawSingleSegData(g, 0, 5, segment, data);
+                }
+
+                graphics.DrawImage(buffer, 20 + position * 45, 5);
+            }
         }
 
-        private string[] flags = {"H", "I", "N", "Z", "V", "C"};
+
         public void Repaint(Graphics graphics)
         {
-            Debug.WriteLine("Repaint!");
-
-            for (int i = 0xC16F; i >= 0xC110; i--)
+            if (Monitor.TryEnter(bglock, 10))
             {
-                Write(i, Memory[i], graphics);
+                for (int address = 0xC16F; address >= 0xC110; address--)
+                {
+                    if ((address & 0x08) != 0x08)
+                    {
+                        Write(address, _trainer.Memory[address], graphics);
+                    }
+                }
+
+                using (var font = new Font("Arial", 8))
+                {
+                    for (int position = 0; position < 6; position++)
+                    {
+                        graphics.DrawString(flags[position], font, Brushes.White, 42 + position * 45, 62);
+                    }
+                }
+                Monitor.Exit(bglock);
             }
 
-            for (int j = 0; j < 6; j++)
+        }
+
+        public void Redraw()
+        {
+            using (var graphics = Graphics.FromHwnd(targetWnd))
             {
-                graphics.DrawString(flags[j], new Font("Arial", 8), Brushes.White, 42 + j * 45, 62);
+                Repaint(graphics);
             }
         }
 
@@ -161,5 +185,9 @@ namespace Sharp6800
 
         }
 
+        public void Dispose()
+        {
+            _updateTimer?.Dispose();
+        }
     }
 }

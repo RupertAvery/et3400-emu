@@ -7,15 +7,40 @@ using Core6800;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
 using Sharp6800.Trainer.Threads;
+using Timer = System.Threading.Timer;
 
 namespace Sharp6800.Trainer
 {
+    public struct WatchEventArgs
+    {
+        public Cpu6800State State { get; set; }
+        public int Address { get; set; }
+        public int Value { get; set; }
+    }
+
+    public struct Watch
+    {
+        public EventType EventType { get; set; }
+        public int Address { get; set; }
+        public int Value { get; set; }
+        public Action<WatchEventArgs> Action { get; set; }
+    }
+
+    public interface IIODevice
+    {
+        int Read(int address);
+        void Write(int address, int value);
+    }
+
+
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
-    public class Trainer : ITrainer
+    public class Trainer : ITrainer, IDisposable
     {
         private SegDisplay _disp;
+
+        public List<Watch> Watches { get; }
 
         public List<int> Breakpoints { get; }
 
@@ -30,13 +55,26 @@ namespace Sharp6800.Trainer
         public TrainerSettings Settings { get; set; }
         public Cpu6800State State { get; set; }
 
-        public bool Running { get; private set; }
+        public bool Running
+        {
+            get { return Runner.Running; }
+        }
+
+        public void AddWatch(Watch watch)
+        {
+            Watches.Add(watch);
+        }
 
         public Trainer()
         {
             Memory = new int[65536];
             Breakpoints = new List<int>();
             Settings = new TrainerSettings();
+            Watches = new List<Watch>();
+            Settings.SettingsUpdated += (sender, args) =>
+            {
+                Runner.Recalibrate();
+            };
 
             State = new Cpu6800State();
 
@@ -48,12 +86,37 @@ namespace Sharp6800.Trainer
                     {
                         address = address & 0xFFFF;
 
+                        //foreach (var watch in Watches.ToList())
+                        //{
+                        //    if (watch.EventType == EventType.Read)
+                        //    {
+                        //        //if (watch.Address == address)
+                        //        //{
+
+                        //        //}
+                        //        watch.Action(new WatchEventArgs() { Address = address });
+                        //    }
+                        //}
+
                         return Memory[address];
                     },
 
                 WriteMem = (address, value) =>
                     {
                         address = address & 0xFFFF;
+
+                        foreach (var watch in Watches.ToList())
+                        {
+                            if (watch.EventType == EventType.Write)
+                            {
+                                //if (watch.Address == address)
+                                //{
+
+                                //}
+
+                                watch.Action(new WatchEventArgs() { Address = address });
+                            }
+                        }
 
                         if (address >= 0xFC00)
                         {
@@ -66,20 +129,20 @@ namespace Sharp6800.Trainer
 
                         // Check if we're writing to memory-mapped display
                         // quick test - just check if we are in C100-C1FF
-                        if ((address & 0xC100) == 0xC100)
-                        {
-                            var displayNo = (address & 0xF0) >> 4;
-                            if (displayNo >= 1 && displayNo <= 6)
-                            {
-                                // OUTCH flicker hack - assumes original OUTCH routine is intact
-                                if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
-                                {
-                                    // don't write to upper bits if in OUTCH routine
-                                    return;
-                                }
-                                _disp.Write(address, value);
-                            }
-                        }
+                        //if ((address & 0xC100) == 0xC100)
+                        //{
+                        //    var displayNo = (address & 0xF0) >> 4;
+                        //    if (displayNo >= 1 && displayNo <= 6)
+                        //    {
+                        //        // OUTCH flicker hack - assumes original OUTCH routine is intact
+                        //        if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
+                        //        {
+                        //            // don't write to upper bits if in OUTCH routine
+                        //            return;
+                        //        }
+                        //        _disp.Write(address, value);
+                        //    }
+                        //}
                     }
             };
 
@@ -107,19 +170,18 @@ namespace Sharp6800.Trainer
 
         public void SetupDisplay(PictureBox target)
         {
-            _disp = new SegDisplay(target) { Memory = Memory };
+            _disp = new SegDisplay(target, this);
+
         }
 
         public void Stop()
         {
-            Runner.Quit();
-            Running = false;
+            Runner.Stop();
             OnStop?.Invoke(this, EventArgs.Empty);
         }
 
         public void StopExternal()
         {
-            Running = false;
             OnStop?.Invoke(this, EventArgs.Empty);
         }
 
@@ -140,16 +202,14 @@ namespace Sharp6800.Trainer
 
         public void Start()
         {
-            Runner.Continue();
-            Running = true;
+            Runner.Start();
             OnStart?.Invoke(this, EventArgs.Empty);
         }
 
         public void Restart()
         {
             Emulator.Reset();
-            Runner.Continue();
-            Running = true;
+            Runner.Start();
             OnStart?.Invoke(this, EventArgs.Empty);
         }
 
@@ -444,10 +504,16 @@ namespace Sharp6800.Trainer
 
         public bool IsInBreak { get; set; }
         public bool BreakpointsEnabled { get; set; }
+        public bool AtBreakPoint
+        {
+            get { return Breakpoints.Contains(State.PC); }
+        }
+
+        #region Debugger Methods
 
         public void Break()
         {
-            Runner.Quit();
+            Runner.Stop();
             IsInBreak = true;
         }
 
@@ -477,9 +543,12 @@ namespace Sharp6800.Trainer
             return Disassembler.IsSubroutine(nextOpCode);
         }
 
-        public bool AtBreakPoint
+        #endregion
+
+        public void Dispose()
         {
-            get { return Breakpoints.Contains(State.PC); }
+            Runner.Stop();
+            _disp.Dispose();
         }
     }
 

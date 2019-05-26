@@ -45,19 +45,11 @@ namespace Sharp6800.Debugger
         {
             if (SelectedLine.HasValue)
             {
-                if (SelectedLine.Value.LineNumber > 0)
+                if (SelectedLine.Value.LineNumber - 1 >= 0)
                 {
-                    SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber];
+                    SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber - 1];
                 }
-
-                //if (SelectedLine.Value.LineNumber < ViewOffset - 1)
-                //{
-                //    if (_scrollBar.Value > 0)
-                //    {
-                //        _scrollBar.Value--;
-                //    }
-                //}
-                EnsureVisble(SelectedLine.Value.Address);
+                EnsureVisble(SelectedLine.Value, -1);
             }
         }
 
@@ -65,19 +57,11 @@ namespace Sharp6800.Debugger
         {
             if (SelectedLine.HasValue)
             {
-                if (SelectedLine.Value.LineNumber + 2 < CurrentView.LineCount)
+                if (SelectedLine.Value.LineNumber + 1 < CurrentView.LineCount)
                 {
-                    SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber + 2];
+                    SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber + 1];
                 }
-
-                //if (SelectedLine.Value.LineNumber > ViewOffset + VisibleItems - 1)
-                //{
-                //    if (_scrollBar.Value < _scrollBar.Maximum)
-                //    {
-                //        _scrollBar.Value++;
-                //    }
-                //}
-                EnsureVisble(SelectedLine.Value.Address);
+                EnsureVisble(SelectedLine.Value, +1);
             }
         }
 
@@ -130,73 +114,85 @@ namespace Sharp6800.Debugger
 
         public DisassemblyLine? GetLineFromAddress(int address)
         {
-            return CurrentView.Lines.Where(x => x.Address == address).Cast<DisassemblyLine?>().FirstOrDefault();
+            return CurrentView.GetLineFromAddress(address);
         }
 
         public void UpdateDisplay()
         {
+            if (IsDisposed) return;
             if (CurrentView == null) return;
 
-            using (var buffer = new Bitmap(Width, Height))
+            if (CurrentView.IsDirty)
             {
-                using (var g = Graphics.FromImage(buffer))
+                CurrentView.Refresh();
+            }
+
+            try
+            {
+                using (var buffer = new Bitmap(Width, Height))
                 {
-                    g.Clear(Color.White);
-
-                    int lineNo = 0;
-                    //var lastComment = "";
-
-                    foreach (var line in CurrentView.Lines.Skip(ViewOffset))
+                    using (var g = Graphics.FromImage(buffer))
                     {
-                        var isAtBreakPoint = _trainer.Breakpoints.Contains(line.Address);
-                        var isSelected = false;
-                        var isCurrentPC = (!_trainer.Running && line.Address == _trainer.State.PC);
+                        g.Clear(Color.White);
 
-                        if (SelectedLine.HasValue && line.LineNumber == SelectedLine.Value.LineNumber)
+                        int lineNo = 0;
+                        //var lastComment = "";
+
+                        foreach (var line in CurrentView.Lines.Skip(ViewOffset).ToList())
                         {
-                            isSelected = true;
-                        }
+                            var isAtBreakPoint = _trainer.Breakpoints.Contains(line.Address);
+                            var isSelected = false;
+                            var isCurrentPC = (!_trainer.Running && line.Address == _trainer.State.PC);
 
-                        if (isAtBreakPoint || isSelected || isCurrentPC)
-                        {
-                            var flags = (isAtBreakPoint ? 1 : 0) +
-                                        (isSelected ? 2 : 0) +
-                                        (isCurrentPC ? 4 : 0);
-
-                            Color highlightColor = colorLookup[flags];
-
-                            using (var brush = new SolidBrush(highlightColor))
+                            if (SelectedLine.HasValue && line.LineNumber == SelectedLine.Value.LineNumber)
                             {
-                                g.FillRectangle(brush, 0, 20 * lineNo, Width, 20);
+                                isSelected = true;
                             }
-                        }
 
-                        var position = _textheight * lineNo;
-                        var bottomPosition = _textheight * (lineNo + 1) - 1;
-
-                        if (isCurrentPC)
-                        {
-                            using (var pen = new Pen(Color.DarkGray))
+                            if (isAtBreakPoint || isSelected || isCurrentPC)
                             {
-                                g.DrawLine(pen, 0, position, Width, position);
-                                g.DrawLine(pen, 0, bottomPosition, Width, bottomPosition);
+                                var flags = (isAtBreakPoint ? 1 : 0) +
+                                            (isSelected ? 2 : 0) +
+                                            (isCurrentPC ? 4 : 0);
+
+                                Color highlightColor = colorLookup[flags];
+
+                                using (var brush = new SolidBrush(highlightColor))
+                                {
+                                    g.FillRectangle(brush, 0, 20 * lineNo, Width, 20);
+                                }
                             }
+
+                            var position = _textheight * lineNo;
+                            var bottomPosition = _textheight * (lineNo + 1) - 1;
+
+                            if (isCurrentPC)
+                            {
+                                using (var pen = new Pen(Color.DarkGray))
+                                {
+                                    g.DrawLine(pen, 0, position, Width, position);
+                                    g.DrawLine(pen, 0, bottomPosition, Width, bottomPosition);
+                                }
+                            }
+
+                            DrawHex(g, 2, position, $"${line.Address:X4}: {line.Text}", isAtBreakPoint, isSelected, isCurrentPC);
+
+                            lineNo++;
+
+                            if (lineNo > VisibleItems) break;
                         }
 
-                        DrawHex(g, 2, position, $"${line.Address:X4}: {line.Text}", isAtBreakPoint, isSelected, isCurrentPC);
-
-                        lineNo++;
-
-                        if (lineNo > VisibleItems) break;
+                        //_disassemblyView.Refresh();
                     }
 
-                    //_disassemblyView.Refresh();
+                    using (var p = Graphics.FromHwnd(_targetWnd))
+                    {
+                        p.DrawImage(buffer, 0, 0);
+                    }
                 }
-
-                using (var p = Graphics.FromHwnd(_targetWnd))
-                {
-                    p.DrawImage(buffer, 0, 0);
-                }
+            }
+            catch (Exception e)
+            {
             }
         }
 
@@ -215,9 +211,12 @@ namespace Sharp6800.Debugger
 
         public void Dispose()
         {
+            IsDisposed = true;
             _brush?.Dispose();
             _font?.Dispose();
         }
+
+        public bool IsDisposed { get; private set; }
 
         public void PageDown()
         {
@@ -249,13 +248,17 @@ namespace Sharp6800.Debugger
             }
         }
 
-        public void EnsureVisble(int address)
+        public void EnsureVisble(int address, int direction)
         {
             var line = GetLineFromAddress(address);
+        }
+
+        public void EnsureVisble(DisassemblyLine? line, int direction)
+        {
             if (line.HasValue)
             {
                 var offset = line.Value.LineNumber;
-                var relativeOffset = offset - ViewOffset + 1;
+                var relativeOffset = offset - ViewOffset;
 
                 if (relativeOffset >= VisibleItems)
                 {
@@ -267,7 +270,14 @@ namespace Sharp6800.Debugger
                     {
                         if (offset < _scrollBar.Maximum)
                         {
-                            _scrollBar.Value = offset;
+                            if (direction == -1)
+                            {
+                                _scrollBar.Value = offset - VisibleItems;
+                            }
+                            else
+                            {
+                                _scrollBar.Value = offset;
+                            }
                         }
                     }
                 }
@@ -288,13 +298,15 @@ namespace Sharp6800.Debugger
             }
         }
 
-        public void SelectAddress(int address)
+        public DisassemblyLine? SelectAddress(int address)
         {
             var line = GetLineFromAddress(address);
             if (line != null)
             {
                 SelectedLine = line;
             }
+
+            return line;
         }
     }
 

@@ -70,7 +70,7 @@ namespace Sharp6800
                     EndAddress = Convert.ToInt32(endTextBox.Text.Trim());
                 }
 
-                if (StartAddress < EndAddress)
+                if (StartAddress > EndAddress)
                 {
                     MessageBox.Show("The end address must be larger than or equal to the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;

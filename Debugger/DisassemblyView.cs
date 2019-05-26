@@ -1,29 +1,18 @@
 using System.Collections.Generic;
+using System.Linq;
 using Sharp6800.Trainer;
 
 namespace Sharp6800.Debugger
 {
     public class DisassemblyView
     {
-        private int _startAddress;
-        private int _endAddress;
         private ITrainer _trainer;
-        private string _description;
+        private object lockObject = new object();
 
-        public string Description
-        {
-            get => _description;
-        }
-
-        public int Start
-        {
-            get => _startAddress;
-        }
-
-        public int End
-        {
-            get => _endAddress;
-        }
+        public bool IsDirty { get; private set; }
+        public string Description { get; }
+        public int Start { get; }
+        public int End { get; }
 
         public int LineCount
         {
@@ -33,9 +22,20 @@ namespace Sharp6800.Debugger
         public DisassemblyView(ITrainer trainer, string description, int start, int end)
         {
             _trainer = trainer;
-            _description = description;
-            _startAddress = start;
-            _endAddress = end;
+            Description = description;
+            Start = start;
+            End = end;
+            trainer.AddWatch(new Watch()
+            {
+                EventType = EventType.Write,
+                Action = args =>
+                {
+                    if (args.Address >= start && args.Address <= end)
+                    {
+                        IsDirty = true;
+                    }
+                }
+            });
             DisassembleRange();
         }
 
@@ -51,72 +51,90 @@ namespace Sharp6800.Debugger
             return code;
         }
 
+        public void Refresh()
+        {
+            DisassembleRange();
+        }
+
         private void DisassembleRange()
         {
-            var currentAddress = _startAddress;
-            Lines = new List<DisassemblyLine>();
-
-            DisassemblyLine disassemblyLine;
-            var lineNumber = 0;
-            while (currentAddress < _endAddress)
+            lock (lockObject)
             {
-                var memoryMap = _trainer.GetMemoryMap(currentAddress);
-                if (memoryMap != null)
+                var currentAddress = Start;
+                Lines = new List<DisassemblyLine>();
+
+                DisassemblyLine disassemblyLine;
+                var lineNumber = 0;
+                while (currentAddress < End)
                 {
-                    disassemblyLine = new DisassemblyLine()
+                    var memoryMap = _trainer.GetMemoryMap(currentAddress);
+                    if (memoryMap != null)
                     {
-                        Text = memoryMap.Description,
-                        LineType = LineType.Comment,
-                        Address = currentAddress
-                    };
-
-                    Lines.Add(disassemblyLine);
-
-                    var totalLength = memoryMap.End - memoryMap.Start + 1;
-
-                    while (currentAddress < memoryMap.End)
-                    {
-                        var byteLength = totalLength - (currentAddress - memoryMap.Start);
-
-                        if (byteLength > 8)
-                        {
-                            byteLength = 8;
-                        }
-
                         disassemblyLine = new DisassemblyLine()
                         {
-                            Text = BytesToString(currentAddress, byteLength),
-                            LineType = LineType.Data,
+                            Text = memoryMap.Description,
+                            LineType = LineType.Comment,
                             Address = currentAddress,
                             LineNumber = lineNumber
                         };
 
-                        currentAddress += byteLength;
+                        Lines.Add(disassemblyLine);
+                        lineNumber++;
+
+                        var totalLength = memoryMap.End - memoryMap.Start + 1;
+
+                        while (currentAddress < memoryMap.End)
+                        {
+                            var byteLength = totalLength - (currentAddress - memoryMap.Start);
+
+                            if (byteLength > 8)
+                            {
+                                byteLength = 8;
+                            }
+
+                            disassemblyLine = new DisassemblyLine()
+                            {
+                                Text = BytesToString(currentAddress, byteLength),
+                                LineType = LineType.Data,
+                                Address = currentAddress,
+                                LineNumber = lineNumber
+                            };
+
+                            currentAddress += byteLength;
+
+                            Lines.Add(disassemblyLine);
+                            lineNumber++;
+                        }
+                    }
+                    else
+                    {
+                        var result = Disassembler.Disassemble(_trainer.Memory, currentAddress);
+
+                        var opCodes = BytesToString(currentAddress, result.ByteLength);
+
+                        disassemblyLine = new DisassemblyLine()
+                        {
+                            Text = $"{opCodes,-9} {result.Operand:2}",
+                            LineType = LineType.Assembly,
+                            ByteLength = result.ByteLength,
+                            Address = currentAddress,
+                            LineNumber = lineNumber
+                        };
 
                         Lines.Add(disassemblyLine);
                         lineNumber++;
+
+                        currentAddress += result.ByteLength;
                     }
                 }
-                else
-                {
-                    var result = Disassembler.Disassemble(_trainer.Memory, currentAddress);
+            }
+        }
 
-                    var opCodes = BytesToString(currentAddress, result.ByteLength);
-
-                    disassemblyLine = new DisassemblyLine()
-                    {
-                        Text = $"{opCodes,-9} {result.Operand:2}",
-                        LineType = LineType.Assembly,
-                        ByteLength = result.ByteLength,
-                        Address = currentAddress,
-                        LineNumber = lineNumber
-                    };
-
-                    Lines.Add(disassemblyLine);
-                    lineNumber++;
-
-                    currentAddress += result.ByteLength;
-                }
+        public DisassemblyLine? GetLineFromAddress(int address)
+        {
+            lock (lockObject)
+            {
+                return Lines.Where(x => x.Address == address).Cast<DisassemblyLine?>().FirstOrDefault();
             }
         }
     }
