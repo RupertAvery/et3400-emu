@@ -169,12 +169,6 @@
   <data name="Reset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Reset.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ROM" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ROM\ROM.HEX;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="zenith" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ROM\zenith.hex;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="Add_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Add_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

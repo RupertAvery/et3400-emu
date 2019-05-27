@@ -108,6 +108,8 @@
     <Compile Include="IO\SrecReader.cs" />
     <Compile Include="IO\SrecWriter.cs" />
     <Compile Include="IO\RomReader.cs" />
+    <Compile Include="Trainer\MemoryMapCollection.cs" />
+    <Compile Include="Trainer\Rs232IOPort.cs" />
     <Compile Include="Trainer\Trainer.cs" />
     <Compile Include="TrainerForm.cs">
       <SubType>Form</SubType>
@@ -197,12 +199,17 @@
     <EmbeddedResource Include="display\hron.png" />
     <EmbeddedResource Include="display\vtoff.png" />
     <EmbeddedResource Include="display\vton.png" />
-    <EmbeddedResource Include="ROM\ROM.HEX" />
-    <EmbeddedResource Include="ROM\zenith.hex" />
     <None Include="..\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <EmbeddedResource Include="ROM\ROM.map" />
+    <EmbeddedResource Include="ROM\FantomII.bin" />
+    <EmbeddedResource Include="ROM\TinyBasic.bin" />
+    <EmbeddedResource Include="ROM\Monitor.bin" />
+    <EmbeddedResource Include="ROM\Monitor.hex" />
+    <EmbeddedResource Include="ROM\Monitor.map" />
+    <EmbeddedResource Include="ROM\MonitorKeyHack.bin" />
+    <EmbeddedResource Include="ROM\MonitorKeyHack.hex" />
+    <EmbeddedResource Include="ROM\FantomII.map" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\0.bmp" />

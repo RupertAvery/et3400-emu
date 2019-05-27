@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
@@ -575,18 +576,37 @@ namespace Sharp6800.Trainer
             //}
         }
 
+        private void LoadRomFromResource(string key, int address, int length)
+        {
+            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, key))
+            {
+                var buffer = new byte[length];
+                stream.Read(buffer, 0, length);
+                _trainer.WriteMemory(address, buffer, buffer.Length);
+            }
+        }
+
         private void LoadDefaultRom()
         {
             _trainer.Stop(false);
 
-            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/ROM.HEX"))
+            //using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/MonitorKeyHack.hex"))
+            //{
+            //    var romLoader = new RomReader(stream);
+            //    var data = romLoader.Read();
+            //    _trainer.WriteMemory(Trainer.RomAddress, data, data.Length);
+            //}
+
+            LoadRomFromResource("ROM/FantomII.bin", 0x1400, 2048);
+            LoadRomFromResource("ROM/TinyBasic.bin", 0x1C00, 2048);
+            LoadRomFromResource("ROM/MonitorKeyHack.bin", Trainer.RomAddress, 1024);
+
+            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/Monitor.map"))
             {
-                var romLoader = new RomReader(stream);
-                var data = romLoader.Read();
-                _trainer.WriteMemory(Trainer.RomAddress, data, data.Length);
+                _trainer.MemoryMaps = MemoryMapCollection.Load(stream);
             }
 
-            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/ROM.map"))
+            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/FantomII.map"))
             {
                 _trainer.MemoryMaps = MemoryMapCollection.Load(stream);
             }
@@ -600,6 +620,19 @@ namespace Sharp6800.Trainer
         {
             _recentFiles.Clear();
             _recentFiles.Save();
+        }
+
+        private void HardResetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.Stop(false);
+            var empty = new byte[0x13FF];
+            _trainer.WriteMemory(0x0000, empty, empty.Length);
+            _trainer.Restart();
+        }
+
+        private void sendTerminalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _trainer.SendTerminal("G 1C00\r");
         }
     }
 }

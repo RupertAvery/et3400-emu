@@ -32,8 +32,10 @@ namespace Sharp6800.Trainer
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveRAMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.RecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ClearRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,6 +47,7 @@ namespace Sharp6800.Trainer
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.stepToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.HardResetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
             this.interruptsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nMIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,8 +80,7 @@ namespace Sharp6800.Trainer
             this.buttonReset = new System.Windows.Forms.PictureBox();
             this.button0 = new System.Windows.Forms.PictureBox();
             this.SegmentPictureBox = new System.Windows.Forms.PictureBox();
-            this.RecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ClearRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sendTerminalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.buttonF)).BeginInit();
@@ -132,41 +134,56 @@ namespace Sharp6800.Trainer
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.openToolStripMenuItem.Text = "&Load RAM";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.LoadRAMToolStripMenuItem_Click);
-            // 
-            // loadROMToolStripMenuItem
-            // 
-            this.loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
-            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadROMToolStripMenuItem.Text = "Load &ROM";
-            this.loadROMToolStripMenuItem.Click += new System.EventHandler(this.LoadROMToolStripMenuItem_Click);
             // 
             // saveRAMToolStripMenuItem
             // 
             this.saveRAMToolStripMenuItem.Name = "saveRAMToolStripMenuItem";
             this.saveRAMToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveRAMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveRAMToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.saveRAMToolStripMenuItem.Text = "&Save RAM";
             this.saveRAMToolStripMenuItem.Click += new System.EventHandler(this.SaveRAMToolStripMenuItem_Click);
+            // 
+            // RecentToolStripMenuItem
+            // 
+            this.RecentToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ClearRecentToolStripMenuItem});
+            this.RecentToolStripMenuItem.Name = "RecentToolStripMenuItem";
+            this.RecentToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.RecentToolStripMenuItem.Text = "R&ecent";
+            // 
+            // ClearRecentToolStripMenuItem
+            // 
+            this.ClearRecentToolStripMenuItem.Name = "ClearRecentToolStripMenuItem";
+            this.ClearRecentToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.ClearRecentToolStripMenuItem.Text = "&Clear Recent";
+            this.ClearRecentToolStripMenuItem.Click += new System.EventHandler(this.ClearRecentToolStripMenuItem_Click);
+            // 
+            // loadROMToolStripMenuItem
+            // 
+            this.loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
+            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.loadROMToolStripMenuItem.Text = "Load &ROM";
+            this.loadROMToolStripMenuItem.Click += new System.EventHandler(this.LoadROMToolStripMenuItem_Click);
             // 
             // resetROMToolStripMenuItem
             // 
             this.resetROMToolStripMenuItem.Name = "resetROMToolStripMenuItem";
-            this.resetROMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.resetROMToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.resetROMToolStripMenuItem.Text = "Reset ROM";
             this.resetROMToolStripMenuItem.Click += new System.EventHandler(this.ResetROMToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(169, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -182,7 +199,7 @@ namespace Sharp6800.Trainer
             // 
             this.debuggerToolStripMenuItem1.Name = "debuggerToolStripMenuItem1";
             this.debuggerToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(168, 22);
+            this.debuggerToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.debuggerToolStripMenuItem1.Text = "Debugger";
             this.debuggerToolStripMenuItem1.Click += new System.EventHandler(this.DebuggerToolStripMenuItem_Click);
             // 
@@ -194,11 +211,13 @@ namespace Sharp6800.Trainer
             this.toolStripMenuItem3,
             this.stepToolStripMenuItem,
             this.resetToolStripMenuItem,
+            this.HardResetToolStripMenuItem,
             this.toolStripMenuItem4,
             this.interruptsToolStripMenuItem,
             this.toolStripMenuItem2,
             this.settingsToolStripMenuItem2,
-            this.breakpointsEnabledToolStripMenuItem});
+            this.breakpointsEnabledToolStripMenuItem,
+            this.sendTerminalToolStripMenuItem});
             this.emulatorToolStripMenuItem.Name = "emulatorToolStripMenuItem";
             this.emulatorToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
             this.emulatorToolStripMenuItem.Text = "Emulator";
@@ -209,7 +228,7 @@ namespace Sharp6800.Trainer
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
             this.startToolStripMenuItem.ShortcutKeyDisplayString = "";
             this.startToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
             // 
@@ -218,21 +237,21 @@ namespace Sharp6800.Trainer
             this.stopToolStripMenuItem.Image = global::Sharp6800.Properties.Resources.Stop_16x;
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
             this.stopToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.StopToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(171, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(177, 6);
             // 
             // stepToolStripMenuItem
             // 
             this.stepToolStripMenuItem.Image = global::Sharp6800.Properties.Resources.StepIntoArrow_16x;
             this.stepToolStripMenuItem.Name = "stepToolStripMenuItem";
             this.stepToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.stepToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.stepToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.stepToolStripMenuItem.Text = "Step";
             this.stepToolStripMenuItem.Click += new System.EventHandler(this.StepToolStripMenuItem_Click);
             // 
@@ -241,14 +260,21 @@ namespace Sharp6800.Trainer
             this.resetToolStripMenuItem.Image = global::Sharp6800.Properties.Resources.Restart_16x;
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
             this.resetToolStripMenuItem.ShortcutKeyDisplayString = "ESC";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.resetToolStripMenuItem.Text = "&Reset";
             this.resetToolStripMenuItem.Click += new System.EventHandler(this.ResetToolStripMenuItem_Click);
+            // 
+            // HardResetToolStripMenuItem
+            // 
+            this.HardResetToolStripMenuItem.Name = "HardResetToolStripMenuItem";
+            this.HardResetToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.HardResetToolStripMenuItem.Text = "Hard Reset";
+            this.HardResetToolStripMenuItem.Click += new System.EventHandler(this.HardResetToolStripMenuItem_Click);
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(171, 6);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(177, 6);
             // 
             // interruptsToolStripMenuItem
             // 
@@ -256,7 +282,7 @@ namespace Sharp6800.Trainer
             this.nMIToolStripMenuItem,
             this.iRQToolStripMenuItem});
             this.interruptsToolStripMenuItem.Name = "interruptsToolStripMenuItem";
-            this.interruptsToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.interruptsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.interruptsToolStripMenuItem.Text = "&Interrupts";
             // 
             // nMIToolStripMenuItem
@@ -278,12 +304,12 @@ namespace Sharp6800.Trainer
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(171, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 6);
             // 
             // settingsToolStripMenuItem2
             // 
             this.settingsToolStripMenuItem2.Name = "settingsToolStripMenuItem2";
-            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(174, 22);
+            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
             this.settingsToolStripMenuItem2.Text = "&Settings";
             this.settingsToolStripMenuItem2.Click += new System.EventHandler(this.SettingsToolStripMenuItem2_Click);
             // 
@@ -293,7 +319,7 @@ namespace Sharp6800.Trainer
             this.breakpointsEnabledToolStripMenuItem.CheckOnClick = true;
             this.breakpointsEnabledToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.breakpointsEnabledToolStripMenuItem.Name = "breakpointsEnabledToolStripMenuItem";
-            this.breakpointsEnabledToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.breakpointsEnabledToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.breakpointsEnabledToolStripMenuItem.Text = "Enable Breakpoints";
             this.breakpointsEnabledToolStripMenuItem.Click += new System.EventHandler(this.BreakpointsEnabledToolStripMenuItem_Click);
             // 
@@ -322,7 +348,7 @@ namespace Sharp6800.Trainer
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StatusToolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 401);
+            this.statusStrip.Location = new System.Drawing.Point(0, 425);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(331, 22);
             this.statusStrip.TabIndex = 19;
@@ -337,7 +363,7 @@ namespace Sharp6800.Trainer
             // buttonF
             // 
             this.buttonF.Image = ((System.Drawing.Image)(resources.GetObject("buttonF.Image")));
-            this.buttonF.Location = new System.Drawing.Point(267, 127);
+            this.buttonF.Location = new System.Drawing.Point(278, 149);
             this.buttonF.Name = "buttonF";
             this.buttonF.Size = new System.Drawing.Size(37, 37);
             this.buttonF.TabIndex = 17;
@@ -346,7 +372,7 @@ namespace Sharp6800.Trainer
             // buttonE
             // 
             this.buttonE.Image = ((System.Drawing.Image)(resources.GetObject("buttonE.Image")));
-            this.buttonE.Location = new System.Drawing.Point(224, 127);
+            this.buttonE.Location = new System.Drawing.Point(235, 149);
             this.buttonE.Name = "buttonE";
             this.buttonE.Size = new System.Drawing.Size(37, 37);
             this.buttonE.TabIndex = 16;
@@ -355,7 +381,7 @@ namespace Sharp6800.Trainer
             // buttonD
             // 
             this.buttonD.Image = ((System.Drawing.Image)(resources.GetObject("buttonD.Image")));
-            this.buttonD.Location = new System.Drawing.Point(181, 127);
+            this.buttonD.Location = new System.Drawing.Point(192, 149);
             this.buttonD.Name = "buttonD";
             this.buttonD.Size = new System.Drawing.Size(37, 37);
             this.buttonD.TabIndex = 15;
@@ -364,7 +390,7 @@ namespace Sharp6800.Trainer
             // buttonC
             // 
             this.buttonC.Image = ((System.Drawing.Image)(resources.GetObject("buttonC.Image")));
-            this.buttonC.Location = new System.Drawing.Point(267, 170);
+            this.buttonC.Location = new System.Drawing.Point(278, 192);
             this.buttonC.Name = "buttonC";
             this.buttonC.Size = new System.Drawing.Size(37, 37);
             this.buttonC.TabIndex = 14;
@@ -373,7 +399,7 @@ namespace Sharp6800.Trainer
             // buttonB
             // 
             this.buttonB.Image = ((System.Drawing.Image)(resources.GetObject("buttonB.Image")));
-            this.buttonB.Location = new System.Drawing.Point(224, 170);
+            this.buttonB.Location = new System.Drawing.Point(235, 192);
             this.buttonB.Name = "buttonB";
             this.buttonB.Size = new System.Drawing.Size(37, 37);
             this.buttonB.TabIndex = 13;
@@ -382,7 +408,7 @@ namespace Sharp6800.Trainer
             // buttonA
             // 
             this.buttonA.Image = ((System.Drawing.Image)(resources.GetObject("buttonA.Image")));
-            this.buttonA.Location = new System.Drawing.Point(181, 170);
+            this.buttonA.Location = new System.Drawing.Point(192, 192);
             this.buttonA.Name = "buttonA";
             this.buttonA.Size = new System.Drawing.Size(37, 37);
             this.buttonA.TabIndex = 12;
@@ -391,7 +417,7 @@ namespace Sharp6800.Trainer
             // button9
             // 
             this.button9.Image = ((System.Drawing.Image)(resources.GetObject("button9.Image")));
-            this.button9.Location = new System.Drawing.Point(267, 213);
+            this.button9.Location = new System.Drawing.Point(278, 235);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(37, 37);
             this.button9.TabIndex = 11;
@@ -400,7 +426,7 @@ namespace Sharp6800.Trainer
             // button8
             // 
             this.button8.Image = ((System.Drawing.Image)(resources.GetObject("button8.Image")));
-            this.button8.Location = new System.Drawing.Point(224, 213);
+            this.button8.Location = new System.Drawing.Point(235, 235);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(37, 37);
             this.button8.TabIndex = 10;
@@ -409,7 +435,7 @@ namespace Sharp6800.Trainer
             // button7
             // 
             this.button7.Image = ((System.Drawing.Image)(resources.GetObject("button7.Image")));
-            this.button7.Location = new System.Drawing.Point(181, 213);
+            this.button7.Location = new System.Drawing.Point(192, 235);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(37, 37);
             this.button7.TabIndex = 9;
@@ -418,7 +444,7 @@ namespace Sharp6800.Trainer
             // button6
             // 
             this.button6.Image = ((System.Drawing.Image)(resources.GetObject("button6.Image")));
-            this.button6.Location = new System.Drawing.Point(267, 256);
+            this.button6.Location = new System.Drawing.Point(278, 278);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(37, 37);
             this.button6.TabIndex = 8;
@@ -427,7 +453,7 @@ namespace Sharp6800.Trainer
             // button5
             // 
             this.button5.Image = ((System.Drawing.Image)(resources.GetObject("button5.Image")));
-            this.button5.Location = new System.Drawing.Point(224, 256);
+            this.button5.Location = new System.Drawing.Point(235, 278);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(37, 37);
             this.button5.TabIndex = 7;
@@ -437,7 +463,7 @@ namespace Sharp6800.Trainer
             // 
             this.button4.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.button4.Image = ((System.Drawing.Image)(resources.GetObject("button4.Image")));
-            this.button4.Location = new System.Drawing.Point(181, 256);
+            this.button4.Location = new System.Drawing.Point(192, 278);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(37, 37);
             this.button4.TabIndex = 6;
@@ -446,7 +472,7 @@ namespace Sharp6800.Trainer
             // button3
             // 
             this.button3.Image = ((System.Drawing.Image)(resources.GetObject("button3.Image")));
-            this.button3.Location = new System.Drawing.Point(267, 299);
+            this.button3.Location = new System.Drawing.Point(278, 321);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(37, 37);
             this.button3.TabIndex = 5;
@@ -455,7 +481,7 @@ namespace Sharp6800.Trainer
             // button2
             // 
             this.button2.Image = ((System.Drawing.Image)(resources.GetObject("button2.Image")));
-            this.button2.Location = new System.Drawing.Point(224, 299);
+            this.button2.Location = new System.Drawing.Point(235, 321);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(37, 37);
             this.button2.TabIndex = 4;
@@ -464,7 +490,7 @@ namespace Sharp6800.Trainer
             // button1
             // 
             this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
-            this.button1.Location = new System.Drawing.Point(181, 299);
+            this.button1.Location = new System.Drawing.Point(192, 321);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(37, 37);
             this.button1.TabIndex = 3;
@@ -473,7 +499,7 @@ namespace Sharp6800.Trainer
             // buttonReset
             // 
             this.buttonReset.Image = ((System.Drawing.Image)(resources.GetObject("buttonReset.Image")));
-            this.buttonReset.Location = new System.Drawing.Point(245, 342);
+            this.buttonReset.Location = new System.Drawing.Point(256, 364);
             this.buttonReset.Name = "buttonReset";
             this.buttonReset.Size = new System.Drawing.Size(37, 37);
             this.buttonReset.TabIndex = 2;
@@ -482,7 +508,7 @@ namespace Sharp6800.Trainer
             // button0
             // 
             this.button0.Image = ((System.Drawing.Image)(resources.GetObject("button0.Image")));
-            this.button0.Location = new System.Drawing.Point(202, 342);
+            this.button0.Location = new System.Drawing.Point(213, 364);
             this.button0.Name = "button0";
             this.button0.Size = new System.Drawing.Size(37, 37);
             this.button0.TabIndex = 1;
@@ -498,26 +524,18 @@ namespace Sharp6800.Trainer
             this.SegmentPictureBox.TabIndex = 0;
             this.SegmentPictureBox.TabStop = false;
             // 
-            // RecentToolStripMenuItem
+            // sendTerminalToolStripMenuItem
             // 
-            this.RecentToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ClearRecentToolStripMenuItem});
-            this.RecentToolStripMenuItem.Name = "RecentToolStripMenuItem";
-            this.RecentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.RecentToolStripMenuItem.Text = "R&ecent";
-            // 
-            // ClearRecentToolStripMenuItem
-            // 
-            this.ClearRecentToolStripMenuItem.Name = "ClearRecentToolStripMenuItem";
-            this.ClearRecentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.ClearRecentToolStripMenuItem.Text = "&Clear Recent";
-            this.ClearRecentToolStripMenuItem.Click += new System.EventHandler(this.ClearRecentToolStripMenuItem_Click);
+            this.sendTerminalToolStripMenuItem.Name = "sendTerminalToolStripMenuItem";
+            this.sendTerminalToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.sendTerminalToolStripMenuItem.Text = "Send Terminal";
+            this.sendTerminalToolStripMenuItem.Click += new System.EventHandler(this.sendTerminalToolStripMenuItem_Click);
             // 
             // TrainerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(331, 423);
+            this.ClientSize = new System.Drawing.Size(331, 447);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.buttonF);
             this.Controls.Add(this.buttonE);
@@ -624,6 +642,8 @@ namespace Sharp6800.Trainer
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem RecentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ClearRecentToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem HardResetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sendTerminalToolStripMenuItem;
     }
 }
 

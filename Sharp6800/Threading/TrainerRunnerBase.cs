@@ -13,7 +13,7 @@ namespace Sharp6800.Trainer.Threads
         protected int _lastCycles;
         protected Thread _runner;
         public int sleeps;
-        //protected ManualResetEvent resetEvent;
+        protected ManualResetEvent resetEvent;
 
         public event OnTimerDelegate OnTimer;
 
@@ -23,7 +23,7 @@ namespace Sharp6800.Trainer.Threads
         protected TrainerRunnerBase(Trainer trainer)
         {
             _trainer = trainer;
-            //resetEvent = new ManualResetEvent(false);
+            resetEvent = new ManualResetEvent(false);
         }
 
         protected abstract void Run();
@@ -48,15 +48,16 @@ namespace Sharp6800.Trainer.Threads
             //    resetEvent.WaitOne();
             //    resetEvent.Reset();
             //}
-            Running = false;
+            if (Running)
+            {
+                Running = false;
+                resetEvent.WaitOne();
+                resetEvent.Reset();
+            }
         }
 
         public void Start()
         {
-            if (Running)
-            {
-                var x = 1;
-            }
             Init();
             _runner = new Thread(Run);
             Running = true;

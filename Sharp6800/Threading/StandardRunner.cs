@@ -115,7 +115,7 @@ namespace Sharp6800.Trainer.Threads
                     sleeps++;
                 }
             }
-            //resetEvent.Set();
+            resetEvent.Set();
         }
     }
 }

@@ -95,11 +95,23 @@ namespace Sharp6800.Debugger
             }
             else
             {
+                // Monitor ROM
                 if (_trainer.State.PC >= 0xFC00)
+                {
+                    DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[3];
+                }
+                // TinyBasic
+                else if (_trainer.State.PC >= 0x1C00 && _trainer.State.PC <= 0x23FF)
+                {
+                    DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[2];
+                }
+                // Fantom II
+                else if (_trainer.State.PC >= 0x1400 && _trainer.State.PC <= 0x1BFF)
                 {
                     DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[1];
                 }
-                else if (_trainer.State.PC < 0xFC00)
+                // RAM
+                else if (_trainer.State.PC < 0x07FF)
                 {
                     DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[0];
                 }
@@ -152,7 +164,9 @@ namespace Sharp6800.Debugger
             MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "ROM", Start = 0xFC00, End = 0xFFFF });
             MemToolStripComboBox.SelectedItem = MemToolStripComboBox.Items[0];
 
-            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "RAM", 0x0000, 1024));
+            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "RAM", 0x0000, 0x07FF));
+            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "Fantom II", 0x1400, 0x1BFF));
+            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "TinyBasic", 0x1C00, 0x23FF));
             DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));
             DasmToolStripComboBox.ComboBox.ValueMember = "Description";
 

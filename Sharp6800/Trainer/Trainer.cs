@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using Core6800;
@@ -11,100 +10,6 @@ using Sharp6800.Trainer.Threads;
 
 namespace Sharp6800.Trainer
 {
-    public class MemoryMapCollection : IEnumerable<MemoryMap>
-    {
-        private List<MemoryMap> _memoryMaps;
-
-        public MemoryMapCollection(IEnumerable<MemoryMap> memoryMaps)
-        {
-            _memoryMaps = memoryMaps.ToList();
-        }
-
-        public MemoryMapCollection()
-        {
-            _memoryMaps = new List<MemoryMap>();
-        }
-
-        public IEnumerator<MemoryMap> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public void Add(MemoryMap memoryMap)
-        {
-            _memoryMaps.Add(memoryMap);
-        }
-
-        public void Add(int startAddress, int endAddress, RangeType rangeType, string description)
-        {
-            _memoryMaps.Add(new MemoryMap()
-            {
-                Start = startAddress,
-                End = endAddress,
-                Type = rangeType,
-                Description = description
-            });
-        }
-
-        public MemoryMap this[int startAddress]
-        {
-            get
-            {
-                return _memoryMaps.FirstOrDefault(map => map.Start <= startAddress && map.End >= startAddress);
-            }
-        }
-
-        public void Remove(MemoryMap memoryMap)
-        {
-            _memoryMaps.Remove(memoryMap);
-        }
-
-        public static MemoryMapCollection Load(string file)
-        {
-            using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-            {
-                return Load(stream);
-            }
-        }
-
-        public static MemoryMapCollection Load(Stream stream)
-        {
-            var maps = new List<MemoryMap>();
-
-            var csvReader = new CsvReader(stream);
-
-            var lines = csvReader.ReadAll();
-
-            foreach (var line in lines)
-            {
-                var parts = line;
-                if (parts.Length == 0) continue;
-                if (parts.Length == 4)
-                {
-                    maps.Add(new MemoryMap()
-                    {
-                        Start = Convert.ToInt32(parts[0], 16),
-                        End = Convert.ToInt32(parts[1], 16),
-                        Type = parts[2] == "CODE" ? RangeType.Code : RangeType.Data,
-                        Description = parts[3],
-                    });
-                }
-                else
-                {
-                    throw new Exception("Error reading map file");
-                }
-            }
-
-            return new MemoryMapCollection(maps);
-        }
-
-    }
-
     /// <summary>
     /// Implementation of a ET-3400 Trainer simulation. Wraps the core emulator in the trainer hardware (keys + display) 
     /// </summary>
@@ -138,6 +43,8 @@ namespace Sharp6800.Trainer
             Watches.Add(watch);
         }
 
+        private Rs232IOPort _rs232 = new Rs232IOPort();
+
         public Trainer()
         {
             Memory = new int[65536];
@@ -158,6 +65,17 @@ namespace Sharp6800.Trainer
                 ReadMem = address =>
                     {
                         address = address & 0xFFFF;
+
+                        if (address == 0x1000)
+                        {
+                            return _rs232.Recieve();
+                        }
+
+                        //if (address >= 0x1000 && address <= 0x1100)
+                        //{
+                        //    // Prevent writing to ROM-mapped space
+                        //    Debug.WriteLine($"RD: {address:X4}");
+                        //}
 
                         //foreach (var watch in Watches.ToList())
                         //{
@@ -189,6 +107,29 @@ namespace Sharp6800.Trainer
 
                                 watch.Action(new WatchEventArgs() { Address = address });
                             }
+                        }
+
+                        if (address == 0x1000)
+                        {
+                            _rs232.Send(value);
+                        }
+
+
+                        if (address >= 0x1000 && address <= 0x1100)
+                        {
+                            // Prevent writing to ROM-mapped space
+                        }
+
+                        if (address >= 0x1400 && address <= 0x1BFF)
+                        {
+                            // Prevent writing to ROM-mapped space
+                            return;
+                        }
+
+                        if (address >= 0x1C00 && address <= 0x23FF)
+                        {
+                            // Prevent writing to ROM-mapped space
+                            return;
                         }
 
                         if (address >= 0xFC00)
@@ -498,6 +439,11 @@ namespace Sharp6800.Trainer
         {
             Runner.Stop();
             _disp.Dispose();
+        }
+
+        public void SendTerminal(string value)
+        {
+            _rs232.FeedString(value);
         }
     }
 

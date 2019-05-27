@@ -83,7 +83,7 @@ namespace Sharp6800.Debugger
 
                         var totalLength = memoryMap.End - memoryMap.Start + 1;
 
-                        while (currentAddress < memoryMap.End)
+                        while (currentAddress <= memoryMap.End)
                         {
                             var byteLength = totalLength - (currentAddress - memoryMap.Start);
 
