@@ -183,7 +183,7 @@
             this.ACCATextBox.Location = new System.Drawing.Point(58, 110);
             this.ACCATextBox.Name = "ACCATextBox";
             this.ACCATextBox.Size = new System.Drawing.Size(100, 22);
-            this.ACCATextBox.TabIndex = 3;
+            this.ACCATextBox.TabIndex = 8;
             this.ACCATextBox.Text = "00";
             this.ACCATextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -193,7 +193,7 @@
             this.ACCBTextBox.Location = new System.Drawing.Point(58, 138);
             this.ACCBTextBox.Name = "ACCBTextBox";
             this.ACCBTextBox.Size = new System.Drawing.Size(100, 22);
-            this.ACCBTextBox.TabIndex = 4;
+            this.ACCBTextBox.TabIndex = 10;
             this.ACCBTextBox.Text = "00";
             this.ACCBTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -203,7 +203,7 @@
             this.SPTextBox.Location = new System.Drawing.Point(58, 54);
             this.SPTextBox.Name = "SPTextBox";
             this.SPTextBox.Size = new System.Drawing.Size(100, 22);
-            this.SPTextBox.TabIndex = 5;
+            this.SPTextBox.TabIndex = 4;
             this.SPTextBox.Text = "0000";
             this.SPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -224,7 +224,7 @@
             this.label1.Location = new System.Drawing.Point(28, 29);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(24, 16);
-            this.label1.TabIndex = 7;
+            this.label1.TabIndex = 1;
             this.label1.Text = "PC";
             // 
             // label2
@@ -234,7 +234,7 @@
             this.label2.Location = new System.Drawing.Point(28, 57);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(24, 16);
-            this.label2.TabIndex = 8;
+            this.label2.TabIndex = 3;
             this.label2.Text = "SP";
             // 
             // label3
@@ -244,7 +244,7 @@
             this.label3.Location = new System.Drawing.Point(28, 85);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(24, 16);
-            this.label3.TabIndex = 9;
+            this.label3.TabIndex = 5;
             this.label3.Text = "IX";
             // 
             // label4
@@ -254,7 +254,7 @@
             this.label4.Location = new System.Drawing.Point(12, 113);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(40, 16);
-            this.label4.TabIndex = 10;
+            this.label4.TabIndex = 7;
             this.label4.Text = "ACCA";
             // 
             // label5
@@ -264,7 +264,7 @@
             this.label5.Location = new System.Drawing.Point(12, 141);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(40, 16);
-            this.label5.TabIndex = 11;
+            this.label5.TabIndex = 9;
             this.label5.Text = "ACCB";
             // 
             // label6
@@ -274,7 +274,7 @@
             this.label6.Location = new System.Drawing.Point(25, 184);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(24, 16);
-            this.label6.TabIndex = 13;
+            this.label6.TabIndex = 12;
             this.label6.Text = "CC";
             // 
             // CCTextBox
@@ -283,7 +283,7 @@
             this.CCTextBox.Location = new System.Drawing.Point(55, 180);
             this.CCTextBox.Name = "CCTextBox";
             this.CCTextBox.Size = new System.Drawing.Size(100, 22);
-            this.CCTextBox.TabIndex = 12;
+            this.CCTextBox.TabIndex = 13;
             this.CCTextBox.Text = "00000000";
             this.CCTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -294,7 +294,7 @@
             this.label7.Location = new System.Drawing.Point(84, 166);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(72, 16);
-            this.label7.TabIndex = 14;
+            this.label7.TabIndex = 11;
             this.label7.Text = "--HINZVC";
             // 
             // disassemblerContextMenuStrip
@@ -368,7 +368,7 @@
             this.DebuggerToolStrip.Location = new System.Drawing.Point(0, 0);
             this.DebuggerToolStrip.Name = "DebuggerToolStrip";
             this.DebuggerToolStrip.Size = new System.Drawing.Size(934, 25);
-            this.DebuggerToolStrip.TabIndex = 18;
+            this.DebuggerToolStrip.TabIndex = 1;
             this.DebuggerToolStrip.Text = "toolStrip1";
             // 
             // StartButton
@@ -467,7 +467,7 @@
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(922, 159);
-            this.tabControl1.TabIndex = 19;
+            this.tabControl1.TabIndex = 14;
             // 
             // tabPage1
             // 
@@ -693,7 +693,11 @@
             this.Name = "DebuggerView";
             this.ShowIcon = false;
             this.Text = "ET-3400 Debugger";
+            this.Activated += new System.EventHandler(this.DebuggerView_Activated);
+            this.Deactivate += new System.EventHandler(this.DebuggerView_Deactivate);
             this.Load += new System.EventHandler(this.DebuggerView_Load);
+            this.Enter += new System.EventHandler(this.DebuggerView_Enter);
+            this.Leave += new System.EventHandler(this.DebuggerView_Leave);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).EndInit();
             this.groupBox2.ResumeLayout(false);

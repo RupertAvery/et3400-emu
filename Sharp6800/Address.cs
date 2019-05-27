@@ -44,16 +44,16 @@ namespace Sharp6800
                 {
                     EndAddress = Convert.ToInt32(toTextBox.Text.Trim().Substring(1), 16);
                 }
-                else if (fromTextBox.Text.Trim().ToLower().StartsWith("0x"))
+                else if (toTextBox.Text.Trim().ToLower().StartsWith("0x"))
                 {
-                    StartAddress = Convert.ToInt32(fromTextBox.Text.Trim().Substring(2), 16);
+                    EndAddress = Convert.ToInt32(toTextBox.Text.Trim().Substring(2), 16);
                 }
                 else
                 {
                     EndAddress = Convert.ToInt32(toTextBox.Text.Trim());
                 }
 
-                if (StartAddress > EndAddress || StartAddress == EndAddress)
+                if (StartAddress >= EndAddress)
                 {
                     MessageBox.Show("The end address must be larger than the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;

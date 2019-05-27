@@ -80,6 +80,8 @@ namespace Sharp6800.Trainer
             {
                 //value = 0x7E | (tempBuffer >> rcvState - 1);
                 value = (tempBuffer >> rcvState - 1) & 1;
+                value = value << 1;
+                value = value | 1;
                 rcvState++;
             }
 

@@ -7,7 +7,8 @@ namespace Sharp6800.Debugger
     public class DisassemblyView
     {
         private ITrainer _trainer;
-        private object lockObject = new object();
+
+        public object UpdateLock { get; } = new object();
 
         public bool IsDirty { get; private set; }
         public string Description { get; }
@@ -58,7 +59,7 @@ namespace Sharp6800.Debugger
 
         private void DisassembleRange()
         {
-            lock (lockObject)
+            lock (UpdateLock)
             {
                 var currentAddress = Start;
                 Lines = new List<DisassemblyLine>();
@@ -132,7 +133,7 @@ namespace Sharp6800.Debugger
 
         public DisassemblyLine? GetLineFromAddress(int address)
         {
-            lock (lockObject)
+            lock (UpdateLock)
             {
                 return Lines.Where(x => x.Address == address).Cast<DisassemblyLine?>().FirstOrDefault();
             }

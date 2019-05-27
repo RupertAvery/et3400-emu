@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -38,7 +39,7 @@ namespace Sharp6800.Debugger
         public DebuggerView(Trainer.Trainer trainer)
         {
             InitializeComponent();
-            Application.AddMessageFilter(this);
+            //Application.AddMessageFilter(this);
             this.Closing += OnClosing;
             MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
@@ -95,30 +96,24 @@ namespace Sharp6800.Debugger
             }
             else
             {
-                // Monitor ROM
-                if (_trainer.State.PC >= 0xFC00)
-                {
-                    DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[3];
-                }
-                // TinyBasic
-                else if (_trainer.State.PC >= 0x1C00 && _trainer.State.PC <= 0x23FF)
-                {
-                    DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[2];
-                }
-                // Fantom II
-                else if (_trainer.State.PC >= 0x1400 && _trainer.State.PC <= 0x1BFF)
-                {
-                    DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[1];
-                }
-                // RAM
-                else if (_trainer.State.PC < 0x07FF)
-                {
-                    DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[0];
-                }
-
-                var line = _disassemberDisplay.SelectAddress(_trainer.State.PC);
-                _disassemberDisplay.EnsureVisble(line, +1);
+                EnsureVisible(_trainer.State.PC);
             }
+        }
+
+        private void EnsureVisible(int address)
+        {
+            foreach (var item in DasmToolStripComboBox.Items)
+            {
+                var view = (DisassemblyView)item;
+                if (address >= view.Start && address <= view.End)
+                {
+                    DasmToolStripComboBox.SelectedItem = view;
+                    break;
+                }
+            }
+
+            var line = _disassemberDisplay.SelectAddress(address);
+            _disassemberDisplay.EnsureVisble(line);
         }
 
         public void UpdateDisplay()
@@ -158,9 +153,9 @@ namespace Sharp6800.Debugger
 
         private void DebuggerView_Load(object sender, EventArgs e)
         {
-            MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 1024 });
-            MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "Keypad", Start = 0xC003, End = 0xC003 + 1024 });
-            MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "Display", Start = 0xC110, End = 0xC110 + 1024 });
+            MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 0x07FF });
+            MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "Keypad", Start = 0xC003, End = 0xC005 });
+            MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "Display", Start = 0xC110, End = 0xC16F });
             MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "ROM", Start = 0xFC00, End = 0xFFFF });
             MemToolStripComboBox.SelectedItem = MemToolStripComboBox.Items[0];
 
@@ -202,15 +197,15 @@ namespace Sharp6800.Debugger
             }
         }
 
-        private void MemAddrTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                MemToolStripComboBox.SelectedItem = MemToolStripComboBox.Items[4];
-                _memoryDisplay.MemoryOffset = ((MemoryRange)MemToolStripComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
+        //private void MemAddrTextBox_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.KeyCode == Keys.Enter)
+        //    {
+        //        MemToolStripComboBox.SelectedItem = MemToolStripComboBox.Items[4];
+        //        _memoryDisplay.MemoryOffset = ((MemoryRange)MemToolStripComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
 
-            }
-        }
+        //    }
+        //}
 
         public static Control FindControlAtPoint(Control container, Point pos)
         {
@@ -407,8 +402,26 @@ namespace Sharp6800.Debugger
 
         private void MemToolStripComboBox_SelectedIndexChanged_1(object sender, EventArgs e)
         {
-            _memoryDisplay.MemoryOffset = ((MemoryRange)MemToolStripComboBox.SelectedItem).Start;
+            var selectedRange = (MemoryRange) MemToolStripComboBox.SelectedItem;
+            _memoryDisplay.MemoryOffset = selectedRange.Start;
+            _memoryDisplay.MemoryRange = selectedRange;
+
+            var maxValue = (selectedRange.End - selectedRange.Start) / 8;
+
             MemoryViewScrollBar.Value = 0;
+
+            if (_memoryDisplay.VisibleItems >= maxValue)
+            {
+                MemoryViewScrollBar.Maximum = 0;
+                MemoryViewScrollBar.Enabled = false;
+            }
+            else
+            {
+                // WHY DOES VisibleItems / 2 WORK???
+                MemoryViewScrollBar.Maximum = maxValue - _memoryDisplay.VisibleItems / 2;
+                MemoryViewScrollBar.Enabled = true;
+            }
+
         }
 
         private void DasmToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -423,6 +436,26 @@ namespace Sharp6800.Debugger
         private void DasmViewPictureBox_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void DebuggerView_Activated(object sender, EventArgs e)
+        {
+            Application.AddMessageFilter(this);
+            Debug.WriteLine("Added message filter");
+        }
+
+        private void DebuggerView_Enter(object sender, EventArgs e)
+        {
+        }
+
+        private void DebuggerView_Leave(object sender, EventArgs e)
+        {
+        }
+
+        private void DebuggerView_Deactivate(object sender, EventArgs e)
+        {
+            Application.RemoveMessageFilter(this);
+            Debug.WriteLine("Removed message filter");
         }
     }
 }

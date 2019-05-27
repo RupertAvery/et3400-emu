@@ -44,12 +44,12 @@ namespace Sharp6800
         private void ResetButton_Click(object sender, EventArgs e)
         {
             hScrollBar1.Value = 5;
-            OUTCHCheckBox.Checked = true;
+            //OUTCHCheckBox.Checked = true;
         }
 
-        private void OUTCHCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            _settings.EnableOUTCHHack = OUTCHCheckBox.Checked;
-        }
+        //private void OUTCHCheckBox_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    _settings.EnableOUTCHHack = OUTCHCheckBox.Checked;
+        //}
     }
 }

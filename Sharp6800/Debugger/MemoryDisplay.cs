@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using Sharp6800.Common;
 
 namespace Sharp6800.Debugger
 {
@@ -14,8 +15,6 @@ namespace Sharp6800.Debugger
         private SolidBrush _brush;
         private Font _font;
 
-        public int MemoryOffset { get; set; }
-
         public int Width { get; set; }
         public int Height { get; set; }
 
@@ -23,6 +22,8 @@ namespace Sharp6800.Debugger
 
 
         public bool IsDisposed { get; private set; }
+        public MemoryRange MemoryRange { get; set; }
+        public int MemoryOffset { get; set; }
 
         public MemoryDisplay(Control target, Trainer.Trainer trainer)
         {
@@ -36,8 +37,15 @@ namespace Sharp6800.Debugger
             _font = new Font("Courier New", 12, FontStyle.Regular);
         }
 
+        private int Min(int a, int b)
+        {
+            if (a <= b) return a;
+            return b;
+        }
+
         public void UpdateDisplay()
         {
+            if (MemoryRange == null) return;
             using (var buffer = new Bitmap(Width, Height))
             {
                 using (var g = Graphics.FromImage(buffer))
@@ -45,7 +53,10 @@ namespace Sharp6800.Debugger
                     g.Clear(Color.White);
 
                     var j = 0;
-                    for (var address = MemoryOffset; address <= MemoryOffset + 8 * VisibleItems; address += 8)
+
+                    var end = Min(MemoryRange.End, MemoryOffset + 8 * VisibleItems);
+
+                    for (var address = MemoryOffset; address <= end; address += 8)
                     {
                         DrawHex(g, 10, 20 * j, address);
                         j++;

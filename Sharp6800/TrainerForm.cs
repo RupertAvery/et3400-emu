@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
+using Timer = System.Threading.Timer;
 
 namespace Sharp6800.Trainer
 {
     public partial class TrainerForm : Form
     {
         private RecentFilesCollection _recentFiles;
-
+        private Timer timer;
         private Trainer _trainer;
         private DebuggerView _debuggerView;
 
@@ -87,9 +89,6 @@ namespace Sharp6800.Trainer
             {
                 _trainer = new Trainer();
                 _trainer.SetupDisplay(SegmentPictureBox);
-
-                LoadDefaultRom();
-
                 _trainer.OnStart += OnStart;
                 _trainer.OnStop += OnStop;
                 _trainer.BreakpointsEnabled = true;
@@ -104,6 +103,9 @@ namespace Sharp6800.Trainer
 #endif
 
                 UpdateState();
+
+                // Delay drawing to the form before has loaded as it causes graphical glitches
+                //timer = new Timer(StartDelay, null, TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
             }
             catch (Exception ex)
             {
@@ -113,6 +115,12 @@ namespace Sharp6800.Trainer
         #endregion
 
         #region Event Handlers
+        
+        //private void StartDelay(object obj)
+        //{
+        //    LoadDefaultRom();
+        //    UpdateState();
+        //}
 
         private void OnStart(object sender, EventArgs eventArgs)
         {
@@ -448,8 +456,17 @@ namespace Sharp6800.Trainer
             _trainer.Step();
         }
 
+        private bool isFirstLoad = true;
+
         private void TrainerForm_Activated(object sender, EventArgs e)
         {
+            if (isFirstLoad)
+            {
+                LoadDefaultRom();
+                UpdateState();
+                isFirstLoad = false;
+            }
+
             //    if (_debuggerView != null && !_debuggerView.IsDisposed)
             //    {
             //        _debuggerView.BringToFront();
@@ -466,6 +483,7 @@ namespace Sharp6800.Trainer
         #endregion
 
         #region Private methods
+
 
         private void ShowDebugger()
         {
@@ -501,7 +519,7 @@ namespace Sharp6800.Trainer
             }
             else
             {
-                var state = _trainer.IsRunning;
+                var state = _trainer != null && _trainer.IsRunning;
                 StatusToolStripStatusLabel.Text = state ? "Running" : "Stopped";
                 stopToolStripMenuItem.Enabled = state;
                 resetToolStripMenuItem.Enabled = state;

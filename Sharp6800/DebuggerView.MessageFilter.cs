@@ -76,6 +76,22 @@ namespace Sharp6800.Debugger
 
                         switch (keys)
                         {
+                            case Keys.G:
+                                if ((keys & Keys.ControlKey) != Keys.ControlKey)
+                                {
+                                    //Application.RemoveMessageFilter(this);
+                                    var gotoForm = new Goto();
+                                    var result = gotoForm.ShowDialog(this);
+                                    if (result == DialogResult.OK)
+                                    {
+                                        EnsureVisible(gotoForm.Address);
+                                        focusObject = DasmViewPictureBox;
+                                    }
+                                    //Application.AddMessageFilter(this);
+                                    return true;
+                                }
+
+                                break;
                             case Keys.F4:
                                 if (_trainer.IsRunning)
                                 {

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Remoting.Lifetime;
+using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Trainer;
 
@@ -47,7 +49,7 @@ namespace Sharp6800.Debugger
                 {
                     SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber - 1];
                 }
-                EnsureVisble(SelectedLine.Value, -1);
+                EnsureVisble(SelectedLine.Value);
             }
         }
 
@@ -59,7 +61,7 @@ namespace Sharp6800.Debugger
                 {
                     SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber + 1];
                 }
-                EnsureVisble(SelectedLine.Value, +1);
+                EnsureVisble(SelectedLine.Value);
             }
         }
 
@@ -173,7 +175,15 @@ namespace Sharp6800.Debugger
                                 }
                             }
 
+
                             DrawHex(g, 2, position, $"${line.Address:X4}: {line.Text}", isAtBreakPoint, isSelected, isCurrentPC);
+                            //if (line.LineType == LineType.Data)
+                            //{
+                            //    DrawText(g, 2, position, $"${line.Address:X4}: {line.Text}");
+                            //}
+                            //else
+                            //{
+                            //}
 
                             lineNo++;
 
@@ -219,41 +229,88 @@ namespace Sharp6800.Debugger
 
         public void PageDown()
         {
-            var currentValue = _scrollBar.Value;
-            currentValue += VisibleItems;
-            if (currentValue > _scrollBar.Maximum)
+            if (Monitor.TryEnter(CurrentView.UpdateLock, 50))
             {
-                _scrollBar.Value = _scrollBar.Maximum;
-                //CurrentLine = CurrentView.Lines[ViewOffset + VisibleItems];
-            }
-            else
-            {
-                _scrollBar.Value = currentValue;
+                var currentValue = _scrollBar.Value;
+                currentValue += VisibleItems;
+                if (currentValue > _scrollBar.Maximum)
+                {
+                    _scrollBar.Value = _scrollBar.Maximum;
+
+                    SelectedLine = CurrentView.Lines[CurrentView.LineCount - 1];
+                }
+                else
+                {
+                    _scrollBar.Value = currentValue;
+                    if (SelectedLine.Value.LineNumber + VisibleItems < CurrentView.LineCount)
+                    {
+                        try
+                        {
+                            SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber + VisibleItems];
+                        }
+                        catch (Exception ex)
+                        {
+                            // TODO: Try to lock on disassembly updates, and then determine if code changes occured
+                            // before the current line
+                            Debug.WriteLine($"{CurrentView.Lines.Count}:{SelectedLine.Value.LineNumber - VisibleItems}");
+                        }
+
+                    }
+                    else
+                    {
+                        SelectedLine = CurrentView.Lines[CurrentView.LineCount - 1];
+                    }
+                }
+                Monitor.Exit(CurrentView.UpdateLock);
             }
         }
 
         public void PageUp()
         {
-            var currentValue = _scrollBar.Value;
-            currentValue -= VisibleItems;
-            if (currentValue < 0)
+            if (Monitor.TryEnter(CurrentView.UpdateLock, 50))
             {
-                _scrollBar.Value = 0;
-                //CurrentLine = CurrentView.Lines[ViewOffset];
-            }
-            else
-            {
-                _scrollBar.Value = currentValue;
+                var currentValue = _scrollBar.Value;
+                currentValue -= VisibleItems;
+                if (currentValue < 0)
+                {
+                    _scrollBar.Value = 0;
+
+                    SelectedLine = CurrentView.Lines[0];
+
+                }
+                else
+                {
+                    _scrollBar.Value = currentValue;
+                    if (SelectedLine.Value.LineNumber - VisibleItems > 0)
+                    {
+                        try
+                        {
+                            SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber - VisibleItems];
+                        }
+                        catch (Exception ex)
+                        {
+                            // TODO: Try to lock on disassembly updates, and then determine if code changes occured
+                            // before the current line
+                            Debug.WriteLine($"{CurrentView.Lines.Count}:{SelectedLine.Value.LineNumber - VisibleItems}");
+                        }
+                    }
+                    else
+                    {
+                        SelectedLine = CurrentView.Lines[0];
+                    }
+                }
+                Monitor.Exit(CurrentView.UpdateLock);
             }
         }
 
-        public void EnsureVisble(int address, int direction)
+        public void EnsureVisble(DisassemblyLine? line)
         {
-            var line = GetLineFromAddress(address);
-        }
+            if (!line.HasValue) return;
 
-        public void EnsureVisble(DisassemblyLine? line, int direction)
-        {
+            var currentAddress = CurrentLine.HasValue ? CurrentLine.Value.Address : 0;
+
+            var direction = Math.Abs(line.Value.Address - currentAddress);
+
             if (line.HasValue)
             {
                 var offset = line.Value.LineNumber;

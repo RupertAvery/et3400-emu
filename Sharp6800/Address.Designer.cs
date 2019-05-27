@@ -42,7 +42,7 @@
             this.okButton.Location = new System.Drawing.Point(121, 145);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
-            this.okButton.TabIndex = 0;
+            this.okButton.TabIndex = 6;
             this.okButton.Text = "OK";
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.OkButton_Click);
@@ -52,7 +52,7 @@
             this.cancelButton.Location = new System.Drawing.Point(202, 145);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 1;
+            this.cancelButton.TabIndex = 7;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -95,7 +95,7 @@
             this.label3.Location = new System.Drawing.Point(53, 31);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(298, 13);
-            this.label3.TabIndex = 6;
+            this.label3.TabIndex = 1;
             this.label3.Text = "Enter the address range to save. Use $xxxx for hex addresses";
             // 
             // Address
