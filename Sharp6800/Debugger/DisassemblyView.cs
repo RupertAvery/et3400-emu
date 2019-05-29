@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sharp6800.Trainer;
@@ -66,9 +67,10 @@ namespace Sharp6800.Debugger
 
                 DisassemblyLine disassemblyLine;
                 var lineNumber = 0;
+
                 while (currentAddress < End)
                 {
-                    var memoryMap = _trainer.MemoryMaps[currentAddress];
+                    var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(currentAddress);
                     if (memoryMap != null)
                     {
                         disassemblyLine = new DisassemblyLine()
@@ -81,7 +83,31 @@ namespace Sharp6800.Debugger
 
                         Lines.Add(disassemblyLine);
                         lineNumber++;
+                    }
 
+
+                    if (memoryMap == null || memoryMap.Type == RangeType.Comment)
+                    {
+                        var result = Disassembler.Disassemble(_trainer.Memory, currentAddress);
+
+                        var opCodes = BytesToString(currentAddress, result.ByteLength);
+
+                        disassemblyLine = new DisassemblyLine()
+                        {
+                            Text = $"{opCodes,-9} {result.Operand:2}",
+                            LineType = LineType.Assembly,
+                            ByteLength = result.ByteLength,
+                            Address = currentAddress,
+                            LineNumber = lineNumber
+                        };
+
+                        Lines.Add(disassemblyLine);
+                        lineNumber++;
+
+                        currentAddress += result.ByteLength;
+                    }
+                    else if (memoryMap.Type == RangeType.Data)
+                    {
                         var totalLength = memoryMap.End - memoryMap.Start + 1;
 
                         while (currentAddress <= memoryMap.End)
@@ -107,26 +133,7 @@ namespace Sharp6800.Debugger
                             lineNumber++;
                         }
                     }
-                    else
-                    {
-                        var result = Disassembler.Disassemble(_trainer.Memory, currentAddress);
 
-                        var opCodes = BytesToString(currentAddress, result.ByteLength);
-
-                        disassemblyLine = new DisassemblyLine()
-                        {
-                            Text = $"{opCodes,-9} {result.Operand:2}",
-                            LineType = LineType.Assembly,
-                            ByteLength = result.ByteLength,
-                            Address = currentAddress,
-                            LineNumber = lineNumber
-                        };
-
-                        Lines.Add(disassemblyLine);
-                        lineNumber++;
-
-                        currentAddress += result.ByteLength;
-                    }
                 }
             }
         }

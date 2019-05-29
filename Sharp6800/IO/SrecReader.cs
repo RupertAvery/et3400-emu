@@ -4,22 +4,20 @@ using System.IO;
 
 namespace Sharp6800.Trainer
 {
-    public class SrecReader
+    public class SrecReader : IDisposable
     {
-        private readonly Stream stream;
+        private readonly StreamReader streamReader;
 
         public SrecReader(Stream stream)
         {
-            this.stream = stream;
+            streamReader = new StreamReader(stream);
         }
 
-        public IEnumerable<SrecBlock> Read()
+        public IEnumerable<SrecBlock> ReadAll()
         {
-            var sr = new StreamReader(stream);
-            
-            while(!sr.EndOfStream)
+            while (!streamReader.EndOfStream)
             {
-                var line = sr.ReadLine();
+                var line = streamReader.ReadLine();
                 if (line.Length > 0)
                 {
                     var bytecount = Convert.ToInt32(line.Substring(2, 2), 16);
@@ -94,6 +92,11 @@ namespace Sharp6800.Trainer
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            streamReader?.Dispose();
         }
     }
 }

@@ -51,11 +51,17 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddRange.cs">
+    <Compile Include="AddComment.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddRange.Designer.cs">
-      <DependentUpon>AddRange.cs</DependentUpon>
+    <Compile Include="AddComment.Designer.cs">
+      <DependentUpon>AddComment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddDataRange.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDataRange.Designer.cs">
+      <DependentUpon>AddDataRange.cs</DependentUpon>
     </Compile>
     <Compile Include="Common\MemoryRange.cs" />
     <Compile Include="Common\CustomMemoryRange.cs" />
@@ -89,6 +95,7 @@
     <Compile Include="Goto.Designer.cs">
       <DependentUpon>Goto.cs</DependentUpon>
     </Compile>
+    <Compile Include="IO\CsvWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ranges.cs">
@@ -115,6 +122,9 @@
     <Compile Include="IO\SrecWriter.cs" />
     <Compile Include="IO\RomReader.cs" />
     <Compile Include="Trainer\MemoryMapCollection.cs" />
+    <Compile Include="Trainer\MemoryMapManager.cs" />
+    <Compile Include="Trainer\MemoryMapRegion.cs" />
+    <Compile Include="Trainer\MemoryMapRegionType.cs" />
     <Compile Include="Trainer\Rs232IOPort.cs" />
     <Compile Include="Trainer\Trainer.cs" />
     <Compile Include="TrainerForm.cs">
@@ -150,8 +160,11 @@
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AddRange.resx">
-      <DependentUpon>AddRange.cs</DependentUpon>
+    <EmbeddedResource Include="AddComment.resx">
+      <DependentUpon>AddComment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddDataRange.resx">
+      <DependentUpon>AddDataRange.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Address.resx">
       <DependentUpon>Address.cs</DependentUpon>

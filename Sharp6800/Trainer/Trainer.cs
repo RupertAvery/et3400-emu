@@ -26,7 +26,7 @@ namespace Sharp6800.Trainer
         public EventHandler OnStart { get; set; }
         public EventHandler OnStep { get; set; }
 
-        public MemoryMapCollection MemoryMaps { get; set; }
+        public MemoryMapManager MemoryMapManager { get; set; }
         public ITrainerRunner Runner { get; private set; }
         public Cpu6800 Emulator { get; private set; }
         public int[] Memory { get; }
@@ -51,6 +51,7 @@ namespace Sharp6800.Trainer
             Breakpoints = new List<int>();
             Settings = new TrainerSettings();
             Watches = new List<Watch>();
+            MemoryMapManager = new MemoryMapManager();
             Settings.SettingsUpdated += (sender, args) =>
             {
                 Runner.Recalibrate();

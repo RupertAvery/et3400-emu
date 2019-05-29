@@ -89,6 +89,8 @@
             this.ClearAllRangesButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
             this.GotoRangeButton = new System.Windows.Forms.ToolStripButton();
+            this.addCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -301,22 +303,24 @@
             // 
             this.disassemblerContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addRangeToolStripMenuItem,
-            this.removeRangeToolStripMenuItem});
+            this.removeRangeToolStripMenuItem,
+            this.addCommentToolStripMenuItem,
+            this.removeCommentToolStripMenuItem});
             this.disassemblerContextMenuStrip.Name = "disassemblerContextMenuStrip";
-            this.disassemblerContextMenuStrip.Size = new System.Drawing.Size(154, 48);
+            this.disassemblerContextMenuStrip.Size = new System.Drawing.Size(181, 114);
             // 
             // addRangeToolStripMenuItem
             // 
             this.addRangeToolStripMenuItem.Name = "addRangeToolStripMenuItem";
-            this.addRangeToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
-            this.addRangeToolStripMenuItem.Text = "Add Range";
+            this.addRangeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addRangeToolStripMenuItem.Text = "Add Data Range";
             this.addRangeToolStripMenuItem.Click += new System.EventHandler(this.AddRangeToolStripMenuItem_Click);
             // 
             // removeRangeToolStripMenuItem
             // 
             this.removeRangeToolStripMenuItem.Name = "removeRangeToolStripMenuItem";
-            this.removeRangeToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
-            this.removeRangeToolStripMenuItem.Text = "Remove Range";
+            this.removeRangeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeRangeToolStripMenuItem.Text = "Remove Data Range";
             this.removeRangeToolStripMenuItem.Click += new System.EventHandler(this.RemoveRangeToolStripMenuItem_Click);
             // 
             // groupBox3
@@ -574,7 +578,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(914, 133);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Ranges";
+            this.tabPage2.Text = "Memory Maps";
             // 
             // RangesListView
             // 
@@ -675,6 +679,20 @@
             this.GotoRangeButton.Text = "Go to range";
             this.GotoRangeButton.ToolTipText = "Go to range";
             this.GotoRangeButton.Click += new System.EventHandler(this.GotoRangeButton_Click);
+            // 
+            // addCommentToolStripMenuItem
+            // 
+            this.addCommentToolStripMenuItem.Name = "addCommentToolStripMenuItem";
+            this.addCommentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addCommentToolStripMenuItem.Text = "Add Comment";
+            this.addCommentToolStripMenuItem.Click += new System.EventHandler(this.addCommentToolStripMenuItem_Click);
+            // 
+            // removeCommentToolStripMenuItem
+            // 
+            this.removeCommentToolStripMenuItem.Name = "removeCommentToolStripMenuItem";
+            this.removeCommentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeCommentToolStripMenuItem.Text = "Remove Comment";
+            this.removeCommentToolStripMenuItem.Click += new System.EventHandler(this.removeCommentToolStripMenuItem_Click);
             // 
             // DebuggerView
             // 
@@ -784,5 +802,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripButton1;
         private System.Windows.Forms.ToolStripSeparator toolStripButton2;
+        private System.Windows.Forms.ToolStripMenuItem addCommentToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeCommentToolStripMenuItem;
     }
 }

@@ -4,23 +4,33 @@ using System.IO;
 
 namespace Sharp6800.Trainer
 {
-    public class CsvReader
+    public class CsvReader : IDisposable
     {
         private string data;
+        private StreamReader sr;
+        private string filepath;
 
-        public CsvReader(Stream stream)
+        public CsvReader(Stream stream) 
         {   
-            var sr = new StreamReader(stream);
-            data = sr.ReadToEnd();
+            sr = new StreamReader(stream);
         }
         
         public CsvReader(string filepath)
         {
-            data = File.ReadAllText(filepath);
+            this.filepath = filepath;
         }
 
         public IEnumerable<string[]> ReadAll()
         {
+            if (sr != null)
+            {
+                data = sr.ReadToEnd();
+            }
+            else
+            {
+                data = File.ReadAllText(filepath);
+            }
+
             var lines = data.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             char[] buffer = new char[256];
@@ -67,6 +77,11 @@ namespace Sharp6800.Trainer
 
                 yield return parts.ToArray();
             }
+        }
+
+        public void Dispose()
+        {
+            sr?.Dispose();
         }
     }
 }

@@ -70,6 +70,7 @@
             this.toTextBox.Name = "toTextBox";
             this.toTextBox.Size = new System.Drawing.Size(100, 20);
             this.toTextBox.TabIndex = 0;
+            this.toTextBox.Text = "$";
             // 
             // Goto
             // 

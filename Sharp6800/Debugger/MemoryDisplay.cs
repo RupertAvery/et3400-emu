@@ -46,27 +46,34 @@ namespace Sharp6800.Debugger
         public void UpdateDisplay()
         {
             if (MemoryRange == null) return;
-            using (var buffer = new Bitmap(Width, Height))
+            try
             {
-                using (var g = Graphics.FromImage(buffer))
+                using (var buffer = new Bitmap(Width, Height))
                 {
-                    g.Clear(Color.White);
-
-                    var j = 0;
-
-                    var end = Min(MemoryRange.End, MemoryOffset + 8 * VisibleItems);
-
-                    for (var address = MemoryOffset; address <= end; address += 8)
+                    using (var g = Graphics.FromImage(buffer))
                     {
-                        DrawHex(g, 10, 20 * j, address);
-                        j++;
+                        g.Clear(Color.White);
+
+                        var j = 0;
+
+                        var end = Min(MemoryRange.End, MemoryOffset + 8 * VisibleItems);
+
+                        for (var address = MemoryOffset; address <= end; address += 8)
+                        {
+                            DrawHex(g, 10, 20 * j, address);
+                            j++;
+                        }
+                    }
+
+                    using (var p = Graphics.FromHwnd(targetWnd))
+                    {
+                        p.DrawImage(buffer, 0, 0);
                     }
                 }
-
-                using (var p = Graphics.FromHwnd(targetWnd))
-                {
-                    p.DrawImage(buffer, 0, 0);
-                }
+            }
+            catch
+            {
+                // swallow
             }
         }
 

@@ -11,14 +11,14 @@ using Sharp6800.Debugger;
 
 namespace Sharp6800
 {
-    public partial class AddRange : Form
+    public partial class AddDataRange : Form
     {
         public int StartAddress { get; set; }
         public int EndAddress { get; set; }
         public RangeType RangeType { get; set; }
         public string Description { get; set; }
 
-        public AddRange(int startAddress, int endAddress)
+        public AddDataRange(int startAddress, int endAddress)
         {
             StartAddress = startAddress;
             EndAddress = endAddress;
@@ -26,10 +26,9 @@ namespace Sharp6800
             startTextBox.Text = "$" + startAddress.ToString("X4");
             endTextBox.Text = "$" + endAddress.ToString("X4");
             RangeType = RangeType.Data;
-            dataRadioButton.Checked = true;
         }
 
-        public AddRange()
+        public AddDataRange()
         {
             InitializeComponent();
         }
@@ -74,15 +73,6 @@ namespace Sharp6800
                 {
                     MessageBox.Show("The end address must be larger than or equal to the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
-                }
-
-                if (dataRadioButton.Checked)
-                {
-                    RangeType = RangeType.Data;
-                }
-                else
-                {
-                    RangeType = RangeType.Code;
                 }
 
                 if (descriptionTextBox.Text.Trim() == string.Empty)

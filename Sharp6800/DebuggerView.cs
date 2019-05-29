@@ -244,16 +244,27 @@ namespace Sharp6800.Debugger
 
                     if (_disassemberDisplay.SelectedLine.HasValue)
                     {
-                        var memoryMap = _trainer.MemoryMaps[_disassemberDisplay.SelectedLine.Value.Address];
+                        var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
                         if (memoryMap == null)
                         {
                             addRangeToolStripMenuItem.Enabled = true;
+                            addCommentToolStripMenuItem.Enabled = true;
                             removeRangeToolStripMenuItem.Enabled = false;
+                            removeCommentToolStripMenuItem.Enabled = false;
                         }
                         else
                         {
                             addRangeToolStripMenuItem.Enabled = false;
-                            removeRangeToolStripMenuItem.Enabled = true;
+                            addCommentToolStripMenuItem.Enabled = false;
+                            switch (memoryMap.Type)
+                            {
+                                case RangeType.Data:
+                                    removeRangeToolStripMenuItem.Enabled = true;
+                                    break;
+                                case RangeType.Comment:
+                                    removeCommentToolStripMenuItem.Enabled = true;
+                                    break;
+                            }
                         }
                         disassemblerContextMenuStrip.Show(Cursor.Position);
                     }
@@ -265,10 +276,9 @@ namespace Sharp6800.Debugger
 
         private void AddRangeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            hasFocus = false;
             if (_disassemberDisplay.SelectedLine.HasValue)
             {
-                var addRangeDialog = new AddRange(_disassemberDisplay.SelectedLine.Value.Address, _disassemberDisplay.SelectedLine.Value.Address + 1);
+                var addRangeDialog = new AddDataRange(_disassemberDisplay.SelectedLine.Value.Address, _disassemberDisplay.SelectedLine.Value.Address + 1);
                 //addRangeDialog.Parent = this;
                 addRangeDialog.StartPosition = FormStartPosition.CenterParent;
                 var result = addRangeDialog.ShowDialog(this);
@@ -282,29 +292,26 @@ namespace Sharp6800.Debugger
                         Description = addRangeDialog.Description
                     };
 
-                    _trainer.MemoryMaps.Add(memoryMap);
+                    _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
                 }
             }
-            hasFocus = true;
         }
 
         private void RemoveRangeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            hasFocus = false;
             if (_disassemberDisplay.SelectedLine.HasValue)
             {
-                var memoryMap = _trainer.MemoryMaps[_disassemberDisplay.SelectedLine.Value.Address];
+                var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
 
                 if (memoryMap != null)
                 {
-                    if (MessageBox.Show($"Are you sure you want to remove the map {memoryMap.Description}?",
-                            "Remove Memory Map", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (MessageBox.Show($"Are you sure you want to remove the data range {memoryMap.Description}?",
+                            "Remove Data Range", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
-                        _trainer.MemoryMaps.Remove(memoryMap);
+                        _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
                     }
                 }
             }
-            hasFocus = true;
         }
 
         private void ResetMenuItem_Click(object sender, EventArgs e)
@@ -456,6 +463,46 @@ namespace Sharp6800.Debugger
         {
             Application.RemoveMessageFilter(this);
             Debug.WriteLine("Removed message filter");
+        }
+
+        private void addCommentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var addRangeDialog = new AddComment(_disassemberDisplay.SelectedLine.Value.Address);
+                //addRangeDialog.Parent = this;
+                addRangeDialog.StartPosition = FormStartPosition.CenterParent;
+                var result = addRangeDialog.ShowDialog(this);
+                if (result == DialogResult.OK)
+                {
+                    var memoryMap = new MemoryMap()
+                    {
+                        Start = addRangeDialog.StartAddress,
+                        End = addRangeDialog.StartAddress,
+                        Type = addRangeDialog.RangeType,
+                        Description = addRangeDialog.Description
+                    };
+
+                    _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
+                }
+            }
+        }
+
+        private void removeCommentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
+
+                if (memoryMap != null)
+                {
+                    if (MessageBox.Show($"Are you sure you want to remove the comment {memoryMap.Description}?",
+                            "Remove Comment", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
+                    }
+                }
+            }
         }
     }
 }

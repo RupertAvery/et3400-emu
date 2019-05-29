@@ -1,22 +1,21 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Sharp6800.Trainer
 {
-    public class SrecWriter
+    public class SrecWriter : IDisposable
     {
-        private readonly Stream stream;
+        private readonly StreamWriter streamWriter;
 
         public SrecWriter(Stream stream)
         {
-            this.stream = stream;
+            streamWriter = new StreamWriter(stream);
         }
 
-        public void Write(IEnumerable<SrecBlock> srecBlocks)
+        public void WriteAll(IEnumerable<SrecBlock> srecBlocks)
         {
-            var sw = new StreamWriter(stream);
-
             foreach (var block in srecBlocks)
             {
                 var checkSum = SrecHelper.CalculateCheckSum(block.ByteCount, block.Address, block.Data);
@@ -26,8 +25,13 @@ namespace Sharp6800.Trainer
                 var byteCountHex = (block.ByteCount + 3).ToString("X2");
                 var checkSumHex = checkSum.ToString("X2");
 
-                sw.Write($"S1{byteCountHex}{addresshex}{bufferHex}{checkSumHex}");
+                streamWriter.WriteLine($"S1{byteCountHex}{addresshex}{bufferHex}{checkSumHex}");
             }
+        }
+
+        public void Dispose()
+        {
+            streamWriter?.Dispose();
         }
     }
 }

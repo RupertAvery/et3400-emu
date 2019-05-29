@@ -13,10 +13,17 @@ namespace Sharp6800.Trainer
 {
     public partial class TrainerForm : Form
     {
+        enum Mode
+        {
+            ET3400,
+            ETA3400
+        }
+
         private RecentFilesCollection _recentFiles;
         private Timer timer;
         private Trainer _trainer;
         private DebuggerView _debuggerView;
+        private Mode _emulationMode = Mode.ET3400;
 
         public TrainerForm()
         {
@@ -27,6 +34,7 @@ namespace Sharp6800.Trainer
         {
             InitKeys();
             InitTrainer();
+            LoadDefaultMemoryMaps();
             _recentFiles = new RecentFilesCollection(RecentToolStripMenuItem, GetAppFolderFile("recent.ini"), 10, LoadRam);
         }
 
@@ -115,7 +123,7 @@ namespace Sharp6800.Trainer
         #endregion
 
         #region Event Handlers
-        
+
         //private void StartDelay(object obj)
         //{
         //    LoadDefaultRom();
@@ -310,6 +318,7 @@ namespace Sharp6800.Trainer
         private void LoadRAMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog.Filter = "SREC format files|*.obj;*.s19|All files|*.*";
+            openFileDialog.FileName = "";
             var result = openFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -325,6 +334,14 @@ namespace Sharp6800.Trainer
                 try
                 {
                     var bytes = LoadRamInternal(fileName);
+
+                    var mapFile = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".map");
+                    if (File.Exists(mapFile))
+                    {
+                        var region = _trainer.MemoryMapManager.GetRegion("RAM");
+                        region.MemoryMapCollection.Clear();
+                        region.MemoryMapCollection.AddRange(MemoryMapCollection.Load(mapFile));
+                    }
                     _recentFiles.AddItem(fileName);
                     MessageBox.Show(this, $"Loaded {bytes} bytes", "Sharp6800", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -344,6 +361,7 @@ namespace Sharp6800.Trainer
             try
             {
                 openFileDialog.Filter = "ROM files|*.rom;*.bin;*.hex|All files|*.*";
+                openFileDialog.FileName = "";
                 var result = openFileDialog.ShowDialog();
                 if (result == DialogResult.OK)
                 {
@@ -427,6 +445,7 @@ namespace Sharp6800.Trainer
             }
 
             saveFileDialog.Filter = "SREC format files|*.obj;*.s19|All files|*.*";
+            saveFileDialog.FileName = "";
 
             var result = saveFileDialog.ShowDialog();
             if (result == DialogResult.OK)
@@ -434,14 +453,15 @@ namespace Sharp6800.Trainer
                 _trainer.Stop();
                 try
                 {
-                    var file = saveFileDialog.FileName;
                     var data = _trainer.ReadMemory(addressDialog.StartAddress, addressDialog.EndAddress - addressDialog.StartAddress);
                     var blocks = SrecHelper.ToSrecBlocks(addressDialog.StartAddress, data);
 
-                    using (var stream = new FileStream(file, FileMode.Truncate, FileAccess.Write))
+                    using (var stream = new FileStream(saveFileDialog.FileName, FileMode.Create, FileAccess.Write))
                     {
-                        var writer = new SrecWriter(stream);
-                        writer.Write(blocks);
+                        using (var writer = new SrecWriter(stream))
+                        {
+                            writer.WriteAll(blocks);
+                        }
                     }
                 }
                 finally
@@ -541,12 +561,14 @@ namespace Sharp6800.Trainer
                 case ".s19":
                     using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read))
                     {
-                        var reader = new SrecReader(stream);
-                        var records = reader.Read();
-                        foreach (var srecBlock in records)
+                        using (var reader = new SrecReader(stream))
                         {
-                            _trainer.WriteMemory(srecBlock.Address, srecBlock.Data, srecBlock.Data.Length);
-                            bytes += srecBlock.Data.Length;
+                            var records = reader.ReadAll();
+                            foreach (var srecBlock in records)
+                            {
+                                _trainer.WriteMemory(srecBlock.Address, srecBlock.Data, srecBlock.Data.Length);
+                                bytes += srecBlock.Data.Length;
+                            }
                         }
                     }
 
@@ -558,6 +580,8 @@ namespace Sharp6800.Trainer
                     bytes = ram.Length;
                     break;
             }
+
+            _trainer.MemoryMapManager.GetRegion("RAM").MemoryMapCollection.Clear();
 
             return bytes;
         }
@@ -604,30 +628,48 @@ namespace Sharp6800.Trainer
             }
         }
 
+        private void LoadMapFromResource(string key, int start, int length)
+        {
+            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, key))
+            {
+                _trainer.MemoryMapManager.RemoveRegionByName(key);
+                var region = new MemoryMapRegion { Name = key, Start = start, End = start + length };
+                region.MemoryMapCollection.AddRange(MemoryMapCollection.Load(stream));
+                _trainer.MemoryMapManager.AddRegion(region);
+            }
+        }
+
+        private void LoadDefaultMemoryMaps()
+        {
+            var region = new MemoryMapRegion { Name = "RAM", Start = 0x0, End = 0xFFF };
+            _trainer.MemoryMapManager.AddRegion(region);
+            LoadMapFromResource("ROM/Monitor.map", Trainer.RomAddress, 1024);
+        }
+
         private void LoadDefaultRom()
         {
             _trainer.Stop(false);
 
-            //using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/MonitorKeyHack.hex"))
-            //{
-            //    var romLoader = new RomReader(stream);
-            //    var data = romLoader.Read();
-            //    _trainer.WriteMemory(Trainer.RomAddress, data, data.Length);
-            //}
-
-            LoadRomFromResource("ROM/FantomII.bin", 0x1400, 2048);
-            LoadRomFromResource("ROM/TinyBasic.bin", 0x1C00, 2048);
             LoadRomFromResource("ROM/MonitorKeyHack.bin", Trainer.RomAddress, 1024);
 
-            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/Monitor.map"))
+            if (_emulationMode == Mode.ET3400)
             {
-                _trainer.MemoryMaps = MemoryMapCollection.Load(stream);
+                _trainer.Settings.ClockSpeed = 131072; // 100kHz
+                var buffer = new byte[2048];
+                // Clear ROMs
+                _trainer.WriteMemory(0x1400, buffer, buffer.Length);
+                _trainer.WriteMemory(0x1C00, buffer, buffer.Length);
+                _trainer.MemoryMapManager.RemoveRegionByName("ROM/FantomII.map");
+            }
+            else
+            {
+                _trainer.Settings.ClockSpeed = 1048576; // 1MHz
+                LoadRomFromResource("ROM/FantomII.bin", 0x1400, 2048);
+                LoadRomFromResource("ROM/TinyBasic.bin", 0x1C00, 2048);
+                LoadMapFromResource("ROM/FantomII.map", 0x1400, 2048);
             }
 
-            using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, "ROM/FantomII.map"))
-            {
-                _trainer.MemoryMaps = MemoryMapCollection.Load(stream);
-            }
+
 
             _trainer.Restart();
         }
@@ -651,6 +693,51 @@ namespace Sharp6800.Trainer
         private void sendTerminalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.SendTerminal("G 1C00\r");
+        }
+
+        private void ModeET3400ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ModeETA3400ToolStripMenuItem.Checked = false;
+            ModeET3400ToolStripMenuItem.Checked = true;
+            _emulationMode = Mode.ET3400;
+            LoadDefaultRom();
+        }
+
+        private void ModeETA3400ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ModeET3400ToolStripMenuItem.Checked = false;
+            ModeETA3400ToolStripMenuItem.Checked = true;
+            _emulationMode = Mode.ETA3400;
+            LoadDefaultRom();
+        }
+
+        private void loadMapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog.Filter = "Memory Map Files|*.map";
+            openFileDialog.FileName = "";
+            var result = openFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                var region = _trainer.MemoryMapManager.GetRegion("RAM");
+                region.MemoryMapCollection.Clear();
+                region.MemoryMapCollection.AddRange(MemoryMapCollection.Load(openFileDialog.FileName));
+            }
+        }
+
+        private void saveMapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            saveFileDialog.Filter = "Memory Map Files|*.map";
+            saveFileDialog.FileName = "";
+            var result = saveFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                var region = _trainer.MemoryMapManager.GetRegion("RAM");
+
+                using (var stream = new FileStream(saveFileDialog.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    MemoryMapCollection.Save(stream, region.MemoryMapCollection);
+                }
+            }
         }
     }
 }
