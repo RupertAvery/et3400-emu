@@ -175,15 +175,22 @@ namespace Sharp6800.Debugger
                                 }
                             }
 
+                            DrawText(g, 2, position, $"${line.Address:X4}:", Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
 
-                            DrawHex(g, 2, position, $"${line.Address:X4}: {line.Text}", isAtBreakPoint, isSelected, isCurrentPC);
-                            //if (line.LineType == LineType.Data)
-                            //{
-                            //    DrawText(g, 2, position, $"${line.Address:X4}: {line.Text}");
-                            //}
-                            //else
-                            //{
-                            //}
+                            if (line.LineType == LineType.Comment)
+                            {
+                                DrawText(g, 70, position, line.Text, Color.Green, isAtBreakPoint, isSelected, isCurrentPC);
+                            }
+                            else if (line.LineType == LineType.Assembly)
+                            {
+                                DrawText(g, 70, position, line.Opcodes, Color.Black, isAtBreakPoint, isSelected, isCurrentPC);
+                                DrawText(g, 180, position, line.Instruction, Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
+                                DrawText(g, 230, position, line.Operands, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
+                            }
+                            else if (line.LineType == LineType.Data)
+                            {
+                                DrawText(g, 70, position, line.Text, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
+                            }
 
                             lineNo++;
 
@@ -205,16 +212,11 @@ namespace Sharp6800.Debugger
             }
         }
 
-        private void DrawText(Graphics g, int x, int y, string text)
+        private void DrawText(Graphics g, int x, int y, string text, Color defaultColor, bool isAtBreakPoint, bool isSelected, bool isCurrent)
         {
-            g.DrawString(text, _font, _brush, x, y);
-        }
-
-        private void DrawHex(Graphics g, int x, int y, string asm, bool isAtBreakPoint, bool isSelected, bool isCurrent)
-        {
-            using (var brush = new SolidBrush(isAtBreakPoint && !isCurrent ? Color.White : Color.Black))
+            using (var brush = new SolidBrush(isAtBreakPoint && !isCurrent ? Color.White : defaultColor))
             {
-                g.DrawString(asm, _font, brush, x, y);
+                g.DrawString(text, _font, brush, x, y);
             }
         }
 

@@ -87,7 +87,7 @@ namespace Sharp6800.Trainer.Threads
                 
                 if (_trainer.BreakpointsEnabled && _trainer.AtBreakPoint && lastBreakPointPC != _trainer.State.PC)
                 {
-                    Stop();
+                    Stop(true);
                     _trainer.StopExternal();
                     lastBreakPointPC = _trainer.State.PC;
                     break;

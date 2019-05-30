@@ -15,7 +15,7 @@ namespace Sharp6800.Debugger
     {
         public bool Illegal { get; set; }
         public string Operand { get; set; }
-        public string Arguments { get; set; }
+        public string Instruction { get; set; }
         public int Flags { get; set; }
         public int ByteLength { get; set; }
     }
@@ -355,48 +355,49 @@ namespace Sharp6800.Debugger
                 };
             }
 
-            string buf = "";
 
-            buf += string.Format("{0,-4} ", op_name_str[opcode]);
+            var instruction = string.Format("{0,-4} ", op_name_str[opcode]);
 
             int byteLength = 0;
+
+            string operand = "";
 
             switch (args)
             {
                 case rel:  /* relative */
-                    buf += string.Format("${0:X4}", pc + SIGNED(memory[pc + 1]) + 2);
+                    operand += string.Format("${0:X4}", pc + SIGNED(memory[pc + 1]) + 2);
                     byteLength = 2;
                     break;
                 case imb:  /* immediate (byte) */
-                    buf += string.Format("#${0:X2}", memory[pc + 1]);
+                    operand += string.Format("#${0:X2}", memory[pc + 1]);
                     byteLength = 2;
                     break;
                 case imw:  /* immediate (word) */
-                    buf += string.Format("#${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
+                    operand += string.Format("#${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
                     byteLength = 3;
                     break;
                 case idx:  /* indexed + byte offset */
-                    buf += string.Format("${0:X2},x", memory[pc + 1]);
+                    operand += string.Format("${0:X2},x", memory[pc + 1]);
                     byteLength = 2;
                     break;
                 case imx:  /* immediate, indexed + byte offset */
-                    buf += string.Format("#${0:X2},(x+${1:X2})", memory[pc + 1], memory[pc + 2]);
+                    operand += string.Format("#${0:X2},(x+${1:X2})", memory[pc + 1], memory[pc + 2]);
                     byteLength = 3;
                     break;
                 case dir:  /* direct address */
-                    buf += string.Format("${0:X2}", memory[pc + 1]);
+                    operand += string.Format("${0:X2}", memory[pc + 1]);
                     byteLength = 2;
                     break;
                 case imd:  /* immediate, direct address */
-                    buf += string.Format("#${0:X2},${1:X2}", memory[pc + 1], memory[pc + 2]);
+                    operand += string.Format("#${0:X2},${1:X2}", memory[pc + 1], memory[pc + 2]);
                     byteLength = 3;
                     break;
                 case ext:  /* extended address */
-                    buf += string.Format("${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
+                    operand += string.Format("${0:X4}", (memory[pc + 1] << 8) + memory[pc + 2]);
                     byteLength = 3;
                     break;
                 case sx1:  /* byte from address (s + 1) */
-                    buf += string.Format("(s+1)");
+                    operand += string.Format("(s+1)");
                     byteLength = 1;
                     break;
                 default:
@@ -406,7 +407,8 @@ namespace Sharp6800.Debugger
 
             return new DasmResult()
             {
-                Operand = buf,
+                Instruction = instruction,
+                Operand = operand,
                 ByteLength = byteLength,
                 Flags = flags | DASMFLAG_SUPPORTED
             };

@@ -6,7 +6,7 @@ namespace Sharp6800.Trainer.Threads
     {
         event OnTimerDelegate OnTimer;
         bool Running { get; }
-        void Stop();
+        void Stop(bool noWait = false);
         void Start();
         void Recalibrate();
     }

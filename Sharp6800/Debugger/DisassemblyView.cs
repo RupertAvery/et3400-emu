@@ -94,7 +94,9 @@ namespace Sharp6800.Debugger
 
                         disassemblyLine = new DisassemblyLine()
                         {
-                            Text = $"{opCodes,-9} {result.Operand:2}",
+                            Opcodes = $"{opCodes,-9}",
+                            Instruction = $"{result.Instruction}",
+                            Operands = $"{result.Operand}",
                             LineType = LineType.Assembly,
                             ByteLength = result.ByteLength,
                             Address = currentAddress,

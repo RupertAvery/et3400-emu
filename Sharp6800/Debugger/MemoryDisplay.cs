@@ -60,7 +60,18 @@ namespace Sharp6800.Debugger
 
                         for (var address = MemoryOffset; address <= end; address += 8)
                         {
-                            DrawHex(g, 10, 20 * j, address);
+                            var s = new StringBuilder();
+                            var k = 0;
+
+                            while (address + k < _trainer.Memory.Length && k < 8)
+                            {
+                                s.Append(" " + string.Format("{0:X2}", _trainer.Memory[address + k] & 0xff));
+                                k++;
+                            }
+
+                            DrawText(g, 2, j * 20, $"${address:X4}:", Color.DarkBlue);
+                            DrawText(g, 70, j * 20, s.ToString(), Color.DarkRed);
+
                             j++;
                         }
                     }
@@ -77,26 +88,16 @@ namespace Sharp6800.Debugger
             }
         }
 
-        private void DrawHex(Graphics g, int x, int y, int address)
+        private void DrawText(Graphics g, int x, int y, string s, Color color)
         {
-            var k = 0;
-            var s = new StringBuilder();
-
-            if (address >= _trainer.Memory.Length) return;
-
-            s.Append(string.Format("{0:X4}", address));
-
-            while (address + k < _trainer.Memory.Length && k < 8)
-            {
-                s.Append(" " + string.Format("{0:X2}", _trainer.Memory[address + k] & 0xff));
-                k++;
-            }
-
             lock (_lockObject)
             {
                 if (!IsDisposed)
                 {
-                    g.DrawString(s.ToString(), _font, _brush, x, y);
+                    using (var brush = new SolidBrush(color))
+                    {
+                        g.DrawString(s, _font, brush, x, y);
+                    }
                 }
             }
         }

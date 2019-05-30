@@ -41,7 +41,7 @@ namespace Sharp6800.Trainer.Threads
         /// <summary>
         /// Sets the quit flag on the emulator and waits for execution of the current opcode to complete
         /// </summary>
-        public void Stop()
+        public void Stop(bool noWait = false)
         {
             //if (!breakpoint)
             //{
@@ -51,8 +51,11 @@ namespace Sharp6800.Trainer.Threads
             if (Running)
             {
                 Running = false;
-                resetEvent.WaitOne();
-                resetEvent.Reset();
+                if (!noWait)
+                {
+                    resetEvent.WaitOne();
+                    resetEvent.Reset();
+                }
             }
         }
 

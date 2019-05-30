@@ -1,3 +1,5 @@
+using System;
+
 namespace Sharp6800.Trainer
 {
     public class MemoryMapRegion
@@ -8,9 +10,9 @@ namespace Sharp6800.Trainer
         public int Start { get; set; }
         public int End { get; set; }
 
-        public MemoryMapRegion()
+        public MemoryMapRegion(MemoryMapEventBus memoryMapEventBus)
         {
-            MemoryMapCollection = new MemoryMapCollection();
+            MemoryMapCollection = new MemoryMapCollection(memoryMapEventBus);
         }
     }
 }

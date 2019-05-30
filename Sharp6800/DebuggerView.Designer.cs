@@ -51,6 +51,8 @@
             this.disassemblerContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.DebuggerToolStrip = new System.Windows.Forms.ToolStrip();
@@ -82,15 +84,13 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.RangesToolStrip = new System.Windows.Forms.ToolStrip();
             this.AddRangeButton = new System.Windows.Forms.ToolStripButton();
             this.RemoveRangeButton = new System.Windows.Forms.ToolStripButton();
             this.ClearAllRangesButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
             this.GotoRangeButton = new System.Windows.Forms.ToolStripButton();
-            this.addCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeCommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -307,7 +307,7 @@
             this.addCommentToolStripMenuItem,
             this.removeCommentToolStripMenuItem});
             this.disassemblerContextMenuStrip.Name = "disassemblerContextMenuStrip";
-            this.disassemblerContextMenuStrip.Size = new System.Drawing.Size(181, 114);
+            this.disassemblerContextMenuStrip.Size = new System.Drawing.Size(181, 92);
             // 
             // addRangeToolStripMenuItem
             // 
@@ -322,6 +322,20 @@
             this.removeRangeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.removeRangeToolStripMenuItem.Text = "Remove Data Range";
             this.removeRangeToolStripMenuItem.Click += new System.EventHandler(this.RemoveRangeToolStripMenuItem_Click);
+            // 
+            // addCommentToolStripMenuItem
+            // 
+            this.addCommentToolStripMenuItem.Name = "addCommentToolStripMenuItem";
+            this.addCommentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addCommentToolStripMenuItem.Text = "Add Comment";
+            this.addCommentToolStripMenuItem.Click += new System.EventHandler(this.addCommentToolStripMenuItem_Click);
+            // 
+            // removeCommentToolStripMenuItem
+            // 
+            this.removeCommentToolStripMenuItem.Name = "removeCommentToolStripMenuItem";
+            this.removeCommentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeCommentToolStripMenuItem.Text = "Remove Comment";
+            this.removeCommentToolStripMenuItem.Click += new System.EventHandler(this.removeCommentToolStripMenuItem_Click);
             // 
             // groupBox3
             // 
@@ -439,7 +453,7 @@
             // 
             this.MemToolStripComboBox.Name = "MemToolStripComboBox";
             this.MemToolStripComboBox.Size = new System.Drawing.Size(75, 25);
-            this.MemToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.MemToolStripComboBox_SelectedIndexChanged_1);
+            this.MemToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.MemToolStripComboBox_SelectedIndexChanged);
             // 
             // toolStripButton1
             // 
@@ -583,10 +597,10 @@
             // RangesListView
             // 
             this.RangesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader3,
-            this.columnHeader4,
+            this.columnHeader6,
             this.columnHeader5,
-            this.columnHeader6});
+            this.columnHeader3,
+            this.columnHeader4});
             this.RangesListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RangesListView.FullRowSelect = true;
             this.RangesListView.GridLines = true;
@@ -599,23 +613,21 @@
             // 
             // columnHeader3
             // 
+            this.columnHeader3.DisplayIndex = 0;
             this.columnHeader3.Text = "Start";
             this.columnHeader3.Width = 100;
             // 
             // columnHeader4
             // 
+            this.columnHeader4.DisplayIndex = 1;
             this.columnHeader4.Text = "End";
             this.columnHeader4.Width = 100;
             // 
             // columnHeader5
             // 
+            this.columnHeader5.DisplayIndex = 2;
             this.columnHeader5.Text = "Type";
             this.columnHeader5.Width = 100;
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "Description";
-            this.columnHeader6.Width = 300;
             // 
             // RangesToolStrip
             // 
@@ -680,19 +692,10 @@
             this.GotoRangeButton.ToolTipText = "Go to range";
             this.GotoRangeButton.Click += new System.EventHandler(this.GotoRangeButton_Click);
             // 
-            // addCommentToolStripMenuItem
+            // columnHeader6
             // 
-            this.addCommentToolStripMenuItem.Name = "addCommentToolStripMenuItem";
-            this.addCommentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.addCommentToolStripMenuItem.Text = "Add Comment";
-            this.addCommentToolStripMenuItem.Click += new System.EventHandler(this.addCommentToolStripMenuItem_Click);
-            // 
-            // removeCommentToolStripMenuItem
-            // 
-            this.removeCommentToolStripMenuItem.Name = "removeCommentToolStripMenuItem";
-            this.removeCommentToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.removeCommentToolStripMenuItem.Text = "Remove Comment";
-            this.removeCommentToolStripMenuItem.Click += new System.EventHandler(this.removeCommentToolStripMenuItem_Click);
+            this.columnHeader6.DisplayIndex = 3;
+            this.columnHeader6.Text = "Description";
             // 
             // DebuggerView
             // 
@@ -792,7 +795,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ToolStripSeparator toolStripButton12;
         private System.Windows.Forms.ToolStripButton GotoRangeButton;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
@@ -804,5 +806,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripButton2;
         private System.Windows.Forms.ToolStripMenuItem addCommentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeCommentToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader columnHeader6;
     }
 }

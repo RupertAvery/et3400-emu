@@ -24,7 +24,6 @@ namespace Sharp6800.Trainer
         private Trainer _trainer;
         private DebuggerView _debuggerView;
         private Mode _emulationMode = Mode.ET3400;
-
         public TrainerForm()
         {
             InitializeComponent();
@@ -633,15 +632,15 @@ namespace Sharp6800.Trainer
             using (var stream = ResourceHelper.GetEmbeddedResourceStream(typeof(Trainer).Assembly, key))
             {
                 _trainer.MemoryMapManager.RemoveRegionByName(key);
-                var region = new MemoryMapRegion { Name = key, Start = start, End = start + length };
-                region.MemoryMapCollection.AddRange(MemoryMapCollection.Load(stream));
+                var region = new MemoryMapRegion(_trainer.MemoryMapEventBus) { Name = key, Start = start, End = start + length };
                 _trainer.MemoryMapManager.AddRegion(region);
+                region.MemoryMapCollection.AddRange(MemoryMapCollection.Load(stream));
             }
         }
 
         private void LoadDefaultMemoryMaps()
         {
-            var region = new MemoryMapRegion { Name = "RAM", Start = 0x0, End = 0xFFF };
+            var region = new MemoryMapRegion(_trainer.MemoryMapEventBus) { Name = "RAM", Start = 0x0, End = 0xFFF };
             _trainer.MemoryMapManager.AddRegion(region);
             LoadMapFromResource("ROM/Monitor.map", Trainer.RomAddress, 1024);
         }

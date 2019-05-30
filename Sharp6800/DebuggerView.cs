@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Core6800;
 using Sharp6800.Common;
+using Sharp6800.Trainer;
 using Timer = System.Threading.Timer;
 
 namespace Sharp6800.Debugger
@@ -36,6 +37,19 @@ namespace Sharp6800.Debugger
         private bool hasFocus = true;
         private Timer _updateTimer;
 
+        public ListViewItem FromMemoryMap(MemoryMap memoryMap)
+        {
+            var item = new ListViewItem()
+            {
+                Text = memoryMap.Description,
+            };
+            item.Tag = memoryMap;
+            item.SubItems.Add(new ListViewItem.ListViewSubItem(item, memoryMap.Type.ToString()));
+            item.SubItems.Add(new ListViewItem.ListViewSubItem(item, memoryMap.Start.ToString("X4")));
+            item.SubItems.Add(new ListViewItem.ListViewSubItem(item, memoryMap.End.ToString("X4")));
+            return item;
+        }
+
         public DebuggerView(Trainer.Trainer trainer)
         {
             InitializeComponent();
@@ -52,12 +66,38 @@ namespace Sharp6800.Debugger
             _trainer.OnStart += OnStart;
             _trainer.OnStep += OnStep;
 
+            _trainer.MemoryMapEventBus.Subscribe(MapEventType.Add, AddMapEventAction);
+            _trainer.MemoryMapEventBus.Subscribe(MapEventType.Update, UpdateMapEventAction);
+            _trainer.MemoryMapEventBus.Subscribe(MapEventType.Remove, RemoveMapEventAction);
+            _trainer.MemoryMapEventBus.Subscribe(MapEventType.Clear, ClearMapEventAction);
+
+            var region = trainer.MemoryMapManager.GetRegion("RAM");
+
+            foreach (var memoryMap in region.MemoryMapCollection)
+            {
+                RangesListView.Items.Add(FromMemoryMap(memoryMap));
+            }
+
             _updateTimer = new System.Threading.Timer(state =>
             {
                 UpdateDisplay();
             }, null, 0, 100);
 
             UpdateButtonState();
+        }
+
+        public IEnumerable<ListViewItem> FindListViewItem(IEnumerable<MemoryMap> memoryMaps)
+        {
+            foreach (var memoryMap in memoryMaps)
+            {
+                foreach (ListViewItem item in RangesListView.Items)
+                {
+                    if (item.Tag == memoryMap)
+                    {
+                        yield return item;
+                    }
+                }
+            }
         }
 
         private void OnStep(object sender, EventArgs e)
@@ -82,10 +122,42 @@ namespace Sharp6800.Debugger
 
             _trainer.OnStop -= OnStop;
             _trainer.OnStart -= OnStart;
-
+            _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Add, AddMapEventAction);
+            _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Update, UpdateMapEventAction);
+            _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Remove, RemoveMapEventAction);
+            _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Clear, ClearMapEventAction);
             _updateTimer.Dispose();
             _memoryDisplay.Dispose();
             _disassemberDisplay.Dispose();
+        }
+
+        private void AddMapEventAction(IEnumerable<MemoryMap> memoryMaps)
+        {
+            foreach (var memoryMap in memoryMaps)
+            {
+                RangesListView.Items.Add(FromMemoryMap(memoryMap));
+            }
+        }
+
+        private void UpdateMapEventAction(IEnumerable<MemoryMap> memoryMaps)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void RemoveMapEventAction(IEnumerable<MemoryMap> memoryMaps)
+        {
+            foreach (var listViewItem in FindListViewItem(memoryMaps))
+            {
+                RangesListView.Items.Remove(listViewItem);
+            }
+        }
+
+        private void ClearMapEventAction(IEnumerable<MemoryMap> memoryMaps)
+        {
+            foreach (ListViewItem listViewItem in RangesListView.Items)
+            {
+                RangesListView.Items.Remove(listViewItem);
+            }
         }
 
         private void UpdateDissassemblyView()
@@ -274,46 +346,6 @@ namespace Sharp6800.Debugger
             }
         }
 
-        private void AddRangeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (_disassemberDisplay.SelectedLine.HasValue)
-            {
-                var addRangeDialog = new AddDataRange(_disassemberDisplay.SelectedLine.Value.Address, _disassemberDisplay.SelectedLine.Value.Address + 1);
-                //addRangeDialog.Parent = this;
-                addRangeDialog.StartPosition = FormStartPosition.CenterParent;
-                var result = addRangeDialog.ShowDialog(this);
-                if (result == DialogResult.OK)
-                {
-                    var memoryMap = new MemoryMap()
-                    {
-                        Start = addRangeDialog.StartAddress,
-                        End = addRangeDialog.EndAddress,
-                        Type = addRangeDialog.RangeType,
-                        Description = addRangeDialog.Description
-                    };
-
-                    _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
-                }
-            }
-        }
-
-        private void RemoveRangeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (_disassemberDisplay.SelectedLine.HasValue)
-            {
-                var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
-
-                if (memoryMap != null)
-                {
-                    if (MessageBox.Show($"Are you sure you want to remove the data range {memoryMap.Description}?",
-                            "Remove Data Range", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
-                    }
-                }
-            }
-        }
-
         private void ResetMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -407,9 +439,9 @@ namespace Sharp6800.Debugger
 
         }
 
-        private void MemToolStripComboBox_SelectedIndexChanged_1(object sender, EventArgs e)
+        private void MemToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var selectedRange = (MemoryRange) MemToolStripComboBox.SelectedItem;
+            var selectedRange = (MemoryRange)MemToolStripComboBox.SelectedItem;
             _memoryDisplay.MemoryOffset = selectedRange.Start;
             _memoryDisplay.MemoryRange = selectedRange;
 
@@ -465,7 +497,86 @@ namespace Sharp6800.Debugger
             Debug.WriteLine("Removed message filter");
         }
 
+        private void AddRangeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddRange();
+        }
+
+        private void RemoveRangeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RemoveRange();
+        }
+
         private void addCommentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddComment();
+        }
+
+
+        private void removeCommentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RemoveComment();
+        }
+
+        private void AddRange()
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var addRangeDialog = new AddDataRange(_disassemberDisplay.SelectedLine.Value.Address, _disassemberDisplay.SelectedLine.Value.Address + 1);
+                //addRangeDialog.Parent = this;
+                addRangeDialog.StartPosition = FormStartPosition.CenterParent;
+                var result = addRangeDialog.ShowDialog(this);
+                if (result == DialogResult.OK)
+                {
+                    var memoryMap = new MemoryMap()
+                    {
+                        Start = addRangeDialog.StartAddress,
+                        End = addRangeDialog.EndAddress,
+                        Type = addRangeDialog.RangeType,
+                        Description = addRangeDialog.Description
+                    };
+
+                    _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
+                }
+            }
+        }
+
+        
+        private void RemoveComment()
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
+
+                if (memoryMap != null)
+                {
+                    if (MessageBox.Show($"Are you sure you want to remove the comment {memoryMap.Description}?",
+                            "Remove Comment", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
+                    }
+                }
+            }
+        }
+
+        private void RemoveRange()
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
+
+                if (memoryMap != null)
+                {
+                    if (MessageBox.Show($"Are you sure you want to remove the data range {memoryMap.Description}?",
+                            "Remove Data Range", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
+                    }
+                }
+            }
+        }
+
+        public void AddComment()
         {
             if (_disassemberDisplay.SelectedLine.HasValue)
             {
@@ -484,23 +595,6 @@ namespace Sharp6800.Debugger
                     };
 
                     _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
-                }
-            }
-        }
-
-        private void removeCommentToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (_disassemberDisplay.SelectedLine.HasValue)
-            {
-                var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
-
-                if (memoryMap != null)
-                {
-                    if (MessageBox.Show($"Are you sure you want to remove the comment {memoryMap.Description}?",
-                            "Remove Comment", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
-                    }
                 }
             }
         }

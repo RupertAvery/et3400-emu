@@ -3,17 +3,77 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Schema;
 using Sharp6800.Debugger;
 
 namespace Sharp6800.Trainer
 {
+    public class MemoryMapEvent
+    {
+        public MapEventType Type { get; }
+        public IEnumerable<MemoryMap> MemoryMaps { get; }
+
+        public MemoryMapEvent(MapEventType type, IEnumerable<MemoryMap> memoryMaps)
+        {
+            Type = type;
+            MemoryMaps = memoryMaps;
+        }
+
+    }
+
+    public class MemoryMapEventBus
+    {
+        private Dictionary<MapEventType, List<Action<IEnumerable<MemoryMap>>>> _subscriptions;
+
+        public MemoryMapEventBus()
+        {
+            _subscriptions = new Dictionary<MapEventType, List<Action<IEnumerable<MemoryMap>>>>();
+            _subscriptions.Add(MapEventType.Add, new List<Action<IEnumerable<MemoryMap>>>());
+            _subscriptions.Add(MapEventType.Update, new List<Action<IEnumerable<MemoryMap>>>());
+            _subscriptions.Add(MapEventType.Remove, new List<Action<IEnumerable<MemoryMap>>>());
+            _subscriptions.Add(MapEventType.Clear, new List<Action<IEnumerable<MemoryMap>>>());
+        }
+
+        public void Unsubscribe(MapEventType eventType, Action<IEnumerable<MemoryMap>> mapEventAction)
+        {
+            _subscriptions[eventType].Remove(mapEventAction);
+        }
+
+        public void Subscribe(MapEventType eventType, Action<IEnumerable<MemoryMap>> mapEventAction)
+        {
+            _subscriptions[eventType].Add(mapEventAction);
+        }
+
+        public void Publish(MapEventType eventType, IEnumerable<MemoryMap> memoryMaps)
+        {
+            foreach (var action in _subscriptions[eventType])
+            {
+                action(memoryMaps);
+            }
+        }
+
+    }
+
     public class MemoryMapCollection : IEnumerable<MemoryMap>
     {
+        private readonly MemoryMapEventBus _memoryMapEventBus;
         private List<MemoryMap> _memoryMaps;
+        private object lockObject = new object();
 
-        public MemoryMapCollection()
+        public bool RequestLock(int timeOut = 100)
         {
+            return Monitor.TryEnter(lockObject, timeOut);
+        }
+
+        public void ReleaseLock()
+        {
+            Monitor.Exit(lockObject);
+        }
+
+        public MemoryMapCollection(MemoryMapEventBus memoryMapEventBus)
+        {
+            _memoryMapEventBus = memoryMapEventBus;
             _memoryMaps = new List<MemoryMap>();
         }
 
@@ -27,21 +87,29 @@ namespace Sharp6800.Trainer
             return GetEnumerator();
         }
 
-
         public void Add(MemoryMap memoryMap)
         {
-            _memoryMaps.Add(memoryMap);
+            lock (lockObject)
+            {
+                _memoryMaps.Add(memoryMap);
+            }
+            _memoryMapEventBus.Publish(MapEventType.Add, new[] { memoryMap });
         }
 
         public void Add(int startAddress, int endAddress, RangeType rangeType, string description)
         {
-            _memoryMaps.Add(new MemoryMap()
+            var memoryMap = new MemoryMap()
             {
                 Start = startAddress,
                 End = endAddress,
                 Type = rangeType,
                 Description = description
-            });
+            };
+            lock (lockObject)
+            {
+                _memoryMaps.Add(memoryMap);
+            }
+            _memoryMapEventBus.Publish(MapEventType.Add, new[] { memoryMap });
         }
 
         public MemoryMap this[int startAddress]
@@ -51,7 +119,12 @@ namespace Sharp6800.Trainer
 
         public void Remove(MemoryMap memoryMap)
         {
-            _memoryMaps.Remove(memoryMap);
+            lock (lockObject)
+            {
+                _memoryMaps.Remove(memoryMap);
+            }
+
+            _memoryMapEventBus.Publish(MapEventType.Remove, new[] { memoryMap });
         }
 
         public static IEnumerable<MemoryMap> Load(string file)
@@ -112,12 +185,21 @@ namespace Sharp6800.Trainer
 
         public void Clear()
         {
-            _memoryMaps.Clear();
+            lock (lockObject)
+            {
+                _memoryMaps.Clear();
+            }
+            _memoryMapEventBus.Publish(MapEventType.Clear, null);
         }
 
         public void AddRange(IEnumerable<MemoryMap> memoryMaps)
         {
-            _memoryMaps.AddRange(memoryMaps);
+            lock (lockObject)
+            {
+                _memoryMaps.AddRange(memoryMaps);
+            }
+
+            _memoryMapEventBus.Publish(MapEventType.Add, memoryMaps);
         }
 
         public static void Save(Stream stream, IEnumerable<MemoryMap> memoryMaps)
