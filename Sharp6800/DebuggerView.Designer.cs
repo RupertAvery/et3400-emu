@@ -81,16 +81,16 @@
             this.GotoBreakpointButton = new System.Windows.Forms.ToolStripButton();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.RangesListView = new System.Windows.Forms.ListView();
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.RangesToolStrip = new System.Windows.Forms.ToolStrip();
             this.AddRangeButton = new System.Windows.Forms.ToolStripButton();
             this.RemoveRangeButton = new System.Windows.Forms.ToolStripButton();
             this.ClearAllRangesButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
             this.GotoRangeButton = new System.Windows.Forms.ToolStripButton();
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -513,6 +513,7 @@
             this.BreakpointsListView.TabIndex = 1;
             this.BreakpointsListView.UseCompatibleStateImageBehavior = false;
             this.BreakpointsListView.View = System.Windows.Forms.View.Details;
+            this.BreakpointsListView.DoubleClick += new System.EventHandler(this.BreakpointsListView_DoubleClick);
             // 
             // columnHeader1
             // 
@@ -610,6 +611,20 @@
             this.RangesListView.TabIndex = 1;
             this.RangesListView.UseCompatibleStateImageBehavior = false;
             this.RangesListView.View = System.Windows.Forms.View.Details;
+            this.RangesListView.SelectedIndexChanged += new System.EventHandler(this.RangesListView_SelectedIndexChanged);
+            this.RangesListView.DoubleClick += new System.EventHandler(this.RangesListView_DoubleClick);
+            this.RangesListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.RangesListView_KeyDown);
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.DisplayIndex = 3;
+            this.columnHeader6.Text = "Description";
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.DisplayIndex = 2;
+            this.columnHeader5.Text = "Type";
+            this.columnHeader5.Width = 100;
             // 
             // columnHeader3
             // 
@@ -622,12 +637,6 @@
             this.columnHeader4.DisplayIndex = 1;
             this.columnHeader4.Text = "End";
             this.columnHeader4.Width = 100;
-            // 
-            // columnHeader5
-            // 
-            this.columnHeader5.DisplayIndex = 2;
-            this.columnHeader5.Text = "Type";
-            this.columnHeader5.Width = 100;
             // 
             // RangesToolStrip
             // 
@@ -691,11 +700,6 @@
             this.GotoRangeButton.Text = "Go to range";
             this.GotoRangeButton.ToolTipText = "Go to range";
             this.GotoRangeButton.Click += new System.EventHandler(this.GotoRangeButton_Click);
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.DisplayIndex = 3;
-            this.columnHeader6.Text = "Description";
             // 
             // DebuggerView
             // 

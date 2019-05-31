@@ -24,5 +24,10 @@ namespace Sharp6800
         {
             label1.Text = "Sharp6800 - ET3400 Emulator v" + Application.ProductVersion;
         }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+        }
     }
 }

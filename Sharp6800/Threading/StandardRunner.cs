@@ -13,6 +13,8 @@ namespace Sharp6800.Trainer.Threads
     {
         private object lockCycles = new object();
         protected Timer _timer;
+        
+        ManualResetEventSlim manualResetEventSlim = new ManualResetEventSlim();
 
         public StandardRunner(Trainer trainer)
             : base(trainer)
@@ -26,26 +28,32 @@ namespace Sharp6800.Trainer.Threads
         {
             if(!Running) return;
 
+            int elapsedCycles;
+
             lock (lockCycles)
             {
-                CyclesPerSecond = _cycles;
+                elapsedCycles = _cycles;
                 _cycles = 0;
             }
 
             //CyclesPerSecond = _cycles - _lastCycles;
             //var diff = (_trainer.Settings.ClockSpeed - CyclesPerSecond);
-            RaiseTimerEvent();
+            RaiseTimerEvent(elapsedCycles);
 
-            var delta = (_trainer.Settings.ClockSpeed - CyclesPerSecond) / 1000;
-            Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed, CyclesPerSecond);
+            var delta = (_trainer.Settings.ClockSpeed / 10 - elapsedCycles) / 100;
+            
+            Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed, elapsedCycles * 10);
+            
             limit += delta;
-            var ratio = CyclesPerSecond / (float) _trainer.Settings.ClockSpeed;
+
+            var ratio = elapsedCycles * 10 / (float) _trainer.Settings.ClockSpeed;
 
             if (Math.Abs(ratio - 1.0) <= 0.02)
             {
                 referenceLimit = limit;
                 _timer?.Dispose();
             }
+
             if (limit < 0) limit = 0;
             sleeps = 0;
             //_lastCycles = _cycles;
@@ -55,7 +63,7 @@ namespace Sharp6800.Trainer.Threads
         {
             if (referenceLimit == 0)
             {
-                _timer = new Timer(state => CheckSpeed(), null, 0, 1000);
+                _timer = new Timer(state => CheckSpeed(), null, 0, 100);
             }
         }
 
@@ -72,6 +80,7 @@ namespace Sharp6800.Trainer.Threads
 
         public override void Dispose()
         {
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
             _timer?.Dispose();
             base.Dispose();
         }
@@ -108,10 +117,12 @@ namespace Sharp6800.Trainer.Threads
                     _cycles += cycles;
                 }
 
+
                 if (loopCycles > limit)
                 {
                     loopCycles = 0;
-                    Thread.Sleep(1);
+                    //Thread.Sleep(1);
+                    manualResetEventSlim.Wait(1);
                     sleeps++;
                 }
             }

@@ -33,7 +33,11 @@ namespace Sharp6800.Debugger
             var index = ViewOffset + y / _textheight;
             if (index < CurrentView.LineCount)
             {
-                SelectedLine = CurrentView.Lines[ViewOffset + y / _textheight];
+                if (CurrentView.RequestLock())
+                {
+                    SelectedLine = CurrentView.Lines[ViewOffset + y / _textheight];
+                    CurrentView.ReleaseLock();
+                }
             }
             else
             {
@@ -47,7 +51,11 @@ namespace Sharp6800.Debugger
             {
                 if (SelectedLine.Value.LineNumber - 1 >= 0)
                 {
-                    SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber - 1];
+                    if (CurrentView.RequestLock())
+                    {
+                        SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber - 1];
+                        CurrentView.ReleaseLock();
+                    }
                 }
                 EnsureVisble(SelectedLine.Value);
             }
@@ -59,7 +67,11 @@ namespace Sharp6800.Debugger
             {
                 if (SelectedLine.Value.LineNumber + 1 < CurrentView.LineCount)
                 {
-                    SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber + 1];
+                    if (CurrentView.RequestLock())
+                    {
+                        SelectedLine = CurrentView.Lines[SelectedLine.Value.LineNumber + 1];
+                        CurrentView.ReleaseLock();
+                    }
                 }
                 EnsureVisble(SelectedLine.Value);
             }
@@ -231,7 +243,7 @@ namespace Sharp6800.Debugger
 
         public void PageDown()
         {
-            if (Monitor.TryEnter(CurrentView.UpdateLock, 50))
+            if (CurrentView.RequestLock())
             {
                 var currentValue = _scrollBar.Value;
                 currentValue += VisibleItems;
@@ -263,13 +275,13 @@ namespace Sharp6800.Debugger
                         SelectedLine = CurrentView.Lines[CurrentView.LineCount - 1];
                     }
                 }
-                Monitor.Exit(CurrentView.UpdateLock);
+                CurrentView.ReleaseLock();
             }
         }
 
         public void PageUp()
         {
-            if (Monitor.TryEnter(CurrentView.UpdateLock, 50))
+            if (CurrentView.RequestLock())
             {
                 var currentValue = _scrollBar.Value;
                 currentValue -= VisibleItems;
@@ -301,7 +313,7 @@ namespace Sharp6800.Debugger
                         SelectedLine = CurrentView.Lines[0];
                     }
                 }
-                Monitor.Exit(CurrentView.UpdateLock);
+                CurrentView.ReleaseLock();
             }
         }
 

@@ -101,6 +101,5 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonClose;
         private System.Windows.Forms.Label label3;
-
     }
 }

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Sharp6800.Trainer;
 
@@ -17,39 +13,71 @@ namespace Sharp6800
         public SettingsForm(TrainerSettings settings)
         {
             _settings = settings;
+            this.Closing += OnClosing;
+            _settings.SettingsUpdated += SettingsUpdated;
             InitializeComponent();
+            SettingsUpdated(this, EventArgs.Empty);
+            UpdateFrequency();
         }
 
-        private int GetMappedSpeed(int value)
+        private void OnClosing(object sender, CancelEventArgs e)
         {
-            return (int)Math.Pow(10, value);
+            _settings.SettingsUpdated -= SettingsUpdated;
         }
 
-        private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
+
+        private void SettingsUpdated(object sender, EventArgs e)
         {
-            _settings.ClockSpeed = GetMappedSpeed(hScrollBar1.Value);
+            CpuPercentTrackBar.Value = _settings.CpuPercent;
+            UpdateFrequency();
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            hScrollBar1.Value = 5;
         }
 
-        private void hScrollBar1_ValueChanged(object sender, EventArgs e)
+        private void CpuPercentTrackBar_Scroll(object sender, EventArgs e)
         {
-            _settings.ClockSpeed = GetMappedSpeed(hScrollBar1.Value);
-            label1.Text = string.Format("Clock Speed: {0} cycles/sec", _settings.ClockSpeed);
+            UpdateFrequency();
         }
 
         private void ResetButton_Click(object sender, EventArgs e)
         {
-            hScrollBar1.Value = 5;
-            //OUTCHCheckBox.Checked = true;
+            CpuPercentTrackBar.Value = 100;
+            UpdateFrequency();
         }
 
-        //private void OUTCHCheckBox_CheckedChanged(object sender, EventArgs e)
-        //{
-        //    _settings.EnableOUTCHHack = OUTCHCheckBox.Checked;
-        //}
+        private string Fix(int value)
+        {
+            if (value >= 1_000_000)
+            {
+                return $"{Math.Round(value / 1_000_000f, 2, MidpointRounding.ToEven)}MHz";
+
+            }
+            else if (value >= 1_000)
+            {
+                return $"{Math.Round(value / 1_000f, 2, MidpointRounding.ToEven)}MHz";
+            }
+            else
+            {
+                return $"{value}Hz";
+            }
+        }
+
+        private void UpdateFrequency()
+        {
+            var frequency = (int)((CpuPercentTrackBar.Value / 100f) * _settings.BaseFrequency);
+            BaseFrequencyLabel.Text = Fix(_settings.BaseFrequency);
+            FrequencyLabel.Text = Fix(frequency);
+            _settings.SettingsUpdated -= SettingsUpdated;
+            _settings.CpuPercent = CpuPercentTrackBar.Value;
+            _settings.ClockSpeed = frequency;
+            _settings.SettingsUpdated += SettingsUpdated;
+        }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
     }
 }

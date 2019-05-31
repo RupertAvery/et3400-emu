@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using Core6800;
 using Sharp6800.Common;
 using Sharp6800.Trainer;
@@ -119,7 +120,7 @@ namespace Sharp6800.Debugger
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             Application.RemoveMessageFilter(this);
-
+            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
             _trainer.OnStop -= OnStop;
             _trainer.OnStart -= OnStart;
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Add, AddMapEventAction);
@@ -421,12 +422,38 @@ namespace Sharp6800.Debugger
 
         private void AddRangeButton_Click(object sender, EventArgs e)
         {
+            var address = _disassemberDisplay.SelectedLine.HasValue
+                ? _disassemberDisplay.SelectedLine.Value.Address
+                : 0;
 
+            var addRangeDialog = new AddDataRange(address, address + 1);
+            addRangeDialog.StartPosition = FormStartPosition.CenterParent;
+            var result = addRangeDialog.ShowDialog(this);
+            if (result == DialogResult.OK)
+            {
+                var memoryMap = new MemoryMap()
+                {
+                    Start = addRangeDialog.StartAddress,
+                    End = addRangeDialog.EndAddress,
+                    Type = addRangeDialog.RangeType,
+                    Description = addRangeDialog.Description
+                };
+
+                _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
+            }
         }
 
         private void RemoveRangeButton_Click(object sender, EventArgs e)
         {
-
+            if (RangesListView.SelectedItems != null && RangesListView.SelectedItems.Count > 0)
+            {
+                var memoryMap = (MemoryMap)RangesListView.SelectedItems[0].Tag;
+                if (MessageBox.Show($"Are you sure you want to remove the data range {memoryMap.Description}?",
+                        "Remove Data Range", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    _trainer.MemoryMapManager.RemoveMemoryMap(memoryMap);
+                }
+            }
         }
 
         private void ClearAllRangesButton_Click(object sender, EventArgs e)
@@ -436,7 +463,7 @@ namespace Sharp6800.Debugger
 
         private void GotoRangeButton_Click(object sender, EventArgs e)
         {
-
+            GotoRange();
         }
 
         private void MemToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -541,7 +568,7 @@ namespace Sharp6800.Debugger
             }
         }
 
-        
+
         private void RemoveComment()
         {
             if (_disassemberDisplay.SelectedLine.HasValue)
@@ -597,6 +624,42 @@ namespace Sharp6800.Debugger
                     _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
                 }
             }
+        }
+
+        private void BreakpointsListView_DoubleClick(object sender, EventArgs e)
+        {
+        }
+
+        private void RangesListView_DoubleClick(object sender, EventArgs e)
+        {
+            GotoRange();
+        }
+
+        private void GotoRange()
+        {
+            if (RangesListView.SelectedItems != null && RangesListView.SelectedItems.Count > 0)
+            {
+                var map = (MemoryMap)RangesListView.SelectedItems[0].Tag;
+                EnsureVisible(map.Start);
+            }
+        }
+
+        private void RangesListView_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    GotoRangeButton_Click(null, EventArgs.Empty);
+                    break;
+                case Keys.Delete:
+                    RemoveRangeButton_Click(null, EventArgs.Empty);
+                    break;
+            }
+        }
+
+        private void RangesListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

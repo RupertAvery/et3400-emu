@@ -17,7 +17,6 @@ namespace Sharp6800.Trainer.Threads
 
         public event OnTimerDelegate OnTimer;
 
-        public int CyclesPerSecond { get; protected set; }
         public bool Running { get; protected set; }
 
         protected TrainerRunnerBase(Trainer trainer)
@@ -33,9 +32,9 @@ namespace Sharp6800.Trainer.Threads
 
         }
 
-        protected void RaiseTimerEvent()
+        protected void RaiseTimerEvent(int cyclesPerSecond)
         {
-            OnTimer?.Invoke(CyclesPerSecond);
+            OnTimer?.Invoke(cyclesPerSecond);
         }
 
         /// <summary>

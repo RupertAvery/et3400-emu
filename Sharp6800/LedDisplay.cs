@@ -16,6 +16,7 @@ namespace Sharp6800
         private readonly Image[] vt = new Image[2];
         private readonly Image[] hr = new Image[2];
         private readonly Image[] dp = new Image[2];
+        private readonly PictureBox _target;
 
         private string[] flags = { "H", "I", "N", "Z", "V", "C" };
         
@@ -24,6 +25,7 @@ namespace Sharp6800
         public LedDisplay(PictureBox target, IMemory trainer)
         {
             _trainer = trainer;
+            _target = target;
 
             _updateTimer = new System.Threading.Timer(state =>
             {
@@ -35,8 +37,8 @@ namespace Sharp6800
                 width = target.Width;
                 height = target.Height;
 
-                targetWnd = target.Handle;
-                target.Paint += (sender, args) => Repaint(args.Graphics);
+                targetWnd = _target.Handle;
+                _target.Paint += TargetOnPaint;
 
                 vt[0] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/vtoff.png"));
                 vt[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/vton.png"));
@@ -49,6 +51,11 @@ namespace Sharp6800
             {
                 throw new Exception("Error initializing the display. one or more segment image files may be missing.");
             }
+        }
+
+        private void TargetOnPaint(object sender, PaintEventArgs e)
+        {
+            Repaint(e.Graphics);
         }
 
         public void Write(int address, int data)
@@ -173,6 +180,8 @@ namespace Sharp6800
 
         public void Dispose()
         {
+            _target.Paint -= TargetOnPaint;
+            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
             _updateTimer?.Dispose();
         }
     }

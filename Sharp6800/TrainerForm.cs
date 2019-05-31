@@ -22,8 +22,12 @@ namespace Sharp6800.Trainer
         private RecentFilesCollection _recentFiles;
         private Timer timer;
         private Trainer _trainer;
+        private TrainerSettings _trainerSettings;
         private DebuggerView _debuggerView;
         private Mode _emulationMode = Mode.ET3400;
+        private bool isFirstLoad = true;
+        private SettingsForm _settingsForm;
+
         public TrainerForm()
         {
             InitializeComponent();
@@ -90,11 +94,21 @@ namespace Sharp6800.Trainer
                 filename);
         }
 
+        private string _settingsPath = "Sharp6800.ini";
+
         private void InitTrainer()
         {
             try
             {
-                _trainer = new Trainer();
+                if (File.Exists(_settingsPath))
+                {
+                    _trainerSettings = TrainerSettings.Load(_settingsPath);
+                }
+                else
+                {
+                    _trainerSettings = new TrainerSettings();
+                }
+                _trainer = new Trainer(_trainerSettings);
                 _trainer.SetupDisplay(SegmentPictureBox);
                 _trainer.OnStart += OnStart;
                 _trainer.OnStop += OnStop;
@@ -103,10 +117,8 @@ namespace Sharp6800.Trainer
                 this.Resize += OnResize;
                 this.Closing += OnClosing;
 #if DEBUG
-                Action<int> updateSpeed = delegate (int cyclesPerSecond)
-                    { this.Text = string.Format("ET-3400 ({0:0}%)", ((float)cyclesPerSecond / (float)_trainer.DefaultClockSpeed) * 100); };
 
-                _trainer.Runner.OnTimer += second => Invoke(updateSpeed, second);
+                _trainer.Runner.OnTimer += RunnerOnTimer;
 #endif
 
                 UpdateState();
@@ -119,6 +131,19 @@ namespace Sharp6800.Trainer
                 MessageBox.Show(ex.Message, "Error initializing the emulator");
             }
         }
+
+        private void RunnerOnTimer(int cyclesPerSecond)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((Action<int>)RunnerOnTimer, new object[] { cyclesPerSecond });
+            }
+            else
+            {
+                Text = string.Format("ET-3400 ({0:0}%)", ((float)cyclesPerSecond / (float)_trainer.Settings.BaseFrequency) * 100);
+            }
+        }
+
         #endregion
 
         #region Event Handlers
@@ -161,6 +186,20 @@ namespace Sharp6800.Trainer
 
         private void OnClosing(object sender, CancelEventArgs e)
         {
+
+            if (_settingsForm != null && !_settingsForm.IsDisposed)
+            {
+                _settingsForm.Close();
+                _settingsForm.Dispose();
+            }
+
+            if (_debuggerView != null && !_debuggerView.IsDisposed)
+            {
+                _debuggerView.Close();
+                _debuggerView.Dispose();
+            }
+
+            _trainer.Runner.OnTimer -= RunnerOnTimer;
             _trainer.OnStart -= OnStart;
             _trainer.OnStop -= OnStop;
             _trainer.Dispose();
@@ -205,6 +244,7 @@ namespace Sharp6800.Trainer
 
             this.KeyUp -= OnReleaseKey;
 
+            TrainerSettings.Save(_trainerSettings, _settingsPath);
         }
 
 
@@ -405,8 +445,15 @@ namespace Sharp6800.Trainer
 
         private void SettingsToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            var settings = new SettingsForm(_trainer.Settings);
-            settings.Show();
+            if (_settingsForm == null || _settingsForm.IsDisposed)
+            {
+                _settingsForm = new SettingsForm(_trainer.Settings);
+                _settingsForm.Show();
+            }
+            else
+            {
+                _settingsForm.BringToFront();
+            }
         }
 
         private void ResetROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -475,7 +522,6 @@ namespace Sharp6800.Trainer
             _trainer.Step();
         }
 
-        private bool isFirstLoad = true;
 
         private void TrainerForm_Activated(object sender, EventArgs e)
         {
@@ -538,12 +584,13 @@ namespace Sharp6800.Trainer
             }
             else
             {
-                var state = _trainer != null && _trainer.IsRunning;
-                StatusToolStripStatusLabel.Text = state ? "Running" : "Stopped";
-                stopToolStripMenuItem.Enabled = state;
-                resetToolStripMenuItem.Enabled = state;
-                stepToolStripMenuItem.Enabled = !state;
-                startToolStripMenuItem.Enabled = !state;
+                var isRunning = _trainer != null && _trainer.IsRunning;
+                StatusToolStripStatusLabel.Text = isRunning ? "Running" : "Stopped";
+                stopToolStripMenuItem.Enabled = isRunning;
+                resetToolStripMenuItem.Enabled = isRunning;
+                stepToolStripMenuItem.Enabled = !isRunning;
+                startToolStripMenuItem.Enabled = !isRunning;
+                clearRAMToolStripMenuItem.Enabled = !isRunning;
             }
         }
 
@@ -653,7 +700,9 @@ namespace Sharp6800.Trainer
 
             if (_emulationMode == Mode.ET3400)
             {
-                _trainer.Settings.ClockSpeed = 131072; // 100kHz
+                _trainer.Settings.BaseFrequency = 100_000; // 100kHz
+                //_trainer.Settings.ClockSpeed = 100_000; 
+                //_trainer.Settings.CpuPercent = 100; 
                 var buffer = new byte[2048];
                 // Clear ROMs
                 _trainer.WriteMemory(0x1400, buffer, buffer.Length);
@@ -662,7 +711,9 @@ namespace Sharp6800.Trainer
             }
             else
             {
-                _trainer.Settings.ClockSpeed = 1048576; // 1MHz
+                _trainer.Settings.BaseFrequency = 1_000_000; // 1MHz
+                //_trainer.Settings.ClockSpeed = 1_000_000; 
+                //_trainer.Settings.CpuPercent = 100; 
                 LoadRomFromResource("ROM/FantomII.bin", 0x1400, 2048);
                 LoadRomFromResource("ROM/TinyBasic.bin", 0x1C00, 2048);
                 LoadMapFromResource("ROM/FantomII.map", 0x1400, 2048);
@@ -684,7 +735,7 @@ namespace Sharp6800.Trainer
         private void HardResetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _trainer.Stop(false);
-            var empty = new byte[0x13FF];
+            var empty = new byte[0x1000];
             _trainer.WriteMemory(0x0000, empty, empty.Length);
             _trainer.Restart();
         }
@@ -737,6 +788,12 @@ namespace Sharp6800.Trainer
                     MemoryMapCollection.Save(stream, region.MemoryMapCollection);
                 }
             }
+        }
+
+        private void clearRAMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var empty = new byte[4096];
+            _trainer.WriteMemory(0x0000, empty, empty.Length);
         }
     }
 }

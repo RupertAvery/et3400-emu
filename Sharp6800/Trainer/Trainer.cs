@@ -46,11 +46,11 @@ namespace Sharp6800.Trainer
 
         private Rs232IOPort _rs232 = new Rs232IOPort();
 
-        public Trainer()
+        public Trainer(TrainerSettings settings)
         {
             Memory = new int[65536];
             Breakpoints = new List<int>();
-            Settings = new TrainerSettings();
+            Settings = settings;
             Watches = new List<Watch>();
             MemoryMapManager = new MemoryMapManager();
             MemoryMapEventBus = new MemoryMapEventBus();
@@ -441,6 +441,7 @@ namespace Sharp6800.Trainer
         public void Dispose()
         {
             Runner.Stop();
+            
             _disp.Dispose();
         }
 

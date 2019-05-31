@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Sharp6800.Trainer;
 
 namespace Sharp6800.Debugger
@@ -9,7 +10,7 @@ namespace Sharp6800.Debugger
     {
         private ITrainer _trainer;
 
-        public object UpdateLock { get; } = new object();
+        private object _updateLock = new object();
 
         public bool IsDirty { get; private set; }
         public string Description { get; }
@@ -19,6 +20,16 @@ namespace Sharp6800.Debugger
         public int LineCount
         {
             get { return Lines.Count; }
+        }
+
+        public bool RequestLock(int timeout = 200)
+        {
+            return Monitor.TryEnter(_updateLock);
+        }
+
+        public void ReleaseLock()
+        {
+            Monitor.Exit(_updateLock);
         }
 
         public DisassemblyView(ITrainer trainer, string description, int start, int end)
@@ -60,7 +71,7 @@ namespace Sharp6800.Debugger
 
         private void DisassembleRange()
         {
-            lock (UpdateLock)
+            lock (_updateLock)
             {
                 var currentAddress = Start;
                 Lines = new List<DisassemblyLine>();
@@ -142,7 +153,7 @@ namespace Sharp6800.Debugger
 
         public DisassemblyLine? GetLineFromAddress(int address)
         {
-            lock (UpdateLock)
+            lock (_updateLock)
             {
                 return Lines.Where(x => x.Address == address).Cast<DisassemblyLine?>().FirstOrDefault();
             }

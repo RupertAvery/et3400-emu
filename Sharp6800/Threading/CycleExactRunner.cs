@@ -14,13 +14,14 @@ namespace Sharp6800.Trainer.Threads
         {
         }
 
+        private int CyclesPerSecond;
         private int spinTime = 100;
 
         protected void CheckSpeed()
         {
             CyclesPerSecond = _cycles - _lastCycles;
-            RaiseTimerEvent();
-            spinTime += (CyclesPerSecond - _trainer.Settings.ClockSpeed) / 10;
+            RaiseTimerEvent(CyclesPerSecond);
+            spinTime += (CyclesPerSecond - _trainer.Settings.BaseFrequency) / 10;
 
             if (spinTime > 5000) spinTime = 5000;
             if (spinTime < 1) spinTime = 1;
