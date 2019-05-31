@@ -684,5 +684,13 @@ namespace Sharp6800.Debugger
         {
 
         }
+
+        public void RefreshDisassemblyViews()
+        {
+            foreach (DisassemblyView disasemblyView in DasmToolStripComboBox.Items)
+            {
+                disasemblyView.Refresh();
+            }
+        }
     }
 }

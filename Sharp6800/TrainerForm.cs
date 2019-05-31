@@ -477,7 +477,7 @@ namespace Sharp6800.Trainer
                 "Reset ROM", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
             if (result == DialogResult.Yes)
             {
-                LoadDefaultRom();
+                LoadDefaultRom(true);
             }
         }
 
@@ -542,7 +542,7 @@ namespace Sharp6800.Trainer
         {
             if (isFirstLoad)
             {
-                LoadDefaultRom();
+                LoadDefaultRom(false);
                 UpdateState();
                 isFirstLoad = false;
             }
@@ -707,7 +707,7 @@ namespace Sharp6800.Trainer
             LoadMapFromResource("ROM/Monitor.map", Trainer.RomAddress, 1024);
         }
 
-        private void LoadDefaultRom()
+        private void LoadDefaultRom(bool resetClock)
         {
             _trainer.Stop(false);
 
@@ -715,9 +715,12 @@ namespace Sharp6800.Trainer
 
             if (_emulationMode == Mode.ET3400)
             {
-                _trainer.Settings.BaseFrequency = 100_000; // 100kHz
-                //_trainer.Settings.ClockSpeed = 100_000; 
-                //_trainer.Settings.CpuPercent = 100; 
+                if (resetClock)
+                {
+                    _trainer.Settings.BaseFrequency = 100_000; // 100kHz
+                    _trainer.Settings.ClockSpeed = 100_000; 
+                    _trainer.Settings.CpuPercent = 100; 
+                }
                 var buffer = new byte[2048];
                 // Clear ROMs
                 _trainer.WriteMemory(0x1400, buffer, buffer.Length);
@@ -726,15 +729,21 @@ namespace Sharp6800.Trainer
             }
             else
             {
-                _trainer.Settings.BaseFrequency = 1_000_000; // 1MHz
-                //_trainer.Settings.ClockSpeed = 1_000_000; 
-                //_trainer.Settings.CpuPercent = 100; 
+                if (resetClock)
+                {
+                    _trainer.Settings.BaseFrequency = 1_000_000; // 1MHz
+                    _trainer.Settings.ClockSpeed = 1_000_000;
+                    _trainer.Settings.CpuPercent = 100;
+                }
                 LoadRomFromResource("ROM/FantomII.bin", 0x1400, 2048);
                 LoadRomFromResource("ROM/TinyBasic.bin", 0x1C00, 2048);
                 LoadMapFromResource("ROM/FantomII.map", 0x1400, 2048);
             }
 
-
+            if (_debuggerView != null && !_debuggerView.IsDisposed)
+            {
+                _debuggerView.RefreshDisassemblyViews();
+            }
 
             _trainer.Restart();
         }
@@ -765,7 +774,7 @@ namespace Sharp6800.Trainer
             ModeETA3400ToolStripMenuItem.Checked = false;
             ModeET3400ToolStripMenuItem.Checked = true;
             _emulationMode = Mode.ET3400;
-            LoadDefaultRom();
+            LoadDefaultRom(true);
         }
 
         private void ModeETA3400ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -773,7 +782,7 @@ namespace Sharp6800.Trainer
             ModeET3400ToolStripMenuItem.Checked = false;
             ModeETA3400ToolStripMenuItem.Checked = true;
             _emulationMode = Mode.ETA3400;
-            LoadDefaultRom();
+            LoadDefaultRom(true);
         }
 
         private void loadMapToolStripMenuItem_Click(object sender, EventArgs e)

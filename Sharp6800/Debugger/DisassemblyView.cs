@@ -13,6 +13,7 @@ namespace Sharp6800.Debugger
         private object _updateLock = new object();
 
         public bool IsDirty { get; private set; }
+
         public string Description { get; }
         public int Start { get; }
         public int End { get; }

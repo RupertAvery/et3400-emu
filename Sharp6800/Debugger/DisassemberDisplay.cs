@@ -77,13 +77,12 @@ namespace Sharp6800.Debugger
             }
         }
 
-        private List<DisassemblyView> _disassemblyViews;
+        //private List<DisassemblyView> _disassemblyViews;
 
-        public void AddDisassemblyView(DisassemblyView disassemblyView)
-        {
-            _disassemblyViews.Add(disassemblyView);
-        }
-
+        //public void AddDisassemblyView(DisassemblyView disassemblyView)
+        //{
+        //    _disassemblyViews.Add(disassemblyView);
+        //}
 
         public DisassemblyView CurrentView { get; set; }
 
@@ -121,7 +120,7 @@ namespace Sharp6800.Debugger
             SetUpColors();
             _brush = new SolidBrush(Color.Black);
             _font = new Font("Courier New", 12, FontStyle.Regular);
-            _disassemblyViews = new List<DisassemblyView>();
+            //_disassemblyViews = new List<DisassemblyView>();
         }
 
         public DisassemblyLine? GetLineFromAddress(int address)
