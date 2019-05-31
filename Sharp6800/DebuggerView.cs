@@ -18,6 +18,8 @@ namespace Sharp6800.Debugger
     public partial class DebuggerView : Form
     {
         private readonly Trainer.Trainer _trainer;
+        private object lockObject = new object();
+        private bool IsDisposing;
 
         // P/Invoke declarations
         [DllImport("user32.dll")]
@@ -34,8 +36,6 @@ namespace Sharp6800.Debugger
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_MOUSEWHEEL = 0x20a;
         private const int WM_SYSKEYDOWN = 0x104;
-
-        private bool hasFocus = true;
         private Timer _updateTimer;
 
         public ListViewItem FromMemoryMap(MemoryMap memoryMap)
@@ -79,10 +79,12 @@ namespace Sharp6800.Debugger
                 RangesListView.Items.Add(FromMemoryMap(memoryMap));
             }
 
-            _updateTimer = new System.Threading.Timer(state =>
+            _updateTimer = new Timer(state =>
             {
+                Debug.WriteLine("Tick");
                 UpdateDisplay();
-            }, null, 0, 100);
+            }, null, 0, Timeout.Infinite);
+
 
             UpdateButtonState();
         }
@@ -117,12 +119,14 @@ namespace Sharp6800.Debugger
             UpdateDissassemblyView();
         }
 
+
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             Application.RemoveMessageFilter(this);
-            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            IsDisposing = true;
             _trainer.OnStop -= OnStop;
             _trainer.OnStart -= OnStart;
+            _trainer.OnStep -= OnStep;
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Add, AddMapEventAction);
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Update, UpdateMapEventAction);
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Remove, RemoveMapEventAction);
@@ -130,6 +134,7 @@ namespace Sharp6800.Debugger
             _updateTimer.Dispose();
             _memoryDisplay.Dispose();
             _disassemberDisplay.Dispose();
+            Debug.WriteLine("DebuggerView Disposed");
         }
 
         private void AddMapEventAction(IEnumerable<MemoryMap> memoryMaps)
@@ -189,27 +194,45 @@ namespace Sharp6800.Debugger
             _disassemberDisplay.EnsureVisble(line);
         }
 
-        public void UpdateDisplay()
+        private void UpdateDisplay()
         {
-            _disassemberDisplay.UpdateDisplay();
-            _memoryDisplay.UpdateDisplay();
-
             try
             {
-                Invoke(new MethodInvoker(() =>
-                {
-                    PCTextBox.Text = String.Format("{0:X4}", _trainer.State.PC);
-                    IXTextBox.Text = String.Format("{0:X4}", _trainer.State.X);
-                    SPTextBox.Text = String.Format("{0:X4}", _trainer.State.S);
-                    ACCATextBox.Text = String.Format("{0:X2}", _trainer.State.A);
-                    ACCBTextBox.Text = String.Format("{0:X2}", _trainer.State.B);
-                    var ccText = Convert.ToString(_trainer.State.CC, 2);
-                    CCTextBox.Text = new String('0', 8 - ccText.Length) + ccText;
-                }));
+                _disassemberDisplay.UpdateDisplay();
+                _memoryDisplay.UpdateDisplay();
+                UpdateState();
             }
-            catch
+            finally
             {
-                // swallow
+                if (!IsDisposing)
+                {
+                    _updateTimer.Change(100, Timeout.Infinite);
+                }
+            }
+        }
+
+        private void UpdateState()
+        {
+            if (InvokeRequired)
+            {
+                try
+                {
+                    Invoke((Action)UpdateState);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
+            }
+            else
+            {
+                PCTextBox.Text = String.Format("{0:X4}", _trainer.State.PC);
+                IXTextBox.Text = String.Format("{0:X4}", _trainer.State.X);
+                SPTextBox.Text = String.Format("{0:X4}", _trainer.State.S);
+                ACCATextBox.Text = String.Format("{0:X2}", _trainer.State.A);
+                ACCBTextBox.Text = String.Format("{0:X2}", _trainer.State.B);
+                var ccText = Convert.ToString(_trainer.State.CC, 2);
+                CCTextBox.Text = new String('0', 8 - ccText.Length) + ccText;
             }
         }
 

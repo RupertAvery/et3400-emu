@@ -27,11 +27,6 @@ namespace Sharp6800
             _trainer = trainer;
             _target = target;
 
-            _updateTimer = new System.Threading.Timer(state =>
-            {
-                Redraw();
-            }, null, 0, 16);
-
             try
             {
                 width = target.Width;
@@ -46,11 +41,17 @@ namespace Sharp6800
                 hr[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/hron.png"));
                 dp[0] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/dpoff.png"));
                 dp[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/dpon.png"));
+
+                _updateTimer = new System.Threading.Timer(state =>
+                {
+                    Redraw();
+                }, null, 0, 16);
             }
             catch (Exception)
             {
                 throw new Exception("Error initializing the display. one or more segment image files may be missing.");
             }
+
         }
 
         private void TargetOnPaint(object sender, PaintEventArgs e)

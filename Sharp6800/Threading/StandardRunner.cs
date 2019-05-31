@@ -97,7 +97,7 @@ namespace Sharp6800.Trainer.Threads
                 if (_trainer.BreakpointsEnabled && _trainer.AtBreakPoint && lastBreakPointPC != _trainer.State.PC)
                 {
                     Stop(true);
-                    _trainer.StopExternal();
+                    _trainer.RaiseStopEvent();
                     lastBreakPointPC = _trainer.State.PC;
                     break;
                 }
@@ -112,6 +112,7 @@ namespace Sharp6800.Trainer.Threads
                 }
 
                 loopCycles += cycles;
+
                 lock (lockCycles)
                 {
                     _cycles += cycles;
@@ -121,8 +122,7 @@ namespace Sharp6800.Trainer.Threads
                 if (loopCycles > limit)
                 {
                     loopCycles = 0;
-                    //Thread.Sleep(1);
-                    manualResetEventSlim.Wait(1);
+                    manualResetEventSlim.Wait(20);
                     sleeps++;
                 }
             }

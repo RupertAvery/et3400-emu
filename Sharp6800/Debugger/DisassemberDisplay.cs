@@ -129,98 +129,104 @@ namespace Sharp6800.Debugger
             return CurrentView.GetLineFromAddress(address);
         }
 
+        private object lockObject = new object();
+
         public void UpdateDisplay()
         {
-            if (IsDisposed) return;
-            if (CurrentView == null) return;
-
-            if (CurrentView.IsDirty)
+            if (Monitor.TryEnter(lockObject, 100))
             {
-                CurrentView.Refresh();
-            }
-
-            try
-            {
-                using (var buffer = new Bitmap(Width, Height))
+                try
                 {
-                    using (var g = Graphics.FromImage(buffer))
+                    if (IsDisposed) return;
+                    if (CurrentView == null) return;
+
+                    if (CurrentView.IsDirty)
                     {
-                        g.Clear(Color.White);
+                        CurrentView.Refresh();
+                    }
 
-                        int lineNo = 0;
-                        //var lastComment = "";
-
-                        foreach (var line in CurrentView.Lines.Skip(ViewOffset).ToList())
+                    using (var buffer = new Bitmap(Width, Height))
+                    {
+                        using (var g = Graphics.FromImage(buffer))
                         {
-                            var isAtBreakPoint = _trainer.Breakpoints.Contains(line.Address);
-                            var isSelected = false;
-                            var isCurrentPC = (!_trainer.IsRunning && line.Address == _trainer.State.PC);
+                            g.Clear(Color.White);
 
-                            if (SelectedLine.HasValue && line.LineNumber == SelectedLine.Value.LineNumber)
+                            int lineNo = 0;
+                            //var lastComment = "";
+
+                            foreach (var line in CurrentView.Lines.Skip(ViewOffset).ToList())
                             {
-                                isSelected = true;
-                            }
+                                var isAtBreakPoint = _trainer.Breakpoints.Contains(line.Address);
+                                var isSelected = false;
+                                var isCurrentPC = (!_trainer.IsRunning && line.Address == _trainer.State.PC);
 
-                            if (isAtBreakPoint || isSelected || isCurrentPC)
-                            {
-                                var flags = (isAtBreakPoint ? 1 : 0) +
-                                            (isSelected ? 2 : 0) +
-                                            (isCurrentPC ? 4 : 0);
-
-                                Color highlightColor = colorLookup[flags];
-
-                                using (var brush = new SolidBrush(highlightColor))
+                                if (SelectedLine.HasValue && line.LineNumber == SelectedLine.Value.LineNumber)
                                 {
-                                    g.FillRectangle(brush, 0, 20 * lineNo, Width, 20);
+                                    isSelected = true;
                                 }
-                            }
 
-                            var position = _textheight * lineNo;
-                            var bottomPosition = _textheight * (lineNo + 1) - 1;
-
-                            if (isCurrentPC)
-                            {
-                                using (var pen = new Pen(Color.DarkGray))
+                                if (isAtBreakPoint || isSelected || isCurrentPC)
                                 {
-                                    g.DrawLine(pen, 0, position, Width, position);
-                                    g.DrawLine(pen, 0, bottomPosition, Width, bottomPosition);
+                                    var flags = (isAtBreakPoint ? 1 : 0) +
+                                                (isSelected ? 2 : 0) +
+                                                (isCurrentPC ? 4 : 0);
+
+                                    Color highlightColor = colorLookup[flags];
+
+                                    using (var brush = new SolidBrush(highlightColor))
+                                    {
+                                        g.FillRectangle(brush, 0, 20 * lineNo, Width, 20);
+                                    }
                                 }
+
+                                var position = _textheight * lineNo;
+                                var bottomPosition = _textheight * (lineNo + 1) - 1;
+
+                                if (isCurrentPC)
+                                {
+                                    using (var pen = new Pen(Color.DarkGray))
+                                    {
+                                        g.DrawLine(pen, 0, position, Width, position);
+                                        g.DrawLine(pen, 0, bottomPosition, Width, bottomPosition);
+                                    }
+                                }
+
+                                DrawText(g, 2, position, $"${line.Address:X4}:", Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
+
+                                if (line.LineType == LineType.Comment)
+                                {
+                                    DrawText(g, 70, position, line.Text, Color.Green, isAtBreakPoint, isSelected, isCurrentPC);
+                                }
+                                else if (line.LineType == LineType.Assembly)
+                                {
+                                    DrawText(g, 70, position, line.Opcodes, Color.Black, isAtBreakPoint, isSelected, isCurrentPC);
+                                    DrawText(g, 180, position, line.Instruction, Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
+                                    DrawText(g, 230, position, line.Operands, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
+                                }
+                                else if (line.LineType == LineType.Data)
+                                {
+                                    DrawText(g, 70, position, line.Text, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
+                                }
+
+                                lineNo++;
+
+                                if (lineNo > VisibleItems) break;
                             }
 
-                            DrawText(g, 2, position, $"${line.Address:X4}:", Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
-
-                            if (line.LineType == LineType.Comment)
-                            {
-                                DrawText(g, 70, position, line.Text, Color.Green, isAtBreakPoint, isSelected, isCurrentPC);
-                            }
-                            else if (line.LineType == LineType.Assembly)
-                            {
-                                DrawText(g, 70, position, line.Opcodes, Color.Black, isAtBreakPoint, isSelected, isCurrentPC);
-                                DrawText(g, 180, position, line.Instruction, Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
-                                DrawText(g, 230, position, line.Operands, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
-                            }
-                            else if (line.LineType == LineType.Data)
-                            {
-                                DrawText(g, 70, position, line.Text, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
-                            }
-
-                            lineNo++;
-
-                            if (lineNo > VisibleItems) break;
+                            //_disassemblyView.Refresh();
                         }
 
-                        //_disassemblyView.Refresh();
+                        using (var p = Graphics.FromHwnd(_targetWnd))
+                        {
+                            p.DrawImage(buffer, 0, 0);
+                        }
                     }
 
-                    using (var p = Graphics.FromHwnd(_targetWnd))
-                    {
-                        p.DrawImage(buffer, 0, 0);
-                    }
                 }
-            }
-            catch
-            {
-                // Swallow
+                finally
+                {
+                    Monitor.Exit(lockObject);
+                }
             }
         }
 
@@ -234,9 +240,12 @@ namespace Sharp6800.Debugger
 
         public void Dispose()
         {
-            IsDisposed = true;
-            _brush?.Dispose();
-            _font?.Dispose();
+            lock (lockObject)
+            {
+                IsDisposed = true;
+                _brush?.Dispose();
+                _font?.Dispose();
+            }
         }
 
         public bool IsDisposed { get; private set; }

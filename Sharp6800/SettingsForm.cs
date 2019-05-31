@@ -56,7 +56,7 @@ namespace Sharp6800
             }
             else if (value >= 1_000)
             {
-                return $"{Math.Round(value / 1_000f, 2, MidpointRounding.ToEven)}MHz";
+                return $"{Math.Round(value / 1_000f, 2, MidpointRounding.ToEven)}kHz";
             }
             else
             {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -38,6 +39,11 @@ namespace Sharp6800.Trainer
             InitKeys();
             InitTrainer();
             LoadDefaultMemoryMaps();
+#if !DEBUG
+            sendTerminalToolStripMenuItem.Visible = false;
+            modeToolStripMenuItem.Visible = false;
+#endif
+
             _recentFiles = new RecentFilesCollection(RecentToolStripMenuItem, GetAppFolderFile("recent.ini"), 10, LoadRam);
         }
 
@@ -136,7 +142,14 @@ namespace Sharp6800.Trainer
         {
             if (InvokeRequired)
             {
-                Invoke((Action<int>)RunnerOnTimer, new object[] { cyclesPerSecond });
+                try
+                {
+                    Invoke((Action<int>)RunnerOnTimer, new object[] { cyclesPerSecond });
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
             }
             else
             {
@@ -245,6 +258,8 @@ namespace Sharp6800.Trainer
             this.KeyUp -= OnReleaseKey;
 
             TrainerSettings.Save(_trainerSettings, _settingsPath);
+
+            Thread.Sleep(200);
         }
 
 

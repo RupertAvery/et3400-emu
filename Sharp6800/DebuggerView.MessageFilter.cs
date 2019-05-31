@@ -16,8 +16,6 @@ namespace Sharp6800.Debugger
             //    return false;
             //}
 
-            if (!hasFocus) return false;
-
             switch (m.Msg)
             {
                 case WM_SYSKEYDOWN:

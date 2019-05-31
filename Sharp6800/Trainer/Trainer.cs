@@ -190,7 +190,7 @@ namespace Sharp6800.Trainer
             _disp = new LedDisplay(target, this);
         }
 
-        public void StopExternal()
+        public void RaiseStopEvent()
         {
             OnStop?.Invoke(this, EventArgs.Empty);
         }
