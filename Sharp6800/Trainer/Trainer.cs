@@ -20,7 +20,7 @@ namespace Sharp6800.Trainer
         public const int RomAddress = 0xFC00;
 
         public List<Watch> Watches { get; }
-        public List<int> Breakpoints { get; }
+        public BreakpointCollection Breakpoints { get; }
 
         public EventHandler OnStop { get; set; }
         public EventHandler OnStart { get; set; }
@@ -49,7 +49,7 @@ namespace Sharp6800.Trainer
         public Trainer(TrainerSettings settings)
         {
             Memory = new int[65536];
-            Breakpoints = new List<int>();
+            Breakpoints = new BreakpointCollection();
             Settings = settings;
             Watches = new List<Watch>();
             MemoryMapManager = new MemoryMapManager();
@@ -174,14 +174,23 @@ namespace Sharp6800.Trainer
 
         public void ToggleBreakPoint(int address)
         {
-            var index = Breakpoints.IndexOf(address);
-            if (index > -1)
+            var breakpoint = Breakpoints[address];
+            if (breakpoint != null)
             {
-                Breakpoints.RemoveAt(index);
+                Breakpoints.Remove(breakpoint.Address);
             }
             else
             {
                 Breakpoints.Add(address);
+            }
+        }
+
+        public void ToggleBreakPointEnabled(int address)
+        {
+            var breakpoint = Breakpoints[address];
+            if (breakpoint != null)
+            {
+                Breakpoints.Toggle(breakpoint.Address);
             }
         }
 
@@ -403,7 +412,11 @@ namespace Sharp6800.Trainer
 
         public bool AtBreakPoint
         {
-            get { return Breakpoints.Contains(State.PC); }
+            get
+            {
+                var breakpoint = Breakpoints[State.PC];
+                return breakpoint != null && breakpoint.IsEnabled;
+            }
         }
 
         #region Debugger Methods

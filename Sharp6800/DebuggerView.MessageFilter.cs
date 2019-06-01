@@ -107,10 +107,7 @@ namespace Sharp6800.Debugger
                                 return true;
 
                             case Keys.F9:
-                                if (_disassemberDisplay.SelectedLine.HasValue)
-                                {
-                                    _trainer.ToggleBreakPoint(_disassemberDisplay.SelectedLine.Value.Address);
-                                }
+                                AddBreakpoint();
                                 return true;
                         }
 

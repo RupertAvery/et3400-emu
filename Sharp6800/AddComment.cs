@@ -61,7 +61,13 @@ namespace Sharp6800
 
                 if (StartAddress < 0)
                 {
-                    MessageBox.Show("The start address must be greater than 0", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("The start address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (StartAddress > 0xFFFF)
+                {
+                    MessageBox.Show("The start address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 

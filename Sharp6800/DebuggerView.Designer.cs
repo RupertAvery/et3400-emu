@@ -31,10 +31,8 @@
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.MemoryViewScrollBar = new System.Windows.Forms.VScrollBar();
-            this.MemoryViewPictureBox = new System.Windows.Forms.PictureBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.DasmViewScrollBar = new System.Windows.Forms.VScrollBar();
-            this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
             this.PCTextBox = new System.Windows.Forms.TextBox();
             this.ACCATextBox = new System.Windows.Forms.TextBox();
             this.ACCBTextBox = new System.Windows.Forms.TextBox();
@@ -56,11 +54,7 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.DebuggerToolStrip = new System.Windows.Forms.ToolStrip();
-            this.StartButton = new System.Windows.Forms.ToolStripButton();
-            this.StopButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.StepButton = new System.Windows.Forms.ToolStripButton();
-            this.ResetButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.MemToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
@@ -74,11 +68,7 @@
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.BreakpointsToolStrip = new System.Windows.Forms.ToolStrip();
-            this.AddBreakpointButton = new System.Windows.Forms.ToolStripButton();
-            this.RemoveBreakpointButton = new System.Windows.Forms.ToolStripButton();
-            this.ClearAllBreakpointsButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.GotoBreakpointButton = new System.Windows.Forms.ToolStripButton();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.RangesListView = new System.Windows.Forms.ListView();
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -86,15 +76,23 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.RangesToolStrip = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
+            this.AddBreakpointButton = new System.Windows.Forms.ToolStripButton();
+            this.RemoveBreakpointButton = new System.Windows.Forms.ToolStripButton();
+            this.ClearAllBreakpointsButton = new System.Windows.Forms.ToolStripButton();
+            this.GotoBreakpointButton = new System.Windows.Forms.ToolStripButton();
             this.AddRangeButton = new System.Windows.Forms.ToolStripButton();
             this.RemoveRangeButton = new System.Windows.Forms.ToolStripButton();
             this.ClearAllRangesButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
             this.GotoRangeButton = new System.Windows.Forms.ToolStripButton();
+            this.StartButton = new System.Windows.Forms.ToolStripButton();
+            this.StopButton = new System.Windows.Forms.ToolStripButton();
+            this.StepButton = new System.Windows.Forms.ToolStripButton();
+            this.ResetButton = new System.Windows.Forms.ToolStripButton();
+            this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
+            this.MemoryViewPictureBox = new System.Windows.Forms.PictureBox();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).BeginInit();
             this.disassemblerContextMenuStrip.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.DebuggerToolStrip.SuspendLayout();
@@ -103,6 +101,8 @@
             this.BreakpointsToolStrip.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.RangesToolStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -126,16 +126,6 @@
             this.MemoryViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.MemoryViewScrollBar_Scroll);
             this.MemoryViewScrollBar.ValueChanged += new System.EventHandler(this.MemoryViewScrollBar_ValueChanged);
             // 
-            // MemoryViewPictureBox
-            // 
-            this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
-            this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.MemoryViewPictureBox.Location = new System.Drawing.Point(6, 19);
-            this.MemoryViewPictureBox.Name = "MemoryViewPictureBox";
-            this.MemoryViewPictureBox.Size = new System.Drawing.Size(319, 394);
-            this.MemoryViewPictureBox.TabIndex = 4;
-            this.MemoryViewPictureBox.TabStop = false;
-            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.DasmViewScrollBar);
@@ -156,18 +146,6 @@
             this.DasmViewScrollBar.TabIndex = 8;
             this.DasmViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.DasmViewScrollBar_Scroll);
             this.DasmViewScrollBar.ValueChanged += new System.EventHandler(this.DasmViewScrollBar_ValueChanged);
-            // 
-            // DasmViewPictureBox
-            // 
-            this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
-            this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.DasmViewPictureBox.Location = new System.Drawing.Point(6, 19);
-            this.DasmViewPictureBox.Name = "DasmViewPictureBox";
-            this.DasmViewPictureBox.Size = new System.Drawing.Size(319, 394);
-            this.DasmViewPictureBox.TabIndex = 7;
-            this.DasmViewPictureBox.TabStop = false;
-            this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
-            this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
             // 
             // PCTextBox
             // 
@@ -361,9 +339,9 @@
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 618);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 639);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(934, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(930, 22);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 17;
             this.statusStrip1.Text = "statusStrip1";
@@ -385,58 +363,14 @@
             this.toolStripButton2});
             this.DebuggerToolStrip.Location = new System.Drawing.Point(0, 0);
             this.DebuggerToolStrip.Name = "DebuggerToolStrip";
-            this.DebuggerToolStrip.Size = new System.Drawing.Size(934, 25);
+            this.DebuggerToolStrip.Size = new System.Drawing.Size(930, 25);
             this.DebuggerToolStrip.TabIndex = 1;
             this.DebuggerToolStrip.Text = "toolStrip1";
-            // 
-            // StartButton
-            // 
-            this.StartButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.StartButton.Image = global::Sharp6800.Properties.Resources.Run_16x;
-            this.StartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(23, 22);
-            this.StartButton.Text = "Start";
-            this.StartButton.ToolTipText = "Start (F5)";
-            this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
-            // 
-            // StopButton
-            // 
-            this.StopButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.StopButton.Image = global::Sharp6800.Properties.Resources.Stop_16x;
-            this.StopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(23, 22);
-            this.StopButton.Text = "Stop";
-            this.StopButton.ToolTipText = "Stop (F4)";
-            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // StepButton
-            // 
-            this.StepButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.StepButton.Image = global::Sharp6800.Properties.Resources.StepIntoArrow_16x;
-            this.StepButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.StepButton.Name = "StepButton";
-            this.StepButton.Size = new System.Drawing.Size(23, 22);
-            this.StepButton.Text = "Step";
-            this.StepButton.ToolTipText = "Step (F10)";
-            this.StepButton.Click += new System.EventHandler(this.StepButton_Click);
-            // 
-            // ResetButton
-            // 
-            this.ResetButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.ResetButton.Image = global::Sharp6800.Properties.Resources.Restart_16x;
-            this.ResetButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.ResetButton.Name = "ResetButton";
-            this.ResetButton.Size = new System.Drawing.Size(23, 22);
-            this.ResetButton.Text = "Reset";
-            this.ResetButton.ToolTipText = "Reset (ESC)";
-            this.ResetButton.Click += new System.EventHandler(this.ResetButton_Click);
             // 
             // toolStripSeparator1
             // 
@@ -479,12 +413,15 @@
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Location = new System.Drawing.Point(12, 456);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(922, 159);
+            this.tabControl1.Size = new System.Drawing.Size(918, 180);
             this.tabControl1.TabIndex = 14;
             // 
             // tabPage1
@@ -495,7 +432,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(914, 133);
+            this.tabPage1.Size = new System.Drawing.Size(910, 154);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Breakpoints";
             // 
@@ -509,11 +446,12 @@
             this.BreakpointsListView.GridLines = true;
             this.BreakpointsListView.Location = new System.Drawing.Point(3, 28);
             this.BreakpointsListView.Name = "BreakpointsListView";
-            this.BreakpointsListView.Size = new System.Drawing.Size(908, 102);
+            this.BreakpointsListView.Size = new System.Drawing.Size(904, 123);
             this.BreakpointsListView.TabIndex = 1;
             this.BreakpointsListView.UseCompatibleStateImageBehavior = false;
             this.BreakpointsListView.View = System.Windows.Forms.View.Details;
             this.BreakpointsListView.DoubleClick += new System.EventHandler(this.BreakpointsListView_DoubleClick);
+            this.BreakpointsListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.BreakpointsListView_KeyDown);
             // 
             // columnHeader1
             // 
@@ -534,54 +472,14 @@
             this.GotoBreakpointButton});
             this.BreakpointsToolStrip.Location = new System.Drawing.Point(3, 3);
             this.BreakpointsToolStrip.Name = "BreakpointsToolStrip";
-            this.BreakpointsToolStrip.Size = new System.Drawing.Size(908, 25);
+            this.BreakpointsToolStrip.Size = new System.Drawing.Size(904, 25);
             this.BreakpointsToolStrip.TabIndex = 0;
             this.BreakpointsToolStrip.Text = "toolStrip2";
-            // 
-            // AddBreakpointButton
-            // 
-            this.AddBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.AddBreakpointButton.Image = global::Sharp6800.Properties.Resources.Add_16x;
-            this.AddBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.AddBreakpointButton.Name = "AddBreakpointButton";
-            this.AddBreakpointButton.Size = new System.Drawing.Size(23, 22);
-            this.AddBreakpointButton.Text = "Add breakpoint";
-            this.AddBreakpointButton.Click += new System.EventHandler(this.AddBreakpointButton_Click);
-            // 
-            // RemoveBreakpointButton
-            // 
-            this.RemoveBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.RemoveBreakpointButton.Image = global::Sharp6800.Properties.Resources.Remove_16x;
-            this.RemoveBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.RemoveBreakpointButton.Name = "RemoveBreakpointButton";
-            this.RemoveBreakpointButton.Size = new System.Drawing.Size(23, 22);
-            this.RemoveBreakpointButton.Text = "Remove breakpoint";
-            this.RemoveBreakpointButton.Click += new System.EventHandler(this.RemoveBreakpointButton_Click);
-            // 
-            // ClearAllBreakpointsButton
-            // 
-            this.ClearAllBreakpointsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.ClearAllBreakpointsButton.Image = global::Sharp6800.Properties.Resources.ClearCollection_16x;
-            this.ClearAllBreakpointsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.ClearAllBreakpointsButton.Name = "ClearAllBreakpointsButton";
-            this.ClearAllBreakpointsButton.Size = new System.Drawing.Size(23, 22);
-            this.ClearAllBreakpointsButton.Text = "Clear all breakpoints";
-            this.ClearAllBreakpointsButton.Click += new System.EventHandler(this.ClearAllBreakpointsButton_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
-            // GotoBreakpointButton
-            // 
-            this.GotoBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.GotoBreakpointButton.Image = global::Sharp6800.Properties.Resources.GoToSourceCode_16x;
-            this.GotoBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.GotoBreakpointButton.Name = "GotoBreakpointButton";
-            this.GotoBreakpointButton.Size = new System.Drawing.Size(23, 22);
-            this.GotoBreakpointButton.Text = "Go to breakpoint";
-            this.GotoBreakpointButton.Click += new System.EventHandler(this.GotoBreakpointButton_Click);
             // 
             // tabPage2
             // 
@@ -652,6 +550,51 @@
             this.RangesToolStrip.TabIndex = 0;
             this.RangesToolStrip.Text = "toolStrip3";
             // 
+            // toolStripButton12
+            // 
+            this.toolStripButton12.Name = "toolStripButton12";
+            this.toolStripButton12.Size = new System.Drawing.Size(6, 25);
+            // 
+            // AddBreakpointButton
+            // 
+            this.AddBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.AddBreakpointButton.Image = global::Sharp6800.Properties.Resources.Add_16x;
+            this.AddBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.AddBreakpointButton.Name = "AddBreakpointButton";
+            this.AddBreakpointButton.Size = new System.Drawing.Size(23, 22);
+            this.AddBreakpointButton.Text = "Add breakpoint";
+            this.AddBreakpointButton.Click += new System.EventHandler(this.AddBreakpointButton_Click);
+            // 
+            // RemoveBreakpointButton
+            // 
+            this.RemoveBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.RemoveBreakpointButton.Image = global::Sharp6800.Properties.Resources.Remove_16x;
+            this.RemoveBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.RemoveBreakpointButton.Name = "RemoveBreakpointButton";
+            this.RemoveBreakpointButton.Size = new System.Drawing.Size(23, 22);
+            this.RemoveBreakpointButton.Text = "Remove breakpoint";
+            this.RemoveBreakpointButton.Click += new System.EventHandler(this.RemoveBreakpointButton_Click);
+            // 
+            // ClearAllBreakpointsButton
+            // 
+            this.ClearAllBreakpointsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.ClearAllBreakpointsButton.Image = global::Sharp6800.Properties.Resources.ClearCollection_16x;
+            this.ClearAllBreakpointsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ClearAllBreakpointsButton.Name = "ClearAllBreakpointsButton";
+            this.ClearAllBreakpointsButton.Size = new System.Drawing.Size(23, 22);
+            this.ClearAllBreakpointsButton.Text = "Clear all breakpoints";
+            this.ClearAllBreakpointsButton.Click += new System.EventHandler(this.ClearAllBreakpointsButton_Click);
+            // 
+            // GotoBreakpointButton
+            // 
+            this.GotoBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.GotoBreakpointButton.Image = global::Sharp6800.Properties.Resources.GoToSourceCode_16x;
+            this.GotoBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.GotoBreakpointButton.Name = "GotoBreakpointButton";
+            this.GotoBreakpointButton.Size = new System.Drawing.Size(23, 22);
+            this.GotoBreakpointButton.Text = "Go to breakpoint";
+            this.GotoBreakpointButton.Click += new System.EventHandler(this.GotoBreakpointButton_Click);
+            // 
             // AddRangeButton
             // 
             this.AddRangeButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -685,11 +628,6 @@
             this.ClearAllRangesButton.ToolTipText = "Clear all ranges";
             this.ClearAllRangesButton.Click += new System.EventHandler(this.ClearAllRangesButton_Click);
             // 
-            // toolStripButton12
-            // 
-            this.toolStripButton12.Name = "toolStripButton12";
-            this.toolStripButton12.Size = new System.Drawing.Size(6, 25);
-            // 
             // GotoRangeButton
             // 
             this.GotoRangeButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -701,32 +639,99 @@
             this.GotoRangeButton.ToolTipText = "Go to range";
             this.GotoRangeButton.Click += new System.EventHandler(this.GotoRangeButton_Click);
             // 
+            // StartButton
+            // 
+            this.StartButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StartButton.Image = global::Sharp6800.Properties.Resources.Run_16x;
+            this.StartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StartButton.Name = "StartButton";
+            this.StartButton.Size = new System.Drawing.Size(23, 22);
+            this.StartButton.Text = "Start";
+            this.StartButton.ToolTipText = "Start (F5)";
+            this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
+            // 
+            // StopButton
+            // 
+            this.StopButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StopButton.Image = global::Sharp6800.Properties.Resources.Stop_16x;
+            this.StopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StopButton.Name = "StopButton";
+            this.StopButton.Size = new System.Drawing.Size(23, 22);
+            this.StopButton.Text = "Stop";
+            this.StopButton.ToolTipText = "Stop (F4)";
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
+            // 
+            // StepButton
+            // 
+            this.StepButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StepButton.Image = global::Sharp6800.Properties.Resources.StepIntoArrow_16x;
+            this.StepButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StepButton.Name = "StepButton";
+            this.StepButton.Size = new System.Drawing.Size(23, 22);
+            this.StepButton.Text = "Step";
+            this.StepButton.ToolTipText = "Step (F10)";
+            this.StepButton.Click += new System.EventHandler(this.StepButton_Click);
+            // 
+            // ResetButton
+            // 
+            this.ResetButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.ResetButton.Image = global::Sharp6800.Properties.Resources.Restart_16x;
+            this.ResetButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ResetButton.Name = "ResetButton";
+            this.ResetButton.Size = new System.Drawing.Size(23, 22);
+            this.ResetButton.Text = "Reset";
+            this.ResetButton.ToolTipText = "Reset (ESC)";
+            this.ResetButton.Click += new System.EventHandler(this.ResetButton_Click);
+            // 
+            // DasmViewPictureBox
+            // 
+            this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
+            this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.DasmViewPictureBox.Location = new System.Drawing.Point(6, 19);
+            this.DasmViewPictureBox.Name = "DasmViewPictureBox";
+            this.DasmViewPictureBox.Size = new System.Drawing.Size(319, 394);
+            this.DasmViewPictureBox.TabIndex = 7;
+            this.DasmViewPictureBox.TabStop = false;
+            this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
+            this.DasmViewPictureBox.DoubleClick += new System.EventHandler(this.DasmViewPictureBox_DoubleClick);
+            this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
+            // 
+            // MemoryViewPictureBox
+            // 
+            this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
+            this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.MemoryViewPictureBox.Location = new System.Drawing.Point(6, 19);
+            this.MemoryViewPictureBox.Name = "MemoryViewPictureBox";
+            this.MemoryViewPictureBox.Size = new System.Drawing.Size(319, 394);
+            this.MemoryViewPictureBox.TabIndex = 4;
+            this.MemoryViewPictureBox.TabStop = false;
+            // 
             // DebuggerView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(934, 640);
+            this.ClientSize = new System.Drawing.Size(930, 661);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.DebuggerToolStrip);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(946, 766);
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(946, 700);
             this.Name = "DebuggerView";
             this.ShowIcon = false;
-            this.Text = "ET-3400 Debugger";
+            this.Text = "Debugger";
             this.Activated += new System.EventHandler(this.DebuggerView_Activated);
             this.Deactivate += new System.EventHandler(this.DebuggerView_Deactivate);
             this.Load += new System.EventHandler(this.DebuggerView_Load);
             this.Enter += new System.EventHandler(this.DebuggerView_Enter);
             this.Leave += new System.EventHandler(this.DebuggerView_Leave);
             this.groupBox1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).EndInit();
             this.groupBox2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).EndInit();
             this.disassemblerContextMenuStrip.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
@@ -741,6 +746,8 @@
             this.tabPage2.PerformLayout();
             this.RangesToolStrip.ResumeLayout(false);
             this.RangesToolStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

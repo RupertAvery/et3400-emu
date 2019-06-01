@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Resources;
 using System.Runtime.Remoting.Lifetime;
 using System.Threading;
 using System.Windows.Forms;
@@ -19,6 +20,8 @@ namespace Sharp6800.Debugger
         private readonly ITrainer _trainer;
         private readonly IntPtr _targetWnd;
         private VScrollBar _scrollBar;
+        private Bitmap _breakpointEnabledBitmap;
+        private Bitmap _breakpointDisabledBitmap;
 
         public int ViewOffset { get; set; }
         public int Width { get; }
@@ -109,6 +112,13 @@ namespace Sharp6800.Debugger
             colorLookup.Add(isCurrentPC, current);
         }
 
+        private void LoadImages()
+        {
+            var rm = new ResourceManager("Resources", this.GetType().Assembly);
+            _breakpointEnabledBitmap = Sharp6800.Properties.Resources.BreakpointEnable_16x;
+            _breakpointDisabledBitmap= Sharp6800.Properties.Resources.BreakpointDisable_16x;
+        }
+
         public DisassemberDisplay(Control target, VScrollBar scrollBar, Trainer.Trainer trainer)
         {
             _trainer = trainer;
@@ -118,6 +128,7 @@ namespace Sharp6800.Debugger
             VisibleItems = Height / _textheight - 1;
             _targetWnd = target.Handle;
             SetUpColors();
+            LoadImages();
             _brush = new SolidBrush(Color.Black);
             _font = new Font("Courier New", 12, FontStyle.Regular);
             //_disassemblyViews = new List<DisassemblyView>();
@@ -155,7 +166,12 @@ namespace Sharp6800.Debugger
 
                             foreach (var line in CurrentView.Lines.Skip(ViewOffset).ToList())
                             {
-                                var isAtBreakPoint = _trainer.Breakpoints.Contains(line.Address);
+                                var top = _textheight * lineNo;
+                                var left = 2;
+
+                                var breakPoint = _trainer.Breakpoints[line.Address];
+                                var isBreakPoint = breakPoint != null;
+                                var isBreakPointEnabled = isBreakPoint && breakPoint.IsEnabled;
                                 var isSelected = false;
                                 var isCurrentPC = (!_trainer.IsRunning && line.Address == _trainer.State.PC);
 
@@ -164,47 +180,66 @@ namespace Sharp6800.Debugger
                                     isSelected = true;
                                 }
 
-                                if (isAtBreakPoint || isSelected || isCurrentPC)
+                                if (isBreakPoint)
                                 {
-                                    var flags = (isAtBreakPoint ? 1 : 0) +
+                                    if (breakPoint.IsEnabled)
+                                    {
+                                        g.DrawImage(_breakpointEnabledBitmap, left, top + 2);
+                                    }
+                                    else
+                                    {
+                                        g.DrawImage(_breakpointDisabledBitmap, left, top + 2);
+                                    }
+                                }
+
+                                left += 18;
+
+                                if (isBreakPointEnabled || isSelected || isCurrentPC)
+                                {
+                                    var flags = (isBreakPointEnabled ? 1 : 0) +
                                                 (isSelected ? 2 : 0) +
                                                 (isCurrentPC ? 4 : 0);
 
-                                    Color highlightColor = colorLookup[flags];
-
-                                    using (var brush = new SolidBrush(highlightColor))
+                                    if (flags != 0)
                                     {
-                                        g.FillRectangle(brush, 0, 20 * lineNo, Width, 20);
+                                        Color highlightColor = colorLookup[flags];
+
+                                        using (var brush = new SolidBrush(highlightColor))
+                                        {
+                                            g.FillRectangle(brush, left, top, Width, 20);
+                                        }
                                     }
                                 }
-
-                                var position = _textheight * lineNo;
-                                var bottomPosition = _textheight * (lineNo + 1) - 1;
 
                                 if (isCurrentPC)
                                 {
+                                    var bottomPosition = _textheight * (lineNo + 1) - 1;
                                     using (var pen = new Pen(Color.DarkGray))
                                     {
-                                        g.DrawLine(pen, 0, position, Width, position);
-                                        g.DrawLine(pen, 0, bottomPosition, Width, bottomPosition);
+                                        g.DrawLine(pen, left, top, Width, top);
+                                        g.DrawLine(pen, left, bottomPosition, Width, bottomPosition);
                                     }
                                 }
 
-                                DrawText(g, 2, position, $"${line.Address:X4}:", Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
+                                DrawText(g, left, top, $"${line.Address:X4}:", Color.DarkBlue, isBreakPointEnabled, isSelected, isCurrentPC);
+
+                                left += 70;
 
                                 if (line.LineType == LineType.Comment)
                                 {
-                                    DrawText(g, 70, position, line.Text, Color.Green, isAtBreakPoint, isSelected, isCurrentPC);
+                                    DrawText(g, left, top, line.Text, Color.Green, isBreakPointEnabled, isSelected, isCurrentPC);
                                 }
                                 else if (line.LineType == LineType.Assembly)
                                 {
-                                    DrawText(g, 70, position, line.Opcodes, Color.Black, isAtBreakPoint, isSelected, isCurrentPC);
-                                    DrawText(g, 180, position, line.Instruction, Color.DarkBlue, isAtBreakPoint, isSelected, isCurrentPC);
-                                    DrawText(g, 230, position, line.Operands, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
+                                    DrawText(g, left, top, line.Opcodes, Color.Black, isBreakPointEnabled, isSelected, isCurrentPC);
+                                    left += 110;
+                                    DrawText(g, left, top, line.Instruction, Color.DarkBlue, isBreakPointEnabled, isSelected, isCurrentPC);
+                                    left += 50;
+                                    DrawText(g, left, top, line.Operands, Color.DarkRed, isBreakPointEnabled, isSelected, isCurrentPC);
                                 }
                                 else if (line.LineType == LineType.Data)
                                 {
-                                    DrawText(g, 70, position, line.Text, Color.DarkRed, isAtBreakPoint, isSelected, isCurrentPC);
+                                    DrawText(g, left, top, line.Text, Color.DarkRed, isBreakPointEnabled, isSelected, isCurrentPC);
                                 }
 
                                 lineNo++;
@@ -242,6 +277,8 @@ namespace Sharp6800.Debugger
             lock (lockObject)
             {
                 IsDisposed = true;
+                //_breakpointEnabledBitmap.Dispose();
+                //_breakpointDisabledBitmap.Dispose();
                 _brush?.Dispose();
                 _font?.Dispose();
             }

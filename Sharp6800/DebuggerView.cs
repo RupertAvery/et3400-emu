@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using Core6800;
 using Sharp6800.Common;
 using Sharp6800.Trainer;
 using Timer = System.Threading.Timer;
@@ -56,6 +54,7 @@ namespace Sharp6800.Debugger
             InitializeComponent();
             //Application.AddMessageFilter(this);
             this.Closing += OnClosing;
+
             MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
 
@@ -66,6 +65,7 @@ namespace Sharp6800.Debugger
             _trainer.OnStop += OnStop;
             _trainer.OnStart += OnStart;
             _trainer.OnStep += OnStep;
+            _trainer.Breakpoints.OnChange += OnChange;
 
             _trainer.MemoryMapEventBus.Subscribe(MapEventType.Add, AddMapEventAction);
             _trainer.MemoryMapEventBus.Subscribe(MapEventType.Update, UpdateMapEventAction);
@@ -81,12 +81,61 @@ namespace Sharp6800.Debugger
 
             _updateTimer = new Timer(state =>
             {
-                Debug.WriteLine("Tick");
                 UpdateDisplay();
             }, null, 0, Timeout.Infinite);
 
 
             UpdateButtonState();
+
+            BreakpointsListView.Sorting = SortOrder.Ascending;
+            BreakpointsListView.ListViewItemSorter = new BreakpointComparer();
+            RangesListView.Sorting = SortOrder.Ascending;
+            RangesListView.ListViewItemSorter = new MemoryMapComparer();
+        }
+
+        private void OnChange(object sender, BreakpointEventArgs e)
+        {
+
+            switch (e.EventType)
+            {
+                case BreakpointEventType.Add:
+                    var lvi = new ListViewItem() { Text = $"${e.Address:X4}", Tag = e.Address };
+                    lvi.SubItems.Add(new ListViewItem.ListViewSubItem() { Text = "Yes" });
+                    BreakpointsListView.Items.Add(lvi);
+                    break;
+                case BreakpointEventType.Remove:
+                    {
+                        var item = BreakpointsListView.Items.Cast<ListViewItem>().FirstOrDefault(x => (int)x.Tag == e.Address);
+                        if (item != null)
+                        {
+                            BreakpointsListView.Items.Remove(item);
+                        }
+                    }
+                    break;
+                case BreakpointEventType.Clear:
+                    BreakpointsListView.Items.Clear();
+                    break;
+                case BreakpointEventType.Enable:
+                    {
+                        var item = BreakpointsListView.Items.Cast<ListViewItem>().FirstOrDefault(x => (int)x.Tag == e.Address);
+                        if (item != null)
+                        {
+                            item.SubItems[1].Text = "Yes";
+                        }
+                    }
+                    break;
+                case BreakpointEventType.Disable:
+                    {
+                        var item = BreakpointsListView.Items.Cast<ListViewItem>().FirstOrDefault(x => (int)x.Tag == e.Address);
+                        if (item != null)
+                        {
+                            item.SubItems[1].Text = "No";
+                        }
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public IEnumerable<ListViewItem> FindListViewItem(IEnumerable<MemoryMap> memoryMaps)
@@ -123,18 +172,24 @@ namespace Sharp6800.Debugger
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             Application.RemoveMessageFilter(this);
+
             IsDisposing = true;
+
             _trainer.OnStop -= OnStop;
             _trainer.OnStart -= OnStart;
             _trainer.OnStep -= OnStep;
+
+            _trainer.Breakpoints.OnChange -= OnChange;
+
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Add, AddMapEventAction);
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Update, UpdateMapEventAction);
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Remove, RemoveMapEventAction);
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Clear, ClearMapEventAction);
+
             _updateTimer.Dispose();
             _memoryDisplay.Dispose();
             _disassemberDisplay.Dispose();
-            Debug.WriteLine("DebuggerView Disposed");
+
         }
 
         private void AddMapEventAction(IEnumerable<MemoryMap> memoryMaps)
@@ -425,22 +480,49 @@ namespace Sharp6800.Debugger
 
         private void AddBreakpointButton_Click(object sender, EventArgs e)
         {
+            var address = _disassemberDisplay.SelectedLine.HasValue ? _disassemberDisplay.SelectedLine.Value.Address : 0;
+
+            var addBreakpointDialog = new AddBreakpoint(_disassemberDisplay.SelectedLine.Value.Address);
+            //addBreakpointDialog.Parent = this;
+            addBreakpointDialog.StartPosition = FormStartPosition.CenterParent;
+            var result = addBreakpointDialog.ShowDialog(this);
+            if (result == DialogResult.OK)
+            {
+                address = addBreakpointDialog.StartAddress;
+                if (_trainer.Breakpoints[address] == null)
+                {
+                    _trainer.Breakpoints.Add(address);
+                }
+            }
 
         }
 
         private void RemoveBreakpointButton_Click(object sender, EventArgs e)
         {
-
+            if (BreakpointsListView.SelectedItems != null && BreakpointsListView.SelectedItems.Count > 0)
+            {
+                var address = (int)BreakpointsListView.SelectedItems[0].Tag;
+                //if (MessageBox.Show($"Are you sure you want to remove the breakpoint at  {address}?",
+                //        "Remove Breakpoint", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                //{
+                _trainer.Breakpoints.Remove(address);
+                //}
+            }
         }
 
         private void ClearAllBreakpointsButton_Click(object sender, EventArgs e)
         {
-
+            if (MessageBox.Show("Are you sure you want to clear all breakpoints?", "Clear All Breakpoints",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) ==
+                DialogResult.Yes)
+            {
+                _trainer.Breakpoints.Clear();
+            }
         }
 
         private void GotoBreakpointButton_Click(object sender, EventArgs e)
         {
-
+            GotoBreakpoint();
         }
 
         private void AddRangeButton_Click(object sender, EventArgs e)
@@ -452,8 +534,15 @@ namespace Sharp6800.Debugger
             var addRangeDialog = new AddDataRange(address, address + 1);
             addRangeDialog.StartPosition = FormStartPosition.CenterParent;
             var result = addRangeDialog.ShowDialog(this);
+
             if (result == DialogResult.OK)
             {
+                if (_trainer.MemoryMapManager.GetMemoryMap(addRangeDialog.StartAddress) != null)
+                {
+                    MessageBox.Show("The address range you selected already contains a memory map", "Add Memory Map", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 var memoryMap = new MemoryMap()
                 {
                     Start = addRangeDialog.StartAddress,
@@ -481,6 +570,12 @@ namespace Sharp6800.Debugger
 
         private void ClearAllRangesButton_Click(object sender, EventArgs e)
         {
+            if (MessageBox.Show("Are you sure you want to clear all memory maps?", "Clear All Memory Maps",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) ==
+                DialogResult.Yes)
+            {
+                _trainer.MemoryMapManager.GetRegion("RAM").MemoryMapCollection.Clear();
+            }
 
         }
 
@@ -651,11 +746,21 @@ namespace Sharp6800.Debugger
 
         private void BreakpointsListView_DoubleClick(object sender, EventArgs e)
         {
+            GotoBreakpoint();
         }
 
         private void RangesListView_DoubleClick(object sender, EventArgs e)
         {
             GotoRange();
+        }
+
+        private void GotoBreakpoint()
+        {
+            if (BreakpointsListView.SelectedItems != null && BreakpointsListView.SelectedItems.Count > 0)
+            {
+                var address = (int)BreakpointsListView.SelectedItems[0].Tag;
+                EnsureVisible(address);
+            }
         }
 
         private void GotoRange()
@@ -690,6 +795,35 @@ namespace Sharp6800.Debugger
             foreach (DisassemblyView disasemblyView in DasmToolStripComboBox.Items)
             {
                 disasemblyView.Refresh();
+            }
+        }
+
+        private void AddBreakpoint()
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                _trainer.ToggleBreakPoint(_disassemberDisplay.SelectedLine.Value.Address);
+            }
+        }
+
+        private void BreakpointsListView_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    GotoBreakpointButton_Click(null, EventArgs.Empty);
+                    break;
+                case Keys.Delete:
+                    RemoveBreakpointButton_Click(null, EventArgs.Empty);
+                    break;
+            }
+        }
+
+        private void DasmViewPictureBox_DoubleClick(object sender, EventArgs e)
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                _trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
             }
         }
     }

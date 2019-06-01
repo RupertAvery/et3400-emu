@@ -11,24 +11,18 @@ using Sharp6800.Debugger;
 
 namespace Sharp6800
 {
-    public partial class AddDataRange : Form
+    public partial class AddBreakpoint : Form
     {
         public int StartAddress { get; set; }
-        public int EndAddress { get; set; }
-        public RangeType RangeType { get; set; }
-        public string Description { get; set; }
 
-        public AddDataRange(int startAddress, int endAddress)
+        public AddBreakpoint(int startAddress)
         {
             StartAddress = startAddress;
-            EndAddress = endAddress;
             InitializeComponent();
             startTextBox.Text = "$" + startAddress.ToString("X4");
-            endTextBox.Text = "$" + endAddress.ToString("X4");
-            RangeType = RangeType.Data;
         }
 
-        public AddDataRange()
+        public AddBreakpoint()
         {
             InitializeComponent();
         }
@@ -56,31 +50,6 @@ namespace Sharp6800
                     StartAddress = Convert.ToInt32(startTextBox.Text.Trim());
                 }
 
-                if (endTextBox.Text.Trim().StartsWith("$"))
-                {
-                    EndAddress = Convert.ToInt32(endTextBox.Text.Trim().Substring(1), 16);
-                }
-                else if (startTextBox.Text.Trim().ToLower().StartsWith("0x"))
-                {
-                    StartAddress = Convert.ToInt32(startTextBox.Text.Trim().Substring(2), 16);
-                }
-                else
-                {
-                    EndAddress = Convert.ToInt32(endTextBox.Text.Trim());
-                }
-
-                if (StartAddress > EndAddress)
-                {
-                    MessageBox.Show("The end address must be larger than or equal to the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (descriptionTextBox.Text.Trim() == string.Empty)
-                {
-                    MessageBox.Show("Please enter a description", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
                 if (StartAddress < 0)
                 {
                     MessageBox.Show("The start address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -92,20 +61,6 @@ namespace Sharp6800
                     MessageBox.Show("The start address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
-                if (EndAddress < 0)
-                {
-                    MessageBox.Show("The end address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (EndAddress > 0xFFFF)
-                {
-                    MessageBox.Show("The end address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                Description = descriptionTextBox.Text.Trim();
 
                 DialogResult = DialogResult.OK;
 

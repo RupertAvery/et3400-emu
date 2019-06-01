@@ -51,6 +51,12 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddBreakpoint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddBreakpoint.Designer.cs">
+      <DependentUpon>AddBreakpoint.cs</DependentUpon>
+    </Compile>
     <Compile Include="AddComment.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,6 +69,7 @@
     <Compile Include="AddDataRange.Designer.cs">
       <DependentUpon>AddDataRange.cs</DependentUpon>
     </Compile>
+    <Compile Include="BreakpointComparer.cs" />
     <Compile Include="Common\MemoryRange.cs" />
     <Compile Include="Common\CustomMemoryRange.cs" />
     <Compile Include="Common\EmulationModes.cs" />
@@ -96,6 +103,7 @@
       <DependentUpon>Goto.cs</DependentUpon>
     </Compile>
     <Compile Include="IO\CsvWriter.cs" />
+    <Compile Include="MemoryMapComparer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ranges.cs">
@@ -112,6 +120,8 @@
     <Compile Include="Threading\ITrainerRunner.cs" />
     <Compile Include="Threading\StandardRunner.cs" />
     <Compile Include="Threading\TrainerRunnerBase.cs" />
+    <Compile Include="Trainer\Breakpoint.cs" />
+    <Compile Include="Trainer\BreakpointCollection.cs" />
     <Compile Include="Trainer\IIODevice.cs" />
     <Compile Include="Trainer\IMemory.cs" />
     <Compile Include="Trainer\IMemoryMap.cs" />
@@ -159,6 +169,9 @@
     <None Include="Resources\GoToSourceCode_16x.png" />
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddBreakpoint.resx">
+      <DependentUpon>AddBreakpoint.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="AddComment.resx">
       <DependentUpon>AddComment.cs</DependentUpon>
