@@ -2,42 +2,57 @@ using System.Threading;
 
 namespace Sharp6800.Trainer.Threads
 {
-    /// <summary>
-    /// Attempts to spread out instructions by executing one then sleeping for a quantum 
-    /// of time before executing the next instruction. Consumes more CPU asit does not alwyas
-    /// yield
-    /// </summary>
     public class CycleExactRunner : TrainerRunnerBase
     {
+        ManualResetEventSlim manualResetEventSlim = new ManualResetEventSlim();
+        private int lastBreakPointPC = -1;
+
         public CycleExactRunner(Trainer trainer)
             : base(trainer)
         {
         }
 
-        private int CyclesPerSecond;
-        private int spinTime = 100;
-
-        protected void CheckSpeed()
-        {
-            CyclesPerSecond = _cycles - _lastCycles;
-            RaiseTimerEvent(CyclesPerSecond);
-            spinTime += (CyclesPerSecond - _trainer.Settings.BaseFrequency) / 10;
-
-            if (spinTime > 5000) spinTime = 5000;
-            if (spinTime < 1) spinTime = 1;
-            sleeps = 0;
-            _lastCycles = _cycles;
-        }
-
         protected override void Run()
         {
-            Running = true;
+            //Running = true;
+            var loopCycles = 0;
 
             while (Running)
             {
-                _cycles += _trainer.Emulator.Execute();
-                Thread.SpinWait(spinTime);
+                int cycles = _trainer.Emulator.PreExecute();
+
+                if (_trainer.BreakpointsEnabled && _trainer.AtBreakPoint && lastBreakPointPC != _trainer.State.PC)
+                {
+                    Stop(true);
+                    _trainer.RaiseStopEvent();
+                    lastBreakPointPC = _trainer.State.PC;
+                    break;
+                }
+                else
+                {
+                    lastBreakPointPC = -1;
+                }
+
+                if (cycles == 0)
+                {
+                    cycles = _trainer.Emulator.PostExecute();
+                }
+
+                loopCycles += cycles;
+
+                _cycles += cycles;
+
+                var limit = _trainer.Settings.ClockSpeed / 60;
+
+                if (loopCycles > limit)
+                {
+                    loopCycles = 0;
+                    manualResetEventSlim.Wait(17);
+                    sleeps++;
+                }
             }
+            resetEvent.Set();
         }
+
     }
 }
