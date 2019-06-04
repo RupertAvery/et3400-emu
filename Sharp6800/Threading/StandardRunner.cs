@@ -42,7 +42,7 @@ namespace Sharp6800.Trainer.Threads
 
             var delta = (_trainer.Settings.ClockSpeed / 10 - elapsedCycles) / 100;
             
-            Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed, elapsedCycles * 10);
+            // Debug.WriteLine("delta: {0}, limit {1}, clock: {2}, cps: {3}", delta, limit, _trainer.Settings.ClockSpeed, elapsedCycles * 10);
             
             limit += delta;
 
@@ -80,7 +80,6 @@ namespace Sharp6800.Trainer.Threads
 
         public override void Dispose()
         {
-            _timer.Change(Timeout.Infinite, Timeout.Infinite);
             _timer?.Dispose();
             base.Dispose();
         }

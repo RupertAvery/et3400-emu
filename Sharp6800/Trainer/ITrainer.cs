@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Core6800;
+using Sharp6800.Debugger.Breakpoints;
+using Sharp6800.Debugger.MemoryMaps;
 
 namespace Sharp6800.Trainer
 {

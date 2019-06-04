@@ -1,6 +1,4 @@
-using System;
-
-namespace Sharp6800.Trainer
+namespace Sharp6800.Debugger.MemoryMaps
 {
     public class MemoryMapRegion
     {
@@ -9,6 +7,7 @@ namespace Sharp6800.Trainer
         public MemoryMapRegionType RegionType { get; set; }
         public int Start { get; set; }
         public int End { get; set; }
+        //public bool IsDirty { get; set; }
 
         public MemoryMapRegion(MemoryMapEventBus memoryMapEventBus)
         {

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
+using Sharp6800.Debugger.MemoryMaps;
 using Timer = System.Threading.Timer;
 
 namespace Sharp6800.Trainer
@@ -199,6 +200,50 @@ namespace Sharp6800.Trainer
 
         private void OnClosing(object sender, CancelEventArgs e)
         {
+            if (_trainer.Breakpoints.IsDirty)
+            {
+                var result = MessageBox.Show("Your breakpoints have changed. Do you want to save them before exiting?",
+                    "Sharp6800", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button3);
+
+                if (result == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                if (result == DialogResult.Yes)
+                {
+                    if (ShowSaveBreakpointDialog() == DialogResult.Cancel)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+            }
+
+            if (_trainer.MemoryMapManager.IsDirty)
+            {
+                var result = MessageBox.Show("Your memory maps have changed. Do you want to save them before exiting?",
+                    "Sharp6800", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button3);
+
+                if (result == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                if (result == DialogResult.Yes)
+                {
+                    if (ShowSaveMemoryMapsDialog() == DialogResult.Cancel)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+            }
+
 
             if (_settingsForm != null && !_settingsForm.IsDisposed)
             {
@@ -800,6 +845,85 @@ namespace Sharp6800.Trainer
 
         private void saveMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            ShowSaveMemoryMapsDialog();
+        }
+
+        private void clearRAMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var empty = new byte[4096];
+            _trainer.WriteMemory(0x0000, empty, empty.Length);
+        }
+
+        private void loadBreakpointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog.Filter = "Breakpoint files|*.brk";
+            openFileDialog.FileName = "";
+            
+            var result = openFileDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                using (var stream = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read))
+                {
+                    using (var reader = new CsvReader(stream))
+                    {
+                        foreach (var part in reader.ReadAll())
+                        {
+                            try
+                            {
+                                if (part.Length == 2)
+                                {
+                                    var address = Convert.ToInt32(part[0], 16);
+                                    var enabled = part[1].Trim().ToLower() == "yes";
+                                    _trainer.Breakpoints.Add(address);
+                                }
+                            }
+                            catch
+                            {
+                            }
+                        }
+                        _trainer.Breakpoints.IsDirty = false;
+                    }
+                }
+            }
+        }
+
+        private void saveBreakpointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowSaveBreakpointDialog();
+        }
+
+        private DialogResult ShowSaveBreakpointDialog()
+        {
+            saveFileDialog.Filter = "Breakpoint files|*.brk";
+            saveFileDialog.FileName = "";
+            
+            var result = saveFileDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                using (var stream = new FileStream(saveFileDialog.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    using (var writer = new CsvWriter(stream))
+                    {
+                        foreach (var breakpoint in _trainer.Breakpoints)
+                        {
+                            var parts = new string[2];
+                            parts[0] = breakpoint.Address.ToString("X4");
+                            parts[1] = breakpoint.IsEnabled ? "Yes": "No";
+                            writer.WriteLine(parts);
+                        }
+
+                        _trainer.Breakpoints.IsDirty = false;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private DialogResult ShowSaveMemoryMapsDialog()
+        {
             saveFileDialog.Filter = "Memory Map Files|*.map";
             saveFileDialog.FileName = "";
             var result = saveFileDialog.ShowDialog();
@@ -811,13 +935,12 @@ namespace Sharp6800.Trainer
                 {
                     MemoryMapCollection.Save(stream, region.MemoryMapCollection);
                 }
+
+                _trainer.MemoryMapManager.IsDirty = false;
             }
+
+            return result;
         }
 
-        private void clearRAMToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var empty = new byte[4096];
-            _trainer.WriteMemory(0x0000, empty, empty.Length);
-        }
     }
 }

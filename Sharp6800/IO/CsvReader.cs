@@ -10,26 +10,14 @@ namespace Sharp6800.Trainer
         private StreamReader sr;
         private string filepath;
 
-        public CsvReader(Stream stream) 
-        {   
-            sr = new StreamReader(stream);
-        }
-        
-        public CsvReader(string filepath)
+        public CsvReader(Stream stream)
         {
-            this.filepath = filepath;
+            sr = new StreamReader(stream);
         }
 
         public IEnumerable<string[]> ReadAll()
         {
-            if (sr != null)
-            {
-                data = sr.ReadToEnd();
-            }
-            else
-            {
-                data = File.ReadAllText(filepath);
-            }
+            data = sr.ReadToEnd();
 
             var lines = data.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -70,9 +58,9 @@ namespace Sharp6800.Trainer
                     }
                     ptr++;
                 }
-            
+
                 if (inQuotes) { throw new Exception("Unterminated quote"); }
-                
+
                 parts.Add(new string(buffer, 0, bufferPtr));
 
                 yield return parts.ToArray();

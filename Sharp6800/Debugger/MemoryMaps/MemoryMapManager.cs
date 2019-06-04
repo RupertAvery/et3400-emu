@@ -1,33 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sharp6800.Debugger;
 
-namespace Sharp6800.Trainer
+namespace Sharp6800.Debugger.MemoryMaps
 {
-    public enum MapEventType
-    {
-        Add,
-        Remove,
-        Update,
-        Clear
-    }
-
-    public class MapEventArgs
-    {
-        public MapEventType Type { get; }
-        public IEnumerable<MemoryMap> MemoryMaps { get; }
-
-        public MapEventArgs(MapEventType type, IEnumerable<MemoryMap> memoryMaps)
-        {
-            Type = type;
-            MemoryMaps = memoryMaps;
-        }
-    }
-
     public class MemoryMapManager
     {
         private List<MemoryMapRegion> _memoryMapsRegions;
+
+        public bool IsDirty { get; set; }
 
         public MemoryMapManager()
         {
@@ -88,6 +68,7 @@ namespace Sharp6800.Trainer
             var region = _memoryMapsRegions.FirstOrDefault(x => x.Start <= memoryMap.Start && x.End >= memoryMap.End);
             if (region != null)
             {
+                IsDirty = true;
                 region.MemoryMapCollection.Add(memoryMap);
             }
         }
@@ -97,6 +78,7 @@ namespace Sharp6800.Trainer
             var region = _memoryMapsRegions.FirstOrDefault(x => x.Start <= memoryMap.Start && x.End >= memoryMap.End);
             if (region != null)
             {
+                IsDirty = true;
                 region.MemoryMapCollection.Remove(memoryMap);
             }
         }

@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Sharp6800.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -116,12 +119,20 @@
     <Compile Include="IO\CsvReader.cs" />
     <Compile Include="RecentFilesCollection.cs" />
     <Compile Include="RecentFilesItem.cs" />
+    <Compile Include="Terminal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Terminal.Designer.cs">
+      <DependentUpon>Terminal.cs</DependentUpon>
+    </Compile>
     <Compile Include="Threading\CycleExactRunner.cs" />
     <Compile Include="Threading\ITrainerRunner.cs" />
     <Compile Include="Threading\StandardRunner.cs" />
     <Compile Include="Threading\TrainerRunnerBase.cs" />
-    <Compile Include="Trainer\Breakpoint.cs" />
-    <Compile Include="Trainer\BreakpointCollection.cs" />
+    <Compile Include="Debugger\Breakpoints\Breakpoint.cs" />
+    <Compile Include="Debugger\Breakpoints\BreakpointCollection.cs" />
+    <Compile Include="Debugger\Breakpoints\BreakpointEventArgs.cs" />
+    <Compile Include="Debugger\Breakpoints\BreakpointEventType.cs" />
     <Compile Include="Trainer\IIODevice.cs" />
     <Compile Include="Trainer\IMemory.cs" />
     <Compile Include="Trainer\IMemoryMap.cs" />
@@ -131,11 +142,15 @@
     <Compile Include="IO\SrecReader.cs" />
     <Compile Include="IO\SrecWriter.cs" />
     <Compile Include="IO\RomReader.cs" />
-    <Compile Include="Trainer\MemoryMapCollection.cs" />
-    <Compile Include="Trainer\MemoryMapManager.cs" />
-    <Compile Include="Trainer\MemoryMapRegion.cs" />
-    <Compile Include="Trainer\MemoryMapRegionType.cs" />
-    <Compile Include="Trainer\Rs232IOPort.cs" />
+    <Compile Include="Debugger\MemoryMaps\MapEventArgs.cs" />
+    <Compile Include="Debugger\MemoryMaps\MapEventType.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapCollection.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapEvent.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapEventBus.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapManager.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapRegion.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapRegionType.cs" />
+    <Compile Include="Trainer\MC6820.cs" />
     <Compile Include="Trainer\Trainer.cs" />
     <Compile Include="TrainerForm.cs">
       <SubType>Form</SubType>
@@ -203,6 +218,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Terminal.resx">
+      <DependentUpon>Terminal.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TrainerForm.resx">
       <DependentUpon>TrainerForm.cs</DependentUpon>
@@ -273,6 +291,7 @@
     <Content Include="Resources\key E.bmp" />
     <Content Include="Resources\key F.bmp" />
     <Content Include="Resources\Reset.bmp" />
+    <Content Include="Sharp6800.ico" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

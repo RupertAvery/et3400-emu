@@ -68,7 +68,7 @@ namespace Sharp6800.Trainer.Threads
 
         public virtual void Dispose()
         {
-            Running = false;
+           Stop();
         }
 
         public virtual void Recalibrate()

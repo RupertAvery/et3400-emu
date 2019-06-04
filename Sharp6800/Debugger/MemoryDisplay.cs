@@ -17,9 +17,7 @@ namespace Sharp6800.Debugger
 
         public int Width { get; set; }
         public int Height { get; set; }
-
         public int VisibleItems { get; }
-
 
         public bool IsDisposed { get; private set; }
         public MemoryRange MemoryRange { get; set; }

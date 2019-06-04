@@ -2,34 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Sharp6800.Trainer
+namespace Sharp6800.Debugger.Breakpoints
 {
-    public enum BreakpointEventType
-    {
-        Add,
-        Remove,
-        Clear,
-        Enable,
-        Disable
-    }
-
-    public class BreakpointEventArgs
-    {
-        public int Address { get; private set; }
-        public BreakpointEventType EventType { get; private set; }
-
-        public BreakpointEventArgs(BreakpointEventType eventType, int address)
-        {
-            Address = address;
-            EventType = eventType;
-        }
-    }
-
     public class BreakpointCollection : IEnumerable<Breakpoint>
     {
         private Dictionary<int, Breakpoint> _breakpointLookup;
 
         public EventHandler<BreakpointEventArgs> OnChange { get; set; }
+
+        public bool IsDirty { get; set; }
 
         public BreakpointCollection()
         {
@@ -51,13 +32,29 @@ namespace Sharp6800.Trainer
         public void Add(int address)
         {
             var breakpoint = new Breakpoint(address);
-            _breakpointLookup.Add(address, breakpoint);
-            OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Add, address));
+            if (!_breakpointLookup.ContainsKey(address))
+            {
+                _breakpointLookup.Add(address, breakpoint);
+                IsDirty = true;
+                OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Add, address));
+            }
+        }
+
+        public void Add(int address, bool enabled)
+        {
+            if (!_breakpointLookup.ContainsKey(address))
+            {
+                var breakpoint = new Breakpoint(address, enabled);
+                _breakpointLookup.Add(address, breakpoint);
+                IsDirty = true;
+                OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Add, address));
+            }
         }
 
         public void Clear()
         {
             _breakpointLookup.Clear();
+            IsDirty = true;
             OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Clear, 0));
         }
 
@@ -66,6 +63,7 @@ namespace Sharp6800.Trainer
             if (_breakpointLookup.ContainsKey(address))
             {
                 _breakpointLookup.Remove(address);
+                IsDirty = true;
                 OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Remove, address));
             }
         }
@@ -75,6 +73,7 @@ namespace Sharp6800.Trainer
             if (_breakpointLookup.TryGetValue(address, out Breakpoint value))
             {
                 value.IsEnabled = !value.IsEnabled;
+                IsDirty = true;
                 if (value.IsEnabled)
                 {
                     OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Enable, address));
@@ -91,6 +90,7 @@ namespace Sharp6800.Trainer
             if (_breakpointLookup.TryGetValue(address, out Breakpoint value))
             {
                 value.IsEnabled = true;
+                IsDirty = true;
                 OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Enable, address));
             }
         }
@@ -101,6 +101,7 @@ namespace Sharp6800.Trainer
             if (_breakpointLookup.TryGetValue(address, out Breakpoint value))
             {
                 value.IsEnabled = false;
+                IsDirty = true;
                 OnChange?.Invoke(this, new BreakpointEventArgs(BreakpointEventType.Disable, address));
             }
         }

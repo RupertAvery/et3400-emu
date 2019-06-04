@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using Core6800;
 using Sharp6800.Common;
 using Sharp6800.Debugger;
+using Sharp6800.Debugger.Breakpoints;
+using Sharp6800.Debugger.MemoryMaps;
 using Sharp6800.Trainer.Threads;
 
 namespace Sharp6800.Trainer
@@ -16,7 +18,7 @@ namespace Sharp6800.Trainer
     public class Trainer : ITrainer, IDisposable
     {
         private LedDisplay _disp;
-        
+
         public const int RomAddress = 0xFC00;
 
         public List<Watch> Watches { get; }
@@ -44,7 +46,20 @@ namespace Sharp6800.Trainer
             Watches.Add(watch);
         }
 
-        private Rs232IOPort _rs232 = new Rs232IOPort();
+        private MC6820 _mc6820;
+
+        private DebugConsoleAdapter _debugConsoleAdapter;
+
+        private void OnPeripheralWrite(object sender, PeripheralEventArgs e)
+        {
+            _debugConsoleAdapter.Read(e.Value & 1);
+        }
+
+        private void OnPeripheralRead(object sender, PeripheralEventArgs e)
+        {
+            e.Value = _debugConsoleAdapter.Write();
+        }
+
 
         public Trainer(TrainerSettings settings)
         {
@@ -54,6 +69,12 @@ namespace Sharp6800.Trainer
             Watches = new List<Watch>();
             MemoryMapManager = new MemoryMapManager();
             MemoryMapEventBus = new MemoryMapEventBus();
+
+            _mc6820 = new MC6820();
+            _debugConsoleAdapter = new DebugConsoleAdapter();
+            _mc6820.OnPeripheralWrite += OnPeripheralWrite; 
+            _mc6820.OnPeripheralRead += OnPeripheralRead; 
+
             Settings.SettingsUpdated += (sender, args) =>
             {
                 Runner.Recalibrate();
@@ -69,16 +90,12 @@ namespace Sharp6800.Trainer
                     {
                         address = address & 0xFFFF;
 
-                        if (address == 0x1000)
+                        if ((address & 0x1003) == address)
                         {
-                            return _rs232.Recieve();
+                            //_mc6820.RegisterSelect(address & 3);
+                            //return _mc6820.Get();
+                            return _mc6820.Get(address & 3);
                         }
-
-                        //if (address >= 0x1000 && address <= 0x1100)
-                        //{
-                        //    // Prevent writing to ROM-mapped space
-                        //    Debug.WriteLine($"RD: {address:X4}");
-                        //}
 
                         //foreach (var watch in Watches.ToList())
                         //{
@@ -112,15 +129,12 @@ namespace Sharp6800.Trainer
                             }
                         }
 
-                        if (address == 0x1000)
+                        if ((address & 0x1003) == address)
                         {
-                            _rs232.Send(value);
-                        }
-
-
-                        if (address >= 0x1000 && address <= 0x1100)
-                        {
-                            // Prevent writing to ROM-mapped space
+                            //_mc6820.RegisterSelect(address & 3);
+                            //_mc6820.Set(value);
+                            _mc6820.Set(address & 3, value);
+                            return;
                         }
 
                         if (address >= 0x1400 && address <= 0x1BFF)
@@ -141,25 +155,8 @@ namespace Sharp6800.Trainer
                             return;
                         }
 
-                        // For accurate emulation we should probably NOT write to memory mapped addresses
+                        // Limit writing to RAM addresses only?
                         Memory[address] = value;
-
-                        // Check if we're writing to memory-mapped display
-                        // quick test - just check if we are in C100-C1FF
-                        //if ((address & 0xC100) == 0xC100)
-                        //{
-                        //    var displayNo = (address & 0xF0) >> 4;
-                        //    if (displayNo >= 1 && displayNo <= 6)
-                        //    {
-                        //        // OUTCH flicker hack - assumes original OUTCH routine is intact
-                        //        if (Settings.EnableOUTCHHack && ((address & 0x08) == 0x08) && (Emulator.State.PC == 0xFE46))
-                        //        {
-                        //            // don't write to upper bits if in OUTCH routine
-                        //            return;
-                        //        }
-                        //        _disp.Write(address, value);
-                        //    }
-                        //}
                     }
             };
 
@@ -453,14 +450,14 @@ namespace Sharp6800.Trainer
 
         public void Dispose()
         {
-            Runner.Stop();
-            
+            _mc6820.OnPeripheralWrite -= OnPeripheralWrite;
+            Runner.Dispose();
             _disp.Dispose();
         }
 
         public void SendTerminal(string value)
         {
-            _rs232.FeedString(value);
+            _debugConsoleAdapter.WriteString(value);
         }
     }
 

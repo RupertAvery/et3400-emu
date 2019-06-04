@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Common;
+using Sharp6800.Debugger.Breakpoints;
+using Sharp6800.Debugger.MemoryMaps;
 using Sharp6800.Trainer;
 using Timer = System.Threading.Timer;
 

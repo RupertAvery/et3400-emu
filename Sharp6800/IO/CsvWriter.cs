@@ -14,12 +14,18 @@ namespace Sharp6800.Trainer
             sw = new StreamWriter(stream);
         }
 
-        public void WriteAll(IEnumerable<string[]> data) 
+        public void WriteLine(string[] parts)
+        {
+            var line = string.Join(",", parts.Select(part => part.Contains(",") ? $"\"{part}\"" : part));
+            sw.WriteLine(line);
+        }
+
+        public void WriteAll(IEnumerable<string[]> data)
         {
             foreach (var parts in data)
             {
                 var line = string.Join(",", parts.Select(part => part.Contains(",") ? $"\"{part}\"" : part));
-                sw.WriteLine(line);                
+                sw.WriteLine(line);
             }
         }
 

@@ -1,4 +1,4 @@
-namespace Sharp6800.Trainer
+namespace Sharp6800.Debugger.Breakpoints
 {
     public class Breakpoint
     {
@@ -10,5 +10,12 @@ namespace Sharp6800.Trainer
             Address = address;
             IsEnabled = true;
         }
+
+        public Breakpoint(int address, bool isEnabled)
+        {
+            Address = address;
+            IsEnabled = isEnabled;
+        }
+
     }
 }

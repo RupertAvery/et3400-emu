@@ -4,57 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Xml.Schema;
-using Sharp6800.Debugger;
+using Sharp6800.Trainer;
 
-namespace Sharp6800.Trainer
+namespace Sharp6800.Debugger.MemoryMaps
 {
-    public class MemoryMapEvent
-    {
-        public MapEventType Type { get; }
-        public IEnumerable<MemoryMap> MemoryMaps { get; }
-
-        public MemoryMapEvent(MapEventType type, IEnumerable<MemoryMap> memoryMaps)
-        {
-            Type = type;
-            MemoryMaps = memoryMaps;
-        }
-
-    }
-
-    public class MemoryMapEventBus
-    {
-        private Dictionary<MapEventType, List<Action<IEnumerable<MemoryMap>>>> _subscriptions;
-
-        public MemoryMapEventBus()
-        {
-            _subscriptions = new Dictionary<MapEventType, List<Action<IEnumerable<MemoryMap>>>>();
-            _subscriptions.Add(MapEventType.Add, new List<Action<IEnumerable<MemoryMap>>>());
-            _subscriptions.Add(MapEventType.Update, new List<Action<IEnumerable<MemoryMap>>>());
-            _subscriptions.Add(MapEventType.Remove, new List<Action<IEnumerable<MemoryMap>>>());
-            _subscriptions.Add(MapEventType.Clear, new List<Action<IEnumerable<MemoryMap>>>());
-        }
-
-        public void Unsubscribe(MapEventType eventType, Action<IEnumerable<MemoryMap>> mapEventAction)
-        {
-            _subscriptions[eventType].Remove(mapEventAction);
-        }
-
-        public void Subscribe(MapEventType eventType, Action<IEnumerable<MemoryMap>> mapEventAction)
-        {
-            _subscriptions[eventType].Add(mapEventAction);
-        }
-
-        public void Publish(MapEventType eventType, IEnumerable<MemoryMap> memoryMaps)
-        {
-            foreach (var action in _subscriptions[eventType])
-            {
-                action(memoryMaps);
-            }
-        }
-
-    }
-
     public class MemoryMapCollection : IEnumerable<MemoryMap>
     {
         private readonly MemoryMapEventBus _memoryMapEventBus;
@@ -105,10 +58,12 @@ namespace Sharp6800.Trainer
                 Type = rangeType,
                 Description = description
             };
+
             lock (lockObject)
             {
                 _memoryMaps.Add(memoryMap);
             }
+
             _memoryMapEventBus.Publish(MapEventType.Add, new[] { memoryMap });
         }
 

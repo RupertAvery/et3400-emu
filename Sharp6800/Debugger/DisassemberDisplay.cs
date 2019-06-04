@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Resources;
-using System.Runtime.Remoting.Lifetime;
 using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Trainer;
