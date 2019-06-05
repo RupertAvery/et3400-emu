@@ -41,6 +41,18 @@ namespace Sharp6800
 
         private void OkButton_Click(object sender, EventArgs e)
         {
+            if (startTextBox.Text.Trim() == string.Empty)
+            {
+                MessageBox.Show("Please enter a start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (endTextBox.Text.Trim() == string.Empty)
+            {
+                MessageBox.Show("Please enter an end address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 if (startTextBox.Text.StartsWith("$"))
@@ -55,7 +67,15 @@ namespace Sharp6800
                 {
                     StartAddress = Convert.ToInt32(startTextBox.Text.Trim());
                 }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("Please enter a valid start address", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
 
+            try
+            {
                 if (endTextBox.Text.Trim().StartsWith("$"))
                 {
                     EndAddress = Convert.ToInt32(endTextBox.Text.Trim().Substring(1), 16);
@@ -68,54 +88,55 @@ namespace Sharp6800
                 {
                     EndAddress = Convert.ToInt32(endTextBox.Text.Trim());
                 }
-
-                if (StartAddress > EndAddress)
-                {
-                    MessageBox.Show("The end address must be larger than or equal to the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (descriptionTextBox.Text.Trim() == string.Empty)
-                {
-                    MessageBox.Show("Please enter a description", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (StartAddress < 0)
-                {
-                    MessageBox.Show("The start address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (StartAddress > 0xFFFF)
-                {
-                    MessageBox.Show("The start address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (EndAddress < 0)
-                {
-                    MessageBox.Show("The end address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (EndAddress > 0xFFFF)
-                {
-                    MessageBox.Show("The end address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                Description = descriptionTextBox.Text.Trim();
-
-                DialogResult = DialogResult.OK;
-
-                Close();
             }
             catch (Exception exception)
             {
-                MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Please enter a valid end address", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
             }
 
+
+            if (StartAddress > EndAddress)
+            {
+                MessageBox.Show("The end address must be larger than or equal to the start address", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (descriptionTextBox.Text.Trim() == string.Empty)
+            {
+                MessageBox.Show("Please enter a description", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (StartAddress < 0)
+            {
+                MessageBox.Show("The start address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (StartAddress > 0xFFFF)
+            {
+                MessageBox.Show("The start address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (EndAddress < 0)
+            {
+                MessageBox.Show("The end address must be greater than $0000", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (EndAddress > 0xFFFF)
+            {
+                MessageBox.Show("The end address must be less than $FFFF", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Description = descriptionTextBox.Text.Trim();
+
+            DialogResult = DialogResult.OK;
+
+            Close();
         }
     }
 }

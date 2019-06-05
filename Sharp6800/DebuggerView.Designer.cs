@@ -31,8 +31,10 @@
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.MemoryViewScrollBar = new System.Windows.Forms.VScrollBar();
+            this.MemoryViewPictureBox = new System.Windows.Forms.PictureBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.DasmViewScrollBar = new System.Windows.Forms.VScrollBar();
+            this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
             this.PCTextBox = new System.Windows.Forms.TextBox();
             this.ACCATextBox = new System.Windows.Forms.TextBox();
             this.ACCBTextBox = new System.Windows.Forms.TextBox();
@@ -54,7 +56,11 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.DebuggerToolStrip = new System.Windows.Forms.ToolStrip();
+            this.StartButton = new System.Windows.Forms.ToolStripButton();
+            this.StopButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.StepButton = new System.Windows.Forms.ToolStripButton();
+            this.ResetButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.MemToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
@@ -68,7 +74,11 @@
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.BreakpointsToolStrip = new System.Windows.Forms.ToolStrip();
+            this.AddBreakpointButton = new System.Windows.Forms.ToolStripButton();
+            this.RemoveBreakpointButton = new System.Windows.Forms.ToolStripButton();
+            this.ClearAllBreakpointsButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.GotoBreakpointButton = new System.Windows.Forms.ToolStripButton();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.RangesListView = new System.Windows.Forms.ListView();
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -76,23 +86,17 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.RangesToolStrip = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
-            this.AddBreakpointButton = new System.Windows.Forms.ToolStripButton();
-            this.RemoveBreakpointButton = new System.Windows.Forms.ToolStripButton();
-            this.ClearAllBreakpointsButton = new System.Windows.Forms.ToolStripButton();
-            this.GotoBreakpointButton = new System.Windows.Forms.ToolStripButton();
-            this.AddRangeButton = new System.Windows.Forms.ToolStripButton();
             this.RemoveRangeButton = new System.Windows.Forms.ToolStripButton();
             this.ClearAllRangesButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton12 = new System.Windows.Forms.ToolStripSeparator();
             this.GotoRangeButton = new System.Windows.Forms.ToolStripButton();
-            this.StartButton = new System.Windows.Forms.ToolStripButton();
-            this.StopButton = new System.Windows.Forms.ToolStripButton();
-            this.StepButton = new System.Windows.Forms.ToolStripButton();
-            this.ResetButton = new System.Windows.Forms.ToolStripButton();
-            this.DasmViewPictureBox = new System.Windows.Forms.PictureBox();
-            this.MemoryViewPictureBox = new System.Windows.Forms.PictureBox();
+            this.AddRangeButton = new System.Windows.Forms.ToolStripDropDownButton();
+            this.addDataRangeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.addCommentToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).BeginInit();
             this.disassemblerContextMenuStrip.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.DebuggerToolStrip.SuspendLayout();
@@ -101,8 +105,6 @@
             this.BreakpointsToolStrip.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.RangesToolStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -126,6 +128,16 @@
             this.MemoryViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.MemoryViewScrollBar_Scroll);
             this.MemoryViewScrollBar.ValueChanged += new System.EventHandler(this.MemoryViewScrollBar_ValueChanged);
             // 
+            // MemoryViewPictureBox
+            // 
+            this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
+            this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.MemoryViewPictureBox.Location = new System.Drawing.Point(6, 19);
+            this.MemoryViewPictureBox.Name = "MemoryViewPictureBox";
+            this.MemoryViewPictureBox.Size = new System.Drawing.Size(319, 394);
+            this.MemoryViewPictureBox.TabIndex = 4;
+            this.MemoryViewPictureBox.TabStop = false;
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.DasmViewScrollBar);
@@ -146,6 +158,19 @@
             this.DasmViewScrollBar.TabIndex = 8;
             this.DasmViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.DasmViewScrollBar_Scroll);
             this.DasmViewScrollBar.ValueChanged += new System.EventHandler(this.DasmViewScrollBar_ValueChanged);
+            // 
+            // DasmViewPictureBox
+            // 
+            this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
+            this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.DasmViewPictureBox.Location = new System.Drawing.Point(6, 19);
+            this.DasmViewPictureBox.Name = "DasmViewPictureBox";
+            this.DasmViewPictureBox.Size = new System.Drawing.Size(319, 394);
+            this.DasmViewPictureBox.TabIndex = 7;
+            this.DasmViewPictureBox.TabStop = false;
+            this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
+            this.DasmViewPictureBox.DoubleClick += new System.EventHandler(this.DasmViewPictureBox_DoubleClick);
+            this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
             // 
             // PCTextBox
             // 
@@ -367,10 +392,54 @@
             this.DebuggerToolStrip.TabIndex = 1;
             this.DebuggerToolStrip.Text = "toolStrip1";
             // 
+            // StartButton
+            // 
+            this.StartButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StartButton.Image = global::Sharp6800.Properties.Resources.Run_16x;
+            this.StartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StartButton.Name = "StartButton";
+            this.StartButton.Size = new System.Drawing.Size(23, 22);
+            this.StartButton.Text = "Start";
+            this.StartButton.ToolTipText = "Start (F5)";
+            this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
+            // 
+            // StopButton
+            // 
+            this.StopButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StopButton.Image = global::Sharp6800.Properties.Resources.Stop_16x;
+            this.StopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StopButton.Name = "StopButton";
+            this.StopButton.Size = new System.Drawing.Size(23, 22);
+            this.StopButton.Text = "Stop";
+            this.StopButton.ToolTipText = "Stop (F4)";
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
+            // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // StepButton
+            // 
+            this.StepButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StepButton.Image = global::Sharp6800.Properties.Resources.StepIntoArrow_16x;
+            this.StepButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StepButton.Name = "StepButton";
+            this.StepButton.Size = new System.Drawing.Size(23, 22);
+            this.StepButton.Text = "Step";
+            this.StepButton.ToolTipText = "Step (F10)";
+            this.StepButton.Click += new System.EventHandler(this.StepButton_Click);
+            // 
+            // ResetButton
+            // 
+            this.ResetButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.ResetButton.Image = global::Sharp6800.Properties.Resources.Restart_16x;
+            this.ResetButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ResetButton.Name = "ResetButton";
+            this.ResetButton.Size = new System.Drawing.Size(23, 22);
+            this.ResetButton.Text = "Reset";
+            this.ResetButton.ToolTipText = "Reset (ESC)";
+            this.ResetButton.Click += new System.EventHandler(this.ResetButton_Click);
             // 
             // toolStripSeparator1
             // 
@@ -476,10 +545,50 @@
             this.BreakpointsToolStrip.TabIndex = 0;
             this.BreakpointsToolStrip.Text = "toolStrip2";
             // 
+            // AddBreakpointButton
+            // 
+            this.AddBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.AddBreakpointButton.Image = global::Sharp6800.Properties.Resources.Add_16x;
+            this.AddBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.AddBreakpointButton.Name = "AddBreakpointButton";
+            this.AddBreakpointButton.Size = new System.Drawing.Size(23, 22);
+            this.AddBreakpointButton.Text = "Add breakpoint";
+            this.AddBreakpointButton.Click += new System.EventHandler(this.AddBreakpointButton_Click);
+            // 
+            // RemoveBreakpointButton
+            // 
+            this.RemoveBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.RemoveBreakpointButton.Image = global::Sharp6800.Properties.Resources.Remove_16x;
+            this.RemoveBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.RemoveBreakpointButton.Name = "RemoveBreakpointButton";
+            this.RemoveBreakpointButton.Size = new System.Drawing.Size(23, 22);
+            this.RemoveBreakpointButton.Text = "Remove breakpoint";
+            this.RemoveBreakpointButton.Click += new System.EventHandler(this.RemoveBreakpointButton_Click);
+            // 
+            // ClearAllBreakpointsButton
+            // 
+            this.ClearAllBreakpointsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.ClearAllBreakpointsButton.Image = global::Sharp6800.Properties.Resources.ClearCollection_16x;
+            this.ClearAllBreakpointsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ClearAllBreakpointsButton.Name = "ClearAllBreakpointsButton";
+            this.ClearAllBreakpointsButton.Size = new System.Drawing.Size(23, 22);
+            this.ClearAllBreakpointsButton.Text = "Clear all breakpoints";
+            this.ClearAllBreakpointsButton.Click += new System.EventHandler(this.ClearAllBreakpointsButton_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // GotoBreakpointButton
+            // 
+            this.GotoBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.GotoBreakpointButton.Image = global::Sharp6800.Properties.Resources.GoToSourceCode_16x;
+            this.GotoBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.GotoBreakpointButton.Name = "GotoBreakpointButton";
+            this.GotoBreakpointButton.Size = new System.Drawing.Size(23, 22);
+            this.GotoBreakpointButton.Text = "Go to breakpoint";
+            this.GotoBreakpointButton.Click += new System.EventHandler(this.GotoBreakpointButton_Click);
             // 
             // tabPage2
             // 
@@ -489,7 +598,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(914, 133);
+            this.tabPage2.Size = new System.Drawing.Size(910, 154);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Memory Maps";
             // 
@@ -505,7 +614,7 @@
             this.RangesListView.GridLines = true;
             this.RangesListView.Location = new System.Drawing.Point(3, 28);
             this.RangesListView.Name = "RangesListView";
-            this.RangesListView.Size = new System.Drawing.Size(908, 102);
+            this.RangesListView.Size = new System.Drawing.Size(904, 123);
             this.RangesListView.TabIndex = 1;
             this.RangesListView.UseCompatibleStateImageBehavior = false;
             this.RangesListView.View = System.Windows.Forms.View.Details;
@@ -546,65 +655,9 @@
             this.GotoRangeButton});
             this.RangesToolStrip.Location = new System.Drawing.Point(3, 3);
             this.RangesToolStrip.Name = "RangesToolStrip";
-            this.RangesToolStrip.Size = new System.Drawing.Size(908, 25);
+            this.RangesToolStrip.Size = new System.Drawing.Size(904, 25);
             this.RangesToolStrip.TabIndex = 0;
             this.RangesToolStrip.Text = "toolStrip3";
-            // 
-            // toolStripButton12
-            // 
-            this.toolStripButton12.Name = "toolStripButton12";
-            this.toolStripButton12.Size = new System.Drawing.Size(6, 25);
-            // 
-            // AddBreakpointButton
-            // 
-            this.AddBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.AddBreakpointButton.Image = global::Sharp6800.Properties.Resources.Add_16x;
-            this.AddBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.AddBreakpointButton.Name = "AddBreakpointButton";
-            this.AddBreakpointButton.Size = new System.Drawing.Size(23, 22);
-            this.AddBreakpointButton.Text = "Add breakpoint";
-            this.AddBreakpointButton.Click += new System.EventHandler(this.AddBreakpointButton_Click);
-            // 
-            // RemoveBreakpointButton
-            // 
-            this.RemoveBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.RemoveBreakpointButton.Image = global::Sharp6800.Properties.Resources.Remove_16x;
-            this.RemoveBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.RemoveBreakpointButton.Name = "RemoveBreakpointButton";
-            this.RemoveBreakpointButton.Size = new System.Drawing.Size(23, 22);
-            this.RemoveBreakpointButton.Text = "Remove breakpoint";
-            this.RemoveBreakpointButton.Click += new System.EventHandler(this.RemoveBreakpointButton_Click);
-            // 
-            // ClearAllBreakpointsButton
-            // 
-            this.ClearAllBreakpointsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.ClearAllBreakpointsButton.Image = global::Sharp6800.Properties.Resources.ClearCollection_16x;
-            this.ClearAllBreakpointsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.ClearAllBreakpointsButton.Name = "ClearAllBreakpointsButton";
-            this.ClearAllBreakpointsButton.Size = new System.Drawing.Size(23, 22);
-            this.ClearAllBreakpointsButton.Text = "Clear all breakpoints";
-            this.ClearAllBreakpointsButton.Click += new System.EventHandler(this.ClearAllBreakpointsButton_Click);
-            // 
-            // GotoBreakpointButton
-            // 
-            this.GotoBreakpointButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.GotoBreakpointButton.Image = global::Sharp6800.Properties.Resources.GoToSourceCode_16x;
-            this.GotoBreakpointButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.GotoBreakpointButton.Name = "GotoBreakpointButton";
-            this.GotoBreakpointButton.Size = new System.Drawing.Size(23, 22);
-            this.GotoBreakpointButton.Text = "Go to breakpoint";
-            this.GotoBreakpointButton.Click += new System.EventHandler(this.GotoBreakpointButton_Click);
-            // 
-            // AddRangeButton
-            // 
-            this.AddRangeButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.AddRangeButton.Image = global::Sharp6800.Properties.Resources.Add_16x;
-            this.AddRangeButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.AddRangeButton.Name = "AddRangeButton";
-            this.AddRangeButton.Size = new System.Drawing.Size(23, 22);
-            this.AddRangeButton.Text = "Add range";
-            this.AddRangeButton.ToolTipText = "Add range";
-            this.AddRangeButton.Click += new System.EventHandler(this.AddRangeButton_Click);
             // 
             // RemoveRangeButton
             // 
@@ -628,6 +681,11 @@
             this.ClearAllRangesButton.ToolTipText = "Clear all ranges";
             this.ClearAllRangesButton.Click += new System.EventHandler(this.ClearAllRangesButton_Click);
             // 
+            // toolStripButton12
+            // 
+            this.toolStripButton12.Name = "toolStripButton12";
+            this.toolStripButton12.Size = new System.Drawing.Size(6, 25);
+            // 
             // GotoRangeButton
             // 
             this.GotoRangeButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -639,72 +697,32 @@
             this.GotoRangeButton.ToolTipText = "Go to range";
             this.GotoRangeButton.Click += new System.EventHandler(this.GotoRangeButton_Click);
             // 
-            // StartButton
+            // AddRangeButton
             // 
-            this.StartButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.StartButton.Image = global::Sharp6800.Properties.Resources.Run_16x;
-            this.StartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(23, 22);
-            this.StartButton.Text = "Start";
-            this.StartButton.ToolTipText = "Start (F5)";
-            this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
+            this.AddRangeButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.AddRangeButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addDataRangeToolStripMenuItem1,
+            this.addCommentToolStripMenuItem2});
+            this.AddRangeButton.Image = global::Sharp6800.Properties.Resources.Add_16x;
+            this.AddRangeButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.AddRangeButton.Name = "AddRangeButton";
+            this.AddRangeButton.Size = new System.Drawing.Size(29, 22);
+            this.AddRangeButton.Text = "Add Memory Map";
+            this.AddRangeButton.ToolTipText = "Add Memory Map";
             // 
-            // StopButton
+            // addDataRangeToolStripMenuItem1
             // 
-            this.StopButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.StopButton.Image = global::Sharp6800.Properties.Resources.Stop_16x;
-            this.StopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(23, 22);
-            this.StopButton.Text = "Stop";
-            this.StopButton.ToolTipText = "Stop (F4)";
-            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
+            this.addDataRangeToolStripMenuItem1.Name = "addDataRangeToolStripMenuItem1";
+            this.addDataRangeToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.addDataRangeToolStripMenuItem1.Text = "Add Data Range";
+            this.addDataRangeToolStripMenuItem1.Click += new System.EventHandler(this.addDataRangeToolStripMenuItem1_Click);
             // 
-            // StepButton
+            // addCommentToolStripMenuItem2
             // 
-            this.StepButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.StepButton.Image = global::Sharp6800.Properties.Resources.StepIntoArrow_16x;
-            this.StepButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.StepButton.Name = "StepButton";
-            this.StepButton.Size = new System.Drawing.Size(23, 22);
-            this.StepButton.Text = "Step";
-            this.StepButton.ToolTipText = "Step (F10)";
-            this.StepButton.Click += new System.EventHandler(this.StepButton_Click);
-            // 
-            // ResetButton
-            // 
-            this.ResetButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.ResetButton.Image = global::Sharp6800.Properties.Resources.Restart_16x;
-            this.ResetButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.ResetButton.Name = "ResetButton";
-            this.ResetButton.Size = new System.Drawing.Size(23, 22);
-            this.ResetButton.Text = "Reset";
-            this.ResetButton.ToolTipText = "Reset (ESC)";
-            this.ResetButton.Click += new System.EventHandler(this.ResetButton_Click);
-            // 
-            // DasmViewPictureBox
-            // 
-            this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
-            this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.DasmViewPictureBox.Location = new System.Drawing.Point(6, 19);
-            this.DasmViewPictureBox.Name = "DasmViewPictureBox";
-            this.DasmViewPictureBox.Size = new System.Drawing.Size(319, 394);
-            this.DasmViewPictureBox.TabIndex = 7;
-            this.DasmViewPictureBox.TabStop = false;
-            this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
-            this.DasmViewPictureBox.DoubleClick += new System.EventHandler(this.DasmViewPictureBox_DoubleClick);
-            this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
-            // 
-            // MemoryViewPictureBox
-            // 
-            this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
-            this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.MemoryViewPictureBox.Location = new System.Drawing.Point(6, 19);
-            this.MemoryViewPictureBox.Name = "MemoryViewPictureBox";
-            this.MemoryViewPictureBox.Size = new System.Drawing.Size(319, 394);
-            this.MemoryViewPictureBox.TabIndex = 4;
-            this.MemoryViewPictureBox.TabStop = false;
+            this.addCommentToolStripMenuItem2.Name = "addCommentToolStripMenuItem2";
+            this.addCommentToolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
+            this.addCommentToolStripMenuItem2.Text = "Add Comment";
+            this.addCommentToolStripMenuItem2.Click += new System.EventHandler(this.addCommentToolStripMenuItem2_Click);
             // 
             // DebuggerView
             // 
@@ -731,7 +749,9 @@
             this.Enter += new System.EventHandler(this.DebuggerView_Enter);
             this.Leave += new System.EventHandler(this.DebuggerView_Leave);
             this.groupBox1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).EndInit();
             this.groupBox2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).EndInit();
             this.disassemblerContextMenuStrip.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
@@ -746,8 +766,6 @@
             this.tabPage2.PerformLayout();
             this.RangesToolStrip.ResumeLayout(false);
             this.RangesToolStrip.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.DasmViewPictureBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.MemoryViewPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -796,7 +814,6 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.ListView RangesListView;
         private System.Windows.Forms.ToolStrip RangesToolStrip;
-        private System.Windows.Forms.ToolStripButton AddRangeButton;
         private System.Windows.Forms.ToolStripButton RemoveRangeButton;
         private System.Windows.Forms.ToolStripButton ClearAllRangesButton;
         private System.Windows.Forms.ColumnHeader columnHeader1;
@@ -818,5 +835,8 @@
         private System.Windows.Forms.ToolStripMenuItem addCommentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeCommentToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.ToolStripDropDownButton AddRangeButton;
+        private System.Windows.Forms.ToolStripMenuItem addDataRangeToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem addCommentToolStripMenuItem2;
     }
 }

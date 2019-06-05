@@ -484,8 +484,8 @@ namespace Sharp6800.Debugger
         {
             var address = _disassemberDisplay.SelectedLine.HasValue ? _disassemberDisplay.SelectedLine.Value.Address : 0;
 
-            var addBreakpointDialog = new AddBreakpoint(_disassemberDisplay.SelectedLine.Value.Address);
-            //addBreakpointDialog.Parent = this;
+            var addBreakpointDialog = new AddBreakpoint(address);
+
             addBreakpointDialog.StartPosition = FormStartPosition.CenterParent;
             var result = addBreakpointDialog.ShowDialog(this);
             if (result == DialogResult.OK)
@@ -527,7 +527,7 @@ namespace Sharp6800.Debugger
             GotoBreakpoint();
         }
 
-        private void AddRangeButton_Click(object sender, EventArgs e)
+        private void ShowAddDataRange()
         {
             var address = _disassemberDisplay.SelectedLine.HasValue
                 ? _disassemberDisplay.SelectedLine.Value.Address
@@ -555,6 +555,7 @@ namespace Sharp6800.Debugger
 
                 _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
             }
+
         }
 
         private void RemoveRangeButton_Click(object sender, EventArgs e)
@@ -656,7 +657,7 @@ namespace Sharp6800.Debugger
 
         private void addCommentToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AddComment();
+            ShowAddComment();
         }
 
 
@@ -723,26 +724,24 @@ namespace Sharp6800.Debugger
             }
         }
 
-        public void AddComment()
+        public void ShowAddComment()
         {
-            if (_disassemberDisplay.SelectedLine.HasValue)
+            var address = _disassemberDisplay.SelectedLine.HasValue ? _disassemberDisplay.SelectedLine.Value.Address : 0;
+            var addRangeDialog = new AddComment(address);
+            //addRangeDialog.Parent = this;
+            addRangeDialog.StartPosition = FormStartPosition.CenterParent;
+            var result = addRangeDialog.ShowDialog(this);
+            if (result == DialogResult.OK)
             {
-                var addRangeDialog = new AddComment(_disassemberDisplay.SelectedLine.Value.Address);
-                //addRangeDialog.Parent = this;
-                addRangeDialog.StartPosition = FormStartPosition.CenterParent;
-                var result = addRangeDialog.ShowDialog(this);
-                if (result == DialogResult.OK)
+                var memoryMap = new MemoryMap()
                 {
-                    var memoryMap = new MemoryMap()
-                    {
-                        Start = addRangeDialog.StartAddress,
-                        End = addRangeDialog.StartAddress,
-                        Type = addRangeDialog.RangeType,
-                        Description = addRangeDialog.Description
-                    };
+                    Start = addRangeDialog.StartAddress,
+                    End = addRangeDialog.StartAddress,
+                    Type = addRangeDialog.RangeType,
+                    Description = addRangeDialog.Description
+                };
 
-                    _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
-                }
+                _trainer.MemoryMapManager.AddMemoryMap(memoryMap);
             }
         }
 
@@ -827,6 +826,16 @@ namespace Sharp6800.Debugger
             {
                 _trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
             }
+        }
+
+        private void addDataRangeToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            ShowAddDataRange();
+        }
+
+        private void addCommentToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            ShowAddComment();
         }
     }
 }
