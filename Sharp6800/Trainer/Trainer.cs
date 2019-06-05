@@ -90,7 +90,7 @@ namespace Sharp6800.Trainer
                     {
                         address = address & 0xFFFF;
 
-                        if ((address & 0x1003) == address)
+                        if (address >= 0x1000 && address <= 0x1003)
                         {
                             //_mc6820.RegisterSelect(address & 3);
                             //return _mc6820.Get();
@@ -129,7 +129,7 @@ namespace Sharp6800.Trainer
                             }
                         }
 
-                        if ((address & 0x1003) == address)
+                        if (address >= 0x1000 && address <= 0x1003)
                         {
                             //_mc6820.RegisterSelect(address & 3);
                             //_mc6820.Set(value);
@@ -160,8 +160,8 @@ namespace Sharp6800.Trainer
                     }
             };
 
-            Runner = new StandardRunner(this);
-            //Runner = new CycleExactRunner(this);
+            //Runner = new StandardRunner(this);
+            Runner = new CycleExactRunner(this);
 
             // Set keyboard mapped memory 'high'
             Memory[0xC003] = 0xFF;
