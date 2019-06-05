@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using Sharp6800.Common;
 
 namespace Sharp6800.Trainer
@@ -48,6 +49,7 @@ namespace Sharp6800.Trainer
         public TrainerSettings()
         {
             BaseFrequency = 100000;
+            ClockSpeed = 100000;
             CpuPercent = 100;
         }
 
