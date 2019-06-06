@@ -14,10 +14,11 @@ namespace Sharp6800.Debugger
         private int _textheight = 20;
         private SolidBrush _brush;
         private Font _font;
+        private Control _target;
 
         public int Width { get; set; }
         public int Height { get; set; }
-        public int VisibleItems { get; }
+        public int VisibleItems { get; private set; }
 
         public bool IsDisposed { get; private set; }
         public MemoryRange MemoryRange { get; set; }
@@ -26,10 +27,9 @@ namespace Sharp6800.Debugger
         public MemoryDisplay(Control target, Trainer.Trainer trainer)
         {
             _trainer = trainer;
-            Width = target.Width;
-            Height = target.Height;
+            _target = target;
+            Resize();
             targetWnd = target.Handle;
-            VisibleItems = Height / _textheight - 1;
 
             _brush = new SolidBrush(Color.Black);
             _font = new Font("Courier New", 12, FontStyle.Regular);
@@ -108,6 +108,13 @@ namespace Sharp6800.Debugger
                 _brush?.Dispose();
                 _font?.Dispose();
             }
+        }
+
+        public void Resize()
+        {
+            Width = _target.Width;
+            Height = _target.Height;
+            VisibleItems = Height / _textheight - 1;
         }
     }
 }

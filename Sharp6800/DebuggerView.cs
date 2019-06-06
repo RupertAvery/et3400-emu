@@ -837,5 +837,84 @@ namespace Sharp6800.Debugger
         {
             ShowAddComment();
         }
+
+        private void memoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (memoryToolStripMenuItem.Checked && CheckCount()) return;
+            memoryToolStripMenuItem.Checked = !memoryToolStripMenuItem.Checked;
+            UpdateFormSize();
+        }
+
+        private void disassemblyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (disassemblyToolStripMenuItem.Checked && CheckCount()) return;
+            disassemblyToolStripMenuItem.Checked = !disassemblyToolStripMenuItem.Checked;
+            UpdateFormSize();
+        }
+
+        private void statusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (statusToolStripMenuItem.Checked && CheckCount()) return;
+            statusToolStripMenuItem.Checked = !statusToolStripMenuItem.Checked;
+            UpdateFormSize();
+        }
+
+
+        private bool CheckCount()
+        {
+            var count = (memoryToolStripMenuItem.Checked ? 1 : 0)
+                        + (disassemblyToolStripMenuItem.Checked ? 1 : 0)
+                        + (statusToolStripMenuItem.Checked ? 1 : 0);
+
+            return (count == 1);
+        }
+
+        private void UpdateFormSize()
+        {
+
+
+            var left = 12;
+            Width = 0;
+
+            MemoryGroupBox.Visible = memoryToolStripMenuItem.Checked;
+            toolStripLabel1.Visible = MemoryGroupBox.Visible;
+            MemToolStripComboBox.Visible = MemoryGroupBox.Visible;
+
+            if (memoryToolStripMenuItem.Checked)
+            {
+                MemoryGroupBox.Left = left;
+                left += MemoryGroupBox.Width + 10;
+            }
+
+            DisassemblyGroupBox.Visible = disassemblyToolStripMenuItem.Checked;
+            toolStripLabel2.Visible = DisassemblyGroupBox.Visible;
+            DasmToolStripComboBox.Visible = DisassemblyGroupBox.Visible;
+
+            if (disassemblyToolStripMenuItem.Checked)
+            {
+                DisassemblyGroupBox.Left = left;
+                left += DisassemblyGroupBox.Width + 10;
+            }
+
+            StatusGroupBox.Visible = statusToolStripMenuItem.Checked;
+            if (statusToolStripMenuItem.Checked)
+            {
+                StatusGroupBox.Left = left;
+                left += StatusGroupBox.Width + 10;
+            }
+
+            Width = left + 12;
+
+        }
+
+        private void DasmViewPictureBox_SizeChanged(object sender, EventArgs e)
+        {
+            _disassemberDisplay.Resize();
+        }
+
+        private void MemoryViewPictureBox_SizeChanged(object sender, EventArgs e)
+        {
+            _memoryDisplay.Resize();
+        }
     }
 }

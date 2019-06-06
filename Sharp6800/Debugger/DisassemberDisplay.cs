@@ -21,11 +21,13 @@ namespace Sharp6800.Debugger
         private VScrollBar _scrollBar;
         private Bitmap _breakpointEnabledBitmap;
         private Bitmap _breakpointDisabledBitmap;
+        private object lockObject = new object();
+        private Control _target;
 
         public int ViewOffset { get; set; }
-        public int Width { get; }
-        public int Height { get; }
-        public int VisibleItems { get; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public int VisibleItems { get; private set; }
 
         public DisassemblyLine? SelectedLine { get; private set; }
         public DisassemblyLine? CurrentLine { get; private set; }
@@ -115,16 +117,15 @@ namespace Sharp6800.Debugger
         {
             var rm = new ResourceManager("Resources", this.GetType().Assembly);
             _breakpointEnabledBitmap = Sharp6800.Properties.Resources.BreakpointEnable_16x;
-            _breakpointDisabledBitmap= Sharp6800.Properties.Resources.BreakpointDisable_16x;
+            _breakpointDisabledBitmap = Sharp6800.Properties.Resources.BreakpointDisable_16x;
         }
 
         public DisassemberDisplay(Control target, VScrollBar scrollBar, Trainer.Trainer trainer)
         {
             _trainer = trainer;
+            _target = target;
+            Resize();
             _scrollBar = scrollBar;
-            Width = target.Width;
-            Height = target.Height;
-            VisibleItems = Height / _textheight - 1;
             _targetWnd = target.Handle;
             SetUpColors();
             LoadImages();
@@ -137,8 +138,6 @@ namespace Sharp6800.Debugger
         {
             return CurrentView.GetLineFromAddress(address);
         }
-
-        private object lockObject = new object();
 
         public void UpdateDisplay()
         {
@@ -265,7 +264,7 @@ namespace Sharp6800.Debugger
 
         private void DrawText(Graphics g, int x, int y, string text, Color defaultColor, bool isAtBreakPoint, bool isSelected, bool isCurrent)
         {
-            using (var brush = new SolidBrush(isAtBreakPoint && !isCurrent ? Color.White : defaultColor))
+            using (var brush = new SolidBrush(isAtBreakPoint && !isCurrent || isSelected ? Color.White : defaultColor))
             {
                 g.DrawString(text, _font, brush, x, y);
             }
@@ -421,6 +420,13 @@ namespace Sharp6800.Debugger
             }
 
             return line;
+        }
+
+        public void Resize()
+        {
+            Width = _target.Width;
+            Height = _target.Height;
+            VisibleItems = Height / _textheight - 1;
         }
     }
 

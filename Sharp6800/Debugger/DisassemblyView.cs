@@ -87,7 +87,7 @@ namespace Sharp6800.Debugger
                     {
                         disassemblyLine = new DisassemblyLine()
                         {
-                            Text = memoryMap.Description,
+                            Text = "; BEGIN - " + memoryMap.Description,
                             LineType = LineType.Comment,
                             Address = currentAddress,
                             LineNumber = lineNumber
@@ -146,6 +146,18 @@ namespace Sharp6800.Debugger
                             Lines.Add(disassemblyLine);
                             lineNumber++;
                         }
+
+                        disassemblyLine = new DisassemblyLine()
+                        {
+                            Text = "; END - " + memoryMap.Description,
+                            LineType = LineType.Comment,
+                            Address = currentAddress,
+                            LineNumber = lineNumber
+                        };
+
+                        Lines.Add(disassemblyLine);
+                        lineNumber++;
+
                     }
 
                 }
