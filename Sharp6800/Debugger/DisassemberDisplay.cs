@@ -32,6 +32,22 @@ namespace Sharp6800.Debugger
         public DisassemblyLine? SelectedLine { get; private set; }
         public DisassemblyLine? CurrentLine { get; private set; }
 
+        public DisassemblyLine? GetLine(int x, int y)
+        {
+            DisassemblyLine? line = null;
+            var index = ViewOffset + y / _textheight;
+            if (index < CurrentView.LineCount)
+            {
+                if (CurrentView.RequestLock())
+                {
+                    line = CurrentView.Lines[ViewOffset + y / _textheight];
+                    CurrentView.ReleaseLock();
+                }
+            }
+
+            return line;
+        }
+
         public void SelectLine(int x, int y)
         {
             var index = ViewOffset + y / _textheight;
@@ -169,7 +185,7 @@ namespace Sharp6800.Debugger
 
                                 var breakPoint = _trainer.Breakpoints[line.Address];
                                 var isBreakPoint = breakPoint != null;
-                                var isBreakPointEnabled = isBreakPoint && breakPoint.IsEnabled;
+                                var isBreakPointEnabled = isBreakPoint && breakPoint.IsEnabled && line.LineType == LineType.Assembly;
                                 var isSelected = false;
                                 var isCurrentPC = (!_trainer.IsRunning && line.Address == _trainer.State.PC);
 
@@ -178,7 +194,7 @@ namespace Sharp6800.Debugger
                                     isSelected = true;
                                 }
 
-                                if (isBreakPoint)
+                                if (isBreakPoint && line.LineType == LineType.Assembly)
                                 {
                                     if (breakPoint.IsEnabled)
                                     {
@@ -427,6 +443,10 @@ namespace Sharp6800.Debugger
             Width = _target.Width;
             Height = _target.Height;
             VisibleItems = Height / _textheight - 1;
+            if (CurrentView != null)
+            {
+                _scrollBar.Maximum = CurrentView.LineCount - VisibleItems / 2;
+            }
         }
     }
 

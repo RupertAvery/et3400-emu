@@ -15,6 +15,7 @@ namespace Sharp6800.Debugger
         private SolidBrush _brush;
         private Font _font;
         private Control _target;
+        private readonly VScrollBar _scrollBar;
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -24,10 +25,11 @@ namespace Sharp6800.Debugger
         public MemoryRange MemoryRange { get; set; }
         public int MemoryOffset { get; set; }
 
-        public MemoryDisplay(Control target, Trainer.Trainer trainer)
+        public MemoryDisplay(Control target, VScrollBar scrollBar, Trainer.Trainer trainer)
         {
             _trainer = trainer;
             _target = target;
+            _scrollBar = scrollBar;
             Resize();
             targetWnd = target.Handle;
 
@@ -115,6 +117,24 @@ namespace Sharp6800.Debugger
             Width = _target.Width;
             Height = _target.Height;
             VisibleItems = Height / _textheight - 1;
+
+            if (MemoryRange != null)
+            {
+                var maxValue = (MemoryRange.End - MemoryRange.Start) / 8;
+
+                if (VisibleItems >= maxValue)
+                {
+                    _scrollBar.Maximum = 0;
+                    _scrollBar.Enabled = false;
+                }
+                else
+                {
+                    // WHY DOES VisibleItems / 2 WORK???
+                    _scrollBar.Maximum = maxValue - VisibleItems;
+                    _scrollBar.Enabled = true;
+                }
+            }
+
         }
     }
 }

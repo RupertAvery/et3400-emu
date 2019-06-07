@@ -7,6 +7,11 @@ namespace Sharp6800.Debugger
 
     partial class DebuggerView : IMessageFilter
     {
+        private bool IsKeyDown(Keys key)
+        {
+            return (GetKeyState(key) & KEY_PRESSED) == KEY_PRESSED;
+        }
+
         public bool PreFilterMessage(ref Message m)
         {
             //Control control = Control.FromChildHandle(m.HWnd);
@@ -75,7 +80,7 @@ namespace Sharp6800.Debugger
                         switch (keys)
                         {
                             case Keys.G:
-                                if ((keys & Keys.ControlKey) != Keys.ControlKey)
+                                if (IsKeyDown(Keys.ControlKey))
                                 {
                                     //Application.RemoveMessageFilter(this);
                                     var gotoForm = new Goto();
@@ -107,7 +112,14 @@ namespace Sharp6800.Debugger
                                 return true;
 
                             case Keys.F9:
-                                AddBreakpoint();
+                                if (IsKeyDown(Keys.ControlKey))
+                                {
+                                    ToggleBreakpointEnabled();
+                                }
+                                else
+                                {
+                                    ToggleBreakPoint();
+                                }
                                 return true;
                         }
 

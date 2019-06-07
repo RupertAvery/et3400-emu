@@ -151,7 +151,7 @@ namespace Sharp6800.Debugger
                         {
                             Text = "; END - " + memoryMap.Description,
                             LineType = LineType.Comment,
-                            Address = currentAddress,
+                            Address = currentAddress - 1,
                             LineNumber = lineNumber
                         };
 

@@ -72,8 +72,8 @@ namespace Sharp6800.Trainer
 
             _mc6820 = new MC6820();
             _debugConsoleAdapter = new DebugConsoleAdapter();
-            _mc6820.OnPeripheralWrite += OnPeripheralWrite; 
-            _mc6820.OnPeripheralRead += OnPeripheralRead; 
+            _mc6820.OnPeripheralWrite += OnPeripheralWrite;
+            _mc6820.OnPeripheralRead += OnPeripheralRead;
 
             Settings.SettingsUpdated += (sender, args) =>
             {
@@ -172,6 +172,9 @@ namespace Sharp6800.Trainer
         public void ToggleBreakPoint(int address)
         {
             var breakpoint = Breakpoints[address];
+            var memoryMap = MemoryMapManager.GetMemoryMap(address);
+            if (memoryMap != null && memoryMap.Type == RangeType.Data) return;
+
             if (breakpoint != null)
             {
                 Breakpoints.Remove(breakpoint.Address);

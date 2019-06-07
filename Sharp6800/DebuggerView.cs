@@ -26,6 +26,8 @@ namespace Sharp6800.Debugger
         private static extern IntPtr WindowFromPoint(Point pt);
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
+        [DllImport("USER32.dll")]
+        public static extern short GetKeyState(Keys nVirtKey);
 
         private readonly MemoryDisplay _memoryDisplay;
         private readonly DisassemberDisplay _disassemberDisplay;
@@ -36,6 +38,7 @@ namespace Sharp6800.Debugger
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_MOUSEWHEEL = 0x20a;
         private const int WM_SYSKEYDOWN = 0x104;
+        private const int KEY_PRESSED = 0x80;
         private Timer _updateTimer;
 
         public ListViewItem FromMemoryMap(MemoryMap memoryMap)
@@ -60,7 +63,7 @@ namespace Sharp6800.Debugger
             MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
 
-            _memoryDisplay = new MemoryDisplay(MemoryViewPictureBox, trainer);
+            _memoryDisplay = new MemoryDisplay(MemoryViewPictureBox, MemoryViewScrollBar, trainer);
             _disassemberDisplay = new DisassemberDisplay(DasmViewPictureBox, DasmViewScrollBar, trainer);
             _trainer = trainer;
 
@@ -313,8 +316,8 @@ namespace Sharp6800.Debugger
             MemToolStripComboBox.SelectedItem = MemToolStripComboBox.Items[0];
 
             DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "RAM", 0x0000, 0x07FF));
-            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "Fantom II", 0x1400, 0x1BFF));
-            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "TinyBasic", 0x1C00, 0x23FF));
+            //DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "Fantom II", 0x1400, 0x1BFF));
+            //DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "TinyBasic", 0x1C00, 0x23FF));
             DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));
             DasmToolStripComboBox.ComboBox.ValueMember = "Description";
 
@@ -386,10 +389,25 @@ namespace Sharp6800.Debugger
 
         private void DasmViewPictureBox_MouseClick(object sender, MouseEventArgs e)
         {
+
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    _disassemberDisplay.SelectLine(e.X, e.Y);
+                    if (e.X < 20)
+                    {
+                        var line = _disassemberDisplay.GetLine(e.X, e.Y);
+                        if (line.HasValue)
+                        {
+                            _trainer.ToggleBreakPoint(line.Value.Address);
+                            //_trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        _disassemberDisplay.SelectLine(e.X, e.Y);
+                    }
+
 
                     break;
                 case MouseButtons.Right:
@@ -593,30 +611,15 @@ namespace Sharp6800.Debugger
             _memoryDisplay.MemoryOffset = selectedRange.Start;
             _memoryDisplay.MemoryRange = selectedRange;
 
-            var maxValue = (selectedRange.End - selectedRange.Start) / 8;
-
+            _memoryDisplay.Resize();
             MemoryViewScrollBar.Value = 0;
-
-            if (_memoryDisplay.VisibleItems >= maxValue)
-            {
-                MemoryViewScrollBar.Maximum = 0;
-                MemoryViewScrollBar.Enabled = false;
-            }
-            else
-            {
-                // WHY DOES VisibleItems / 2 WORK???
-                MemoryViewScrollBar.Maximum = maxValue - _memoryDisplay.VisibleItems / 2;
-                MemoryViewScrollBar.Enabled = true;
-            }
-
         }
 
         private void DasmToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var view = (DisassemblyView)DasmToolStripComboBox.SelectedItem;
             _disassemberDisplay.CurrentView = view;
-            //_disassemberDisplay.MemoryOffset = view.Start;
-            DasmViewScrollBar.Maximum = view.LineCount - _disassemberDisplay.VisibleItems / 2;
+            _disassemberDisplay.Resize();
             DasmViewScrollBar.Value = 0;
         }
 
@@ -799,11 +802,19 @@ namespace Sharp6800.Debugger
             }
         }
 
-        private void AddBreakpoint()
+        private void ToggleBreakPoint()
         {
             if (_disassemberDisplay.SelectedLine.HasValue)
             {
                 _trainer.ToggleBreakPoint(_disassemberDisplay.SelectedLine.Value.Address);
+            }
+        }
+
+        private void ToggleBreakpointEnabled()
+        {
+            if (_disassemberDisplay.SelectedLine.HasValue)
+            {
+                _trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
             }
         }
 
@@ -822,10 +833,6 @@ namespace Sharp6800.Debugger
 
         private void DasmViewPictureBox_DoubleClick(object sender, EventArgs e)
         {
-            if (_disassemberDisplay.SelectedLine.HasValue)
-            {
-                _trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
-            }
         }
 
         private void addDataRangeToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -916,5 +923,14 @@ namespace Sharp6800.Debugger
         {
             _memoryDisplay.Resize();
         }
+
+        private void DasmViewPictureBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void DasmViewPictureBox_MouseMove(object sender, MouseEventArgs e)
+        {
+        }
     }
 }
+

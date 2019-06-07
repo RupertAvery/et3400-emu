@@ -750,6 +750,8 @@
             this.DasmViewPictureBox.TabStop = false;
             this.DasmViewPictureBox.SizeChanged += new System.EventHandler(this.DasmViewPictureBox_SizeChanged);
             this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
+            this.DasmViewPictureBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseDoubleClick);
+            this.DasmViewPictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseMove);
             // 
             // MemoryGroupBox
             // 
