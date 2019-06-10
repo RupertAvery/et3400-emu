@@ -33,7 +33,7 @@ namespace Sharp6800.Trainer
         public ITrainerRunner Runner { get; private set; }
         public Cpu6800 Emulator { get; private set; }
         public int[] Memory { get; }
-        public TrainerSettings Settings { get; set; }
+        public Sharp6800Settings Settings { get; set; }
         public Cpu6800State State { get; set; }
 
         public bool IsRunning
@@ -61,7 +61,7 @@ namespace Sharp6800.Trainer
         }
 
 
-        public Trainer(TrainerSettings settings, PictureBox displayTarget)
+        public Trainer(Sharp6800Settings settings, PictureBox displayTarget)
         {
             Memory = new int[65536];
             Breakpoints = new BreakpointCollection();

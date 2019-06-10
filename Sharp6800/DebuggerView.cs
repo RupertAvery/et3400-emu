@@ -10,6 +10,7 @@ using Sharp6800.Common;
 using Sharp6800.Debugger;
 using Sharp6800.Debugger.Breakpoints;
 using Sharp6800.Debugger.MemoryMaps;
+using Sharp6800.Trainer;
 using Timer = System.Threading.Timer;
 
 namespace Sharp6800
@@ -81,6 +82,13 @@ namespace Sharp6800
             BreakpointsListView.ListViewItemSorter = new BreakpointComparer();
             RangesListView.Sorting = SortOrder.Ascending;
             RangesListView.ListViewItemSorter = new MemoryMapComparer();
+
+            var debuggerSettings = _trainer.Settings.DebuggerSettings;
+            memoryToolStripMenuItem.Checked = debuggerSettings.ShowMemory;
+            disassemblyToolStripMenuItem.Checked = debuggerSettings.ShowDisassembly;
+            statusToolStripMenuItem.Checked = debuggerSettings.ShowStatus;
+
+            UpdateFormSize();
         }
 
         private void OnSelectLine(object sender, SelectLineEventArgs e)
@@ -727,6 +735,7 @@ namespace Sharp6800
         {
             if (memoryToolStripMenuItem.Checked && CheckCount()) return;
             memoryToolStripMenuItem.Checked = !memoryToolStripMenuItem.Checked;
+            debuggerSettings.ShowMemory = memoryToolStripMenuItem.Checked;
             UpdateFormSize();
         }
 
@@ -734,6 +743,7 @@ namespace Sharp6800
         {
             if (disassemblyToolStripMenuItem.Checked && CheckCount()) return;
             disassemblyToolStripMenuItem.Checked = !disassemblyToolStripMenuItem.Checked;
+            debuggerSettings.ShowDisassembly = disassemblyToolStripMenuItem.Checked;
             UpdateFormSize();
         }
 
@@ -741,6 +751,7 @@ namespace Sharp6800
         {
             if (statusToolStripMenuItem.Checked && CheckCount()) return;
             statusToolStripMenuItem.Checked = !statusToolStripMenuItem.Checked;
+            debuggerSettings.ShowStatus = statusToolStripMenuItem.Checked;
             UpdateFormSize();
         }
 
@@ -754,35 +765,46 @@ namespace Sharp6800
             return (count == 1);
         }
 
+        private DebuggerSettings debuggerSettings
+        {
+            get => _trainer.Settings.DebuggerSettings;
+
+        }
+
         private void UpdateFormSize()
         {
+            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
+            if (debuggerSettings.FormHeight > 200)
+            {
+                Height = debuggerSettings.FormHeight;
+            }
 
             var left = 12;
             Width = 0;
 
-            MemoryGroupBox.Visible = memoryToolStripMenuItem.Checked;
-            toolStripLabel1.Visible = MemoryGroupBox.Visible;
-            MemToolStripComboBox.Visible = MemoryGroupBox.Visible;
+            MemoryGroupBox.Visible = debuggerSettings.ShowMemory;
+            toolStripLabel1.Visible = debuggerSettings.ShowMemory;
+            MemToolStripComboBox.Visible = debuggerSettings.ShowMemory;
 
-            if (memoryToolStripMenuItem.Checked)
+            if (debuggerSettings.ShowMemory)
             {
                 MemoryGroupBox.Left = left;
                 left += MemoryGroupBox.Width + 10;
             }
 
-            DisassemblyGroupBox.Visible = disassemblyToolStripMenuItem.Checked;
-            toolStripLabel2.Visible = DisassemblyGroupBox.Visible;
-            DasmToolStripComboBox.Visible = DisassemblyGroupBox.Visible;
+            DisassemblyGroupBox.Visible = debuggerSettings.ShowDisassembly;
+            toolStripLabel2.Visible = debuggerSettings.ShowDisassembly;
+            DasmToolStripComboBox.Visible = debuggerSettings.ShowDisassembly;
 
-            if (disassemblyToolStripMenuItem.Checked)
+            if (debuggerSettings.ShowDisassembly)
             {
                 DisassemblyGroupBox.Left = left;
                 left += DisassemblyGroupBox.Width + 10;
             }
 
-            StatusGroupBox.Visible = statusToolStripMenuItem.Checked;
-            if (statusToolStripMenuItem.Checked)
+            StatusGroupBox.Visible = debuggerSettings.ShowStatus;
+            if (debuggerSettings.ShowStatus)
             {
                 StatusGroupBox.Left = left;
                 left += StatusGroupBox.Width + 10;
@@ -790,6 +812,7 @@ namespace Sharp6800
 
             Width = left + 12;
 
+            _updateTimer.Change(100, Timeout.Infinite);
         }
 
         private void DasmViewPictureBox_SizeChanged(object sender, EventArgs e)
@@ -800,6 +823,15 @@ namespace Sharp6800
         private void MemoryViewPictureBox_SizeChanged(object sender, EventArgs e)
         {
             _memoryDisplay.Resize();
+        }
+
+        private void DebuggerView_Shown(object sender, EventArgs e)
+        {
+        }
+
+        private void DebuggerView_ResizeEnd(object sender, EventArgs e)
+        {
+            debuggerSettings.FormHeight = Height;
         }
     }
 }

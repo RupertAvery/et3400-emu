@@ -8,9 +8,9 @@ namespace Sharp6800
 {
     public partial class SettingsForm : Form
     {
-        private TrainerSettings _settings;
+        private Sharp6800Settings _settings;
 
-        public SettingsForm(TrainerSettings settings)
+        public SettingsForm(Sharp6800Settings settings)
         {
             _settings = settings;
             this.Closing += OnClosing;
@@ -49,14 +49,19 @@ namespace Sharp6800
 
         private string Fix(int value)
         {
-            if (value >= 1_000_000)
+            //const float oneMega = 1048576f;
+            //const float oneKilo = 1024f;
+            const float oneMega = 1000000;
+            const float oneKilo = 1000f;
+
+            if (value >= oneMega)
             {
-                return $"{Math.Round(value / 1_000_000f, 2, MidpointRounding.ToEven)}MHz";
+                return $"{Math.Round(value / oneMega, 2, MidpointRounding.ToEven)}MHz";
 
             }
-            else if (value >= 1_000)
+            else if (value >= oneKilo)
             {
-                return $"{Math.Round(value / 1_000f, 2, MidpointRounding.ToEven)}kHz";
+                return $"{Math.Round(value / oneKilo, 2, MidpointRounding.ToEven)}kHz";
             }
             else
             {
@@ -66,13 +71,14 @@ namespace Sharp6800
 
         private void UpdateFrequency()
         {
-            var frequency = (int)((CpuPercentTrackBar.Value / 100f) * _settings.BaseFrequency);
-            BaseFrequencyLabel.Text = Fix(_settings.BaseFrequency);
-            FrequencyLabel.Text = Fix(frequency);
             _settings.SettingsUpdated -= SettingsUpdated;
             _settings.CpuPercent = CpuPercentTrackBar.Value;
-            _settings.ClockSpeed = frequency;
+            //var frequency = (int)((CpuPercentTrackBar.Value / 100f) * _settings.BaseFrequency);
+            //_settings.ClockSpeed = frequency;
             _settings.SettingsUpdated += SettingsUpdated;
+
+            BaseFrequencyLabel.Text = Fix(_settings.BaseFrequency);
+            FrequencyLabel.Text = Fix(_settings.ClockSpeed);
         }
 
         private void CloseButton_Click(object sender, EventArgs e)

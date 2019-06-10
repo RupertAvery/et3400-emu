@@ -24,7 +24,7 @@ namespace Sharp6800.Trainer
         private RecentFilesCollection _recentFiles;
         private Timer timer;
         private Trainer _trainer;
-        private TrainerSettings _trainerSettings;
+        private Sharp6800Settings sharp6800Settings;
         private DebuggerView _debuggerView;
         private Mode _emulationMode = Mode.ET3400;
         private bool isFirstLoad = true;
@@ -109,13 +109,13 @@ namespace Sharp6800.Trainer
             {
                 if (File.Exists(_settingsPath))
                 {
-                    _trainerSettings = TrainerSettings.Load(_settingsPath);
+                    sharp6800Settings = Sharp6800Settings.Load(_settingsPath);
                 }
                 else
                 {
-                    _trainerSettings = new TrainerSettings();
+                    sharp6800Settings = new Sharp6800Settings();
                 }
-                _trainer = new Trainer(_trainerSettings, SegmentPictureBox);
+                _trainer = new Trainer(sharp6800Settings, SegmentPictureBox);
                 _trainer.OnStart += OnStart;
                 _trainer.OnStop += OnStop;
                 _trainer.BreakpointsEnabled = true;
@@ -309,7 +309,7 @@ namespace Sharp6800.Trainer
 
             this.KeyUp -= OnReleaseKey;
 
-            TrainerSettings.Save(_trainerSettings, _settingsPath);
+            Sharp6800Settings.Save(sharp6800Settings, _settingsPath);
 
             Thread.Sleep(200);
         }
@@ -909,9 +909,7 @@ namespace Sharp6800.Trainer
             {
                 if (resetClock)
                 {
-                    _trainer.Settings.BaseFrequency = 100_000; // 100kHz
-                    _trainer.Settings.ClockSpeed = 100_000; 
-                    _trainer.Settings.CpuPercent = 100; 
+                    _trainer.Settings.ResetSpeed(ClockSpeedSetting.Low);
                 }
                 var buffer = new byte[2048];
                 // Clear ROMs
@@ -923,9 +921,7 @@ namespace Sharp6800.Trainer
             {
                 if (resetClock)
                 {
-                    _trainer.Settings.BaseFrequency = 1_000_000; // 1MHz
-                    _trainer.Settings.ClockSpeed = 1_000_000;
-                    _trainer.Settings.CpuPercent = 100;
+                    _trainer.Settings.ResetSpeed(ClockSpeedSetting.High);
                 }
                 LoadRomFromResource("ROM/FantomII.bin", 0x1400, 2048);
                 LoadRomFromResource("ROM/TinyBasic.bin", 0x1C00, 2048);

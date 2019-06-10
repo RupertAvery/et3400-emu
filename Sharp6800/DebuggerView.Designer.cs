@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DebuggerView));
             this.disassemblerContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -257,7 +256,6 @@
             this.memoryToolStripMenuItem,
             this.disassemblyToolStripMenuItem,
             this.statusToolStripMenuItem});
-            this.PanelToolStripDropDownButton.Image = ((System.Drawing.Image)(resources.GetObject("PanelToolStripDropDownButton.Image")));
             this.PanelToolStripDropDownButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.PanelToolStripDropDownButton.Name = "PanelToolStripDropDownButton";
             this.PanelToolStripDropDownButton.Size = new System.Drawing.Size(54, 22);
@@ -295,15 +293,15 @@
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Location = new System.Drawing.Point(11, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(949, 205);
+            this.tabControl1.Size = new System.Drawing.Size(949, 204);
             this.tabControl1.TabIndex = 14;
             // 
             // tabPage1
@@ -314,7 +312,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(941, 179);
+            this.tabPage1.Size = new System.Drawing.Size(941, 178);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Breakpoints";
             // 
@@ -328,7 +326,7 @@
             this.BreakpointsListView.GridLines = true;
             this.BreakpointsListView.Location = new System.Drawing.Point(3, 28);
             this.BreakpointsListView.Name = "BreakpointsListView";
-            this.BreakpointsListView.Size = new System.Drawing.Size(935, 148);
+            this.BreakpointsListView.Size = new System.Drawing.Size(935, 147);
             this.BreakpointsListView.TabIndex = 1;
             this.BreakpointsListView.UseCompatibleStateImageBehavior = false;
             this.BreakpointsListView.View = System.Windows.Forms.View.Details;
@@ -411,7 +409,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(958, 193);
+            this.tabPage2.Size = new System.Drawing.Size(941, 178);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Memory Maps";
             // 
@@ -427,7 +425,7 @@
             this.RangesListView.GridLines = true;
             this.RangesListView.Location = new System.Drawing.Point(3, 28);
             this.RangesListView.Name = "RangesListView";
-            this.RangesListView.Size = new System.Drawing.Size(952, 162);
+            this.RangesListView.Size = new System.Drawing.Size(935, 147);
             this.RangesListView.TabIndex = 1;
             this.RangesListView.UseCompatibleStateImageBehavior = false;
             this.RangesListView.View = System.Windows.Forms.View.Details;
@@ -467,7 +465,7 @@
             this.GotoRangeButton});
             this.RangesToolStrip.Location = new System.Drawing.Point(3, 3);
             this.RangesToolStrip.Name = "RangesToolStrip";
-            this.RangesToolStrip.Size = new System.Drawing.Size(952, 25);
+            this.RangesToolStrip.Size = new System.Drawing.Size(935, 25);
             this.RangesToolStrip.TabIndex = 0;
             this.RangesToolStrip.Text = "toolStrip3";
             // 
@@ -559,7 +557,7 @@
             // 
             // StatusGroupBox
             // 
-            this.StatusGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.StatusGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.StatusGroupBox.Controls.Add(this.CCTextBox);
             this.StatusGroupBox.Controls.Add(this.PCTextBox);
@@ -713,7 +711,7 @@
             // 
             // DisassemblyGroupBox
             // 
-            this.DisassemblyGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.DisassemblyGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.DisassemblyGroupBox.Controls.Add(this.DasmViewScrollBar);
             this.DisassemblyGroupBox.Controls.Add(this.DasmViewPictureBox);
@@ -726,7 +724,7 @@
             // 
             // DasmViewScrollBar
             // 
-            this.DasmViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.DasmViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.DasmViewScrollBar.Location = new System.Drawing.Point(375, 19);
             this.DasmViewScrollBar.Maximum = 1000;
@@ -736,7 +734,7 @@
             // 
             // DasmViewPictureBox
             // 
-            this.DasmViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.DasmViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
             this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -749,7 +747,7 @@
             // 
             // MemoryGroupBox
             // 
-            this.MemoryGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.MemoryGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MemoryGroupBox.Controls.Add(this.MemoryViewScrollBar);
             this.MemoryGroupBox.Controls.Add(this.MemoryViewPictureBox);
@@ -762,7 +760,7 @@
             // 
             // MemoryViewScrollBar
             // 
-            this.MemoryViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.MemoryViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MemoryViewScrollBar.Location = new System.Drawing.Point(328, 19);
             this.MemoryViewScrollBar.Maximum = 1000;
@@ -772,7 +770,7 @@
             // 
             // MemoryViewPictureBox
             // 
-            this.MemoryViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.MemoryViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
             this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -799,6 +797,8 @@
             this.Activated += new System.EventHandler(this.DebuggerView_Activated);
             this.Deactivate += new System.EventHandler(this.DebuggerView_Deactivate);
             this.Load += new System.EventHandler(this.DebuggerView_Load);
+            this.Shown += new System.EventHandler(this.DebuggerView_Shown);
+            this.ResizeEnd += new System.EventHandler(this.DebuggerView_ResizeEnd);
             this.disassemblerContextMenuStrip.ResumeLayout(false);
             this.DebuggerToolStrip.ResumeLayout(false);
             this.DebuggerToolStrip.PerformLayout();

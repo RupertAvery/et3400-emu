@@ -159,7 +159,7 @@
     <Compile Include="TrainerForm.Designer.cs">
       <DependentUpon>TrainerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Trainer\TrainerSettings.cs" />
+    <Compile Include="Trainer\Sharp6800Settings.cs" />
     <Compile Include="DebuggerView.MessageFilter.cs">
       <SubType>Form</SubType>
     </Compile>
