@@ -17,7 +17,7 @@ namespace Sharp6800.Trainer
     /// </summary>
     public class Trainer : ITrainer, IDisposable
     {
-        private LedDisplay _disp;
+        private LedDisplay _display;
 
         public const int RomAddress = 0xFC00;
 
@@ -61,7 +61,7 @@ namespace Sharp6800.Trainer
         }
 
 
-        public Trainer(TrainerSettings settings)
+        public Trainer(TrainerSettings settings, PictureBox displayTarget)
         {
             Memory = new int[65536];
             Breakpoints = new BreakpointCollection();
@@ -69,6 +69,7 @@ namespace Sharp6800.Trainer
             Watches = new List<Watch>();
             MemoryMapManager = new MemoryMapManager();
             MemoryMapEventBus = new MemoryMapEventBus();
+
 
             _mc6820 = new MC6820();
             _debugConsoleAdapter = new DebugConsoleAdapter();
@@ -163,10 +164,18 @@ namespace Sharp6800.Trainer
             //Runner = new StandardRunner(this);
             Runner = new CycleExactRunner(this);
 
+            _display = new LedDisplay(displayTarget, this);
+            Runner.OnSleep += OnSleep;
+
             // Set keyboard mapped memory 'high'
             Memory[0xC003] = 0xFF;
             Memory[0xC005] = 0xFF;
             Memory[0xC006] = 0xFF;
+        }
+
+        private void OnSleep(object sender, EventArgs e)
+        {
+            _display.Redraw();
         }
 
         public void ToggleBreakPoint(int address)
@@ -192,11 +201,6 @@ namespace Sharp6800.Trainer
             {
                 Breakpoints.Toggle(breakpoint.Address);
             }
-        }
-
-        public void SetupDisplay(PictureBox target)
-        {
-            _disp = new LedDisplay(target, this);
         }
 
         public void RaiseStopEvent()
@@ -454,8 +458,9 @@ namespace Sharp6800.Trainer
         public void Dispose()
         {
             _mc6820.OnPeripheralWrite -= OnPeripheralWrite;
+            Runner.OnSleep -= OnSleep;
             Runner.Dispose();
-            _disp.Dispose();
+            _display.Dispose();
         }
 
         public void SendTerminal(string value)

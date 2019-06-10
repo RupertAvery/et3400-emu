@@ -115,20 +115,19 @@ namespace Sharp6800.Trainer
                 {
                     _trainerSettings = new TrainerSettings();
                 }
-                _trainer = new Trainer(_trainerSettings);
-                _trainer.SetupDisplay(SegmentPictureBox);
+                _trainer = new Trainer(_trainerSettings, SegmentPictureBox);
                 _trainer.OnStart += OnStart;
                 _trainer.OnStop += OnStop;
                 _trainer.BreakpointsEnabled = true;
 
-                this.Resize += OnResize;
-                this.Closing += OnClosing;
+                Resize += OnResize;
+                Closing += OnClosing;
 #if DEBUG
 
                 _trainer.Runner.OnTimer += RunnerOnTimer;
 #endif
-
-                UpdateState();
+                
+                Shown += OnShown;
 
                 // Delay drawing to the form before has loaded as it causes graphical glitches
                 //timer = new Timer(StartDelay, null, TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
@@ -137,6 +136,12 @@ namespace Sharp6800.Trainer
             {
                 MessageBox.Show(ex.Message, "Error initializing the emulator");
             }
+        }
+
+        private void OnShown(object sender, EventArgs e)
+        {
+            LoadDefaultRom(false);
+            UpdateState();
         }
 
         private void RunnerOnTimer(int cyclesPerSecond)
@@ -262,6 +267,8 @@ namespace Sharp6800.Trainer
             _trainer.OnStop -= OnStop;
             _trainer.Dispose();
 
+            Shown -= OnShown;
+
             button0.MouseDown -= OnPressKey;
             button1.MouseDown -= OnPressKey;
             button2.MouseDown -= OnPressKey;
@@ -319,72 +326,110 @@ namespace Sharp6800.Trainer
                 keyargs = (KeyEventArgs)args;
             }
 
+            if (keyargs.Alt || keyargs.Control || keyargs.Shift) return;
+
             // Pull the appropriate bit at mem location LOW to simulate a trainer keydown
             if (sender == button0 || keyargs.KeyCode == Keys.NumPad0 || keyargs.KeyCode == Keys.D0)
+            {
+                button0.Image = Sharp6800.Properties.Resources._0_on;
                 _trainer.PressKey(TrainerKeys.Key0);
+            }
 
             else if (sender == button1 || keyargs.KeyCode == Keys.NumPad1 || keyargs.KeyCode == Keys.D1) // 1, ACCA
+            {
+                button1.Image = Sharp6800.Properties.Resources._1_on;
                 _trainer.PressKey(TrainerKeys.Key1);
+            }
 
             else if (sender == button2 || keyargs.KeyCode == Keys.NumPad2 || keyargs.KeyCode == Keys.D2) // 2
+            {
+                button2.Image = Sharp6800.Properties.Resources._2_on;
                 _trainer.PressKey(TrainerKeys.Key2);
+            }
 
             else if (sender == button3 || keyargs.KeyCode == Keys.NumPad3 || keyargs.KeyCode == Keys.D3) // 3
+            {
+                button3.Image = Sharp6800.Properties.Resources._3_on;
                 _trainer.PressKey(TrainerKeys.Key3);
+            }
 
             else if (sender == button4 || keyargs.KeyCode == Keys.NumPad4 || keyargs.KeyCode == Keys.D4) // 4, INDEX
+            {
+                button4.Image = Sharp6800.Properties.Resources._4_on;
                 _trainer.PressKey(TrainerKeys.Key4);
+            }
 
             else if (sender == button5 || keyargs.KeyCode == Keys.NumPad5 || keyargs.KeyCode == Keys.D5) // 5, CC
+            {
+                button5.Image = Sharp6800.Properties.Resources._5_on;
                 _trainer.PressKey(TrainerKeys.Key5);
+            }
 
             else if (sender == button6 || keyargs.KeyCode == Keys.NumPad6 || keyargs.KeyCode == Keys.D6) // 6
+            {
+                button6.Image = Sharp6800.Properties.Resources._6_on;
                 _trainer.PressKey(TrainerKeys.Key6);
+            }
 
             else if (sender == button7 || keyargs.KeyCode == Keys.NumPad7 || keyargs.KeyCode == Keys.D7) // 7, RTI;
+            {
+                button7.Image = Sharp6800.Properties.Resources._7_on;
                 _trainer.PressKey(TrainerKeys.Key7);
+            }
 
             else if (sender == button8 || keyargs.KeyCode == Keys.NumPad8 || keyargs.KeyCode == Keys.D8) // 8
+            {
+                button8.Image = Sharp6800.Properties.Resources._8_on;
                 _trainer.PressKey(TrainerKeys.Key8);
+            }
 
             else if (sender == button9 || keyargs.KeyCode == Keys.NumPad9 || keyargs.KeyCode == Keys.D9) // 9
+            {
+                button9.Image = Sharp6800.Properties.Resources._9_on;
                 _trainer.PressKey(TrainerKeys.Key9);
+            }
 
             else if (sender == buttonA || keyargs.KeyCode == Keys.A) // A, Auto
+            {
+                buttonA.Image = Sharp6800.Properties.Resources.key_A_on;
                 _trainer.PressKey(TrainerKeys.KeyA);
+            }
 
             else if (sender == buttonB || keyargs.KeyCode == Keys.B) // B
+            {
+                buttonB.Image = Sharp6800.Properties.Resources.key_B_on;
                 _trainer.PressKey(TrainerKeys.KeyB);
+            }
 
             else if (sender == buttonC || keyargs.KeyCode == Keys.C) // C
+            {
+                buttonC.Image = Sharp6800.Properties.Resources.key_C_on;
                 _trainer.PressKey(TrainerKeys.KeyC);
+            }
 
             else if (sender == buttonD || keyargs.KeyCode == Keys.D) // D, Do
+            {
+                buttonD.Image = Sharp6800.Properties.Resources.key_D_on;
                 _trainer.PressKey(TrainerKeys.KeyD);
+            }
 
             else if (sender == buttonE || keyargs.KeyCode == Keys.E) // E, Exam
+            {
+                buttonE.Image = Sharp6800.Properties.Resources.key_E_on;
                 _trainer.PressKey(TrainerKeys.KeyE);
+            }
 
             else if (sender == buttonF || keyargs.KeyCode == Keys.F) // F
+            {
+                buttonF.Image = Sharp6800.Properties.Resources.key_F_on;
                 _trainer.PressKey(TrainerKeys.KeyF);
+            }
 
             else if (sender == buttonReset || keyargs.KeyCode == Keys.Escape) // RESET
+            {
+                buttonReset.Image = Sharp6800.Properties.Resources.Reset_on;
                 _trainer.PressKey(TrainerKeys.KeyReset);
-
-            //else if (keyargs.KeyCode == Keys.F4 && !_trainer.IsRunning)
-            //    _trainer.Runner.Start();
-
-            //else if (keyargs.KeyCode == Keys.F5 && !_trainer.IsRunning)
-            //    _trainer.Runner.Start();
-
-            //else if (keyargs.KeyCode == Keys.F10 && !_trainer.IsRunning)
-            //    _trainer.StepOver();
-
-            //else if (keyargs.KeyCode == Keys.F11 && _trainer.IsInBreak)
-            //    if (keyargs.Shift)
-            //        _trainer.StepOutOf();
-            //    else
-            //        _trainer.StepInto();
+            }
 
         }
 
@@ -399,10 +444,112 @@ namespace Sharp6800.Trainer
                 keyargs = (KeyEventArgs)args;
             }
 
-            if (sender == buttonReset || keyargs.KeyCode == Keys.Escape)
-                _trainer.ReleaseKey(TrainerKeys.KeyReset);
-            else
+            if (keyargs.Alt || keyargs.Control || keyargs.Shift) return;
+
+            // Pull the appropriate bit at mem location LOW to simulate a trainer keydown
+            if (sender == button0 || keyargs.KeyCode == Keys.NumPad0 || keyargs.KeyCode == Keys.D0)
+            {
+                button0.Image = Sharp6800.Properties.Resources._0;
                 _trainer.ReleaseKey(TrainerKeys.Key0);
+            }
+
+            else if (sender == button1 || keyargs.KeyCode == Keys.NumPad1 || keyargs.KeyCode == Keys.D1) // 1, ACCA
+            {
+                button1.Image = Sharp6800.Properties.Resources._1;
+                _trainer.ReleaseKey(TrainerKeys.Key1);
+            }
+
+            else if (sender == button2 || keyargs.KeyCode == Keys.NumPad2 || keyargs.KeyCode == Keys.D2) // 2
+            {
+                button2.Image = Sharp6800.Properties.Resources._2;
+                _trainer.ReleaseKey(TrainerKeys.Key2);
+            }
+
+            else if (sender == button3 || keyargs.KeyCode == Keys.NumPad3 || keyargs.KeyCode == Keys.D3) // 3
+            {
+                button3.Image = Sharp6800.Properties.Resources._3;
+                _trainer.ReleaseKey(TrainerKeys.Key3);
+            }
+
+            else if (sender == button4 || keyargs.KeyCode == Keys.NumPad4 || keyargs.KeyCode == Keys.D4) // 4, INDEX
+            {
+                button4.Image = Sharp6800.Properties.Resources._4;
+                _trainer.ReleaseKey(TrainerKeys.Key4);
+            }
+
+            else if (sender == button5 || keyargs.KeyCode == Keys.NumPad5 || keyargs.KeyCode == Keys.D5) // 5, CC
+            {
+                button5.Image = Sharp6800.Properties.Resources._5;
+                _trainer.ReleaseKey(TrainerKeys.Key5);
+            }
+
+            else if (sender == button6 || keyargs.KeyCode == Keys.NumPad6 || keyargs.KeyCode == Keys.D6) // 6
+            {
+                button6.Image = Sharp6800.Properties.Resources._6;
+                _trainer.ReleaseKey(TrainerKeys.Key6);
+            }
+
+            else if (sender == button7 || keyargs.KeyCode == Keys.NumPad7 || keyargs.KeyCode == Keys.D7) // 7, RTI;
+            {
+                button7.Image = Sharp6800.Properties.Resources._7;
+                _trainer.ReleaseKey(TrainerKeys.Key7);
+            }
+
+            else if (sender == button8 || keyargs.KeyCode == Keys.NumPad8 || keyargs.KeyCode == Keys.D8) // 8
+            {
+                button8.Image = Sharp6800.Properties.Resources._8;
+                _trainer.ReleaseKey(TrainerKeys.Key8);
+            }
+
+            else if (sender == button9 || keyargs.KeyCode == Keys.NumPad9 || keyargs.KeyCode == Keys.D9) // 9
+            {
+                button9.Image = Sharp6800.Properties.Resources._9;
+                _trainer.ReleaseKey(TrainerKeys.Key9);
+            }
+
+            else if (sender == buttonA || keyargs.KeyCode == Keys.A) // A, Auto
+            {
+                buttonA.Image = Sharp6800.Properties.Resources.key_A;
+                _trainer.ReleaseKey(TrainerKeys.KeyA);
+            }
+
+            else if (sender == buttonB || keyargs.KeyCode == Keys.B) // B
+            {
+                buttonB.Image = Sharp6800.Properties.Resources.key_B;
+                _trainer.ReleaseKey(TrainerKeys.KeyB);
+            }
+
+            else if (sender == buttonC || keyargs.KeyCode == Keys.C) // C
+            {
+                buttonC.Image = Sharp6800.Properties.Resources.key_C;
+                _trainer.ReleaseKey(TrainerKeys.KeyC);
+            }
+
+            else if (sender == buttonD || keyargs.KeyCode == Keys.D) // D, Do
+            {
+                buttonD.Image = Sharp6800.Properties.Resources.key_D;
+                _trainer.ReleaseKey(TrainerKeys.KeyD);
+            }
+
+            else if (sender == buttonE || keyargs.KeyCode == Keys.E) // E, Exam
+            {
+                buttonE.Image = Sharp6800.Properties.Resources.key_E;
+                _trainer.ReleaseKey(TrainerKeys.KeyE);
+            }
+
+            else if (sender == buttonF || keyargs.KeyCode == Keys.F) // F
+            {
+                buttonF.Image = Sharp6800.Properties.Resources.key_F;
+                _trainer.ReleaseKey(TrainerKeys.KeyF);
+            }
+
+            else if (sender == buttonReset || keyargs.KeyCode == Keys.Escape) // RESET
+            {
+                buttonReset.Image = Sharp6800.Properties.Resources.Reset;
+                _trainer.ReleaseKey(TrainerKeys.KeyReset);
+            }
+
+
         }
 
         #endregion
@@ -585,12 +732,12 @@ namespace Sharp6800.Trainer
 
         private void TrainerForm_Activated(object sender, EventArgs e)
         {
-            if (isFirstLoad)
-            {
-                LoadDefaultRom(false);
-                UpdateState();
-                isFirstLoad = false;
-            }
+            //if (isFirstLoad)
+            //{
+            //    LoadDefaultRom(false);
+            //    UpdateState();
+            //    isFirstLoad = false;
+            //}
 
             //    if (_debuggerView != null && !_debuggerView.IsDisposed)
             //    {

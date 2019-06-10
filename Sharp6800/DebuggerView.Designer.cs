@@ -1,4 +1,4 @@
-﻿namespace Sharp6800.Debugger
+﻿namespace Sharp6800
 {
     partial class DebuggerView
     {
@@ -295,8 +295,8 @@
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
@@ -431,7 +431,6 @@
             this.RangesListView.TabIndex = 1;
             this.RangesListView.UseCompatibleStateImageBehavior = false;
             this.RangesListView.View = System.Windows.Forms.View.Details;
-            this.RangesListView.SelectedIndexChanged += new System.EventHandler(this.RangesListView_SelectedIndexChanged);
             this.RangesListView.DoubleClick += new System.EventHandler(this.RangesListView_DoubleClick);
             this.RangesListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.RangesListView_KeyDown);
             // 
@@ -560,7 +559,7 @@
             // 
             // StatusGroupBox
             // 
-            this.StatusGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.StatusGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.StatusGroupBox.Controls.Add(this.CCTextBox);
             this.StatusGroupBox.Controls.Add(this.PCTextBox);
@@ -714,7 +713,7 @@
             // 
             // DisassemblyGroupBox
             // 
-            this.DisassemblyGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.DisassemblyGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.DisassemblyGroupBox.Controls.Add(this.DasmViewScrollBar);
             this.DisassemblyGroupBox.Controls.Add(this.DasmViewPictureBox);
@@ -727,19 +726,17 @@
             // 
             // DasmViewScrollBar
             // 
-            this.DasmViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.DasmViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.DasmViewScrollBar.Location = new System.Drawing.Point(375, 19);
             this.DasmViewScrollBar.Maximum = 1000;
             this.DasmViewScrollBar.Name = "DasmViewScrollBar";
             this.DasmViewScrollBar.Size = new System.Drawing.Size(18, 399);
             this.DasmViewScrollBar.TabIndex = 8;
-            this.DasmViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.DasmViewScrollBar_Scroll);
-            this.DasmViewScrollBar.ValueChanged += new System.EventHandler(this.DasmViewScrollBar_ValueChanged);
             // 
             // DasmViewPictureBox
             // 
-            this.DasmViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.DasmViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.DasmViewPictureBox.BackColor = System.Drawing.Color.White;
             this.DasmViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -749,13 +746,10 @@
             this.DasmViewPictureBox.TabIndex = 7;
             this.DasmViewPictureBox.TabStop = false;
             this.DasmViewPictureBox.SizeChanged += new System.EventHandler(this.DasmViewPictureBox_SizeChanged);
-            this.DasmViewPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseClick);
-            this.DasmViewPictureBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseDoubleClick);
-            this.DasmViewPictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DasmViewPictureBox_MouseMove);
             // 
             // MemoryGroupBox
             // 
-            this.MemoryGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.MemoryGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MemoryGroupBox.Controls.Add(this.MemoryViewScrollBar);
             this.MemoryGroupBox.Controls.Add(this.MemoryViewPictureBox);
@@ -768,19 +762,17 @@
             // 
             // MemoryViewScrollBar
             // 
-            this.MemoryViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.MemoryViewScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MemoryViewScrollBar.Location = new System.Drawing.Point(328, 19);
             this.MemoryViewScrollBar.Maximum = 1000;
             this.MemoryViewScrollBar.Name = "MemoryViewScrollBar";
             this.MemoryViewScrollBar.Size = new System.Drawing.Size(18, 399);
             this.MemoryViewScrollBar.TabIndex = 5;
-            this.MemoryViewScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.MemoryViewScrollBar_Scroll);
-            this.MemoryViewScrollBar.ValueChanged += new System.EventHandler(this.MemoryViewScrollBar_ValueChanged);
             // 
             // MemoryViewPictureBox
             // 
-            this.MemoryViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.MemoryViewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MemoryViewPictureBox.BackColor = System.Drawing.Color.White;
             this.MemoryViewPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -807,8 +799,6 @@
             this.Activated += new System.EventHandler(this.DebuggerView_Activated);
             this.Deactivate += new System.EventHandler(this.DebuggerView_Deactivate);
             this.Load += new System.EventHandler(this.DebuggerView_Load);
-            this.Enter += new System.EventHandler(this.DebuggerView_Enter);
-            this.Leave += new System.EventHandler(this.DebuggerView_Leave);
             this.disassemblerContextMenuStrip.ResumeLayout(false);
             this.DebuggerToolStrip.ResumeLayout(false);
             this.DebuggerToolStrip.PerformLayout();

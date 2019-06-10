@@ -30,5 +30,6 @@ namespace Sharp6800.Trainer
         Cpu6800State State { get; }
         bool IsRunning { get; }
         void AddWatch(Watch watch);
+        void ToggleBreakPoint(int valueAddress);
     }
 }

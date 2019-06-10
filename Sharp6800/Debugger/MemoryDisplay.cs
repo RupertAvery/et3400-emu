@@ -16,26 +16,61 @@ namespace Sharp6800.Debugger
         private Font _font;
         private Control _target;
         private readonly VScrollBar _scrollBar;
+        private MemoryRange _memoryRange;
 
         public int Width { get; set; }
         public int Height { get; set; }
         public int VisibleItems { get; private set; }
 
         public bool IsDisposed { get; private set; }
-        public MemoryRange MemoryRange { get; set; }
+
+        public MemoryRange MemoryRange
+        {
+            get => _memoryRange;
+            set
+            {
+                _memoryRange = value;
+                MemoryOffset = _memoryRange.Start;
+                Resize();
+                _scrollBar.Value = 0;
+            }
+        }
+
         public int MemoryOffset { get; set; }
 
-        public MemoryDisplay(Control target, VScrollBar scrollBar, Trainer.Trainer trainer)
+        public MemoryDisplay(PictureBox target, VScrollBar scrollBar, Trainer.Trainer trainer)
         {
             _trainer = trainer;
             _target = target;
             _scrollBar = scrollBar;
             Resize();
             targetWnd = target.Handle;
+            
+            _target.MouseWheel += OnMouseWheel;
+            _scrollBar.Scroll += Scroll;
+            _scrollBar.ValueChanged += ValueChanged;
 
             _brush = new SolidBrush(Color.Black);
             _font = new Font("Courier New", 12, FontStyle.Regular);
         }
+
+        private void Scroll(object sender, ScrollEventArgs e)
+        {
+            MemoryOffset = MemoryRange.Start + _scrollBar.Value * 8;
+        }
+
+        private void ValueChanged(object sender, EventArgs e)
+        {
+            MemoryOffset = MemoryRange.Start + _scrollBar.Value * 8;
+        }
+
+
+
+        private void OnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
+        {
+            _scrollBar.SetDeltaValue(mouseEventArgs.Delta);
+        }
+
 
         private int Min(int a, int b)
         {
@@ -107,6 +142,9 @@ namespace Sharp6800.Debugger
             lock (_lockObject)
             {
                 IsDisposed = true;
+                _target.MouseWheel -= OnMouseWheel;
+                _scrollBar.Scroll -= Scroll;
+                _scrollBar.ValueChanged -= ValueChanged;
                 _brush?.Dispose();
                 _font?.Dispose();
             }

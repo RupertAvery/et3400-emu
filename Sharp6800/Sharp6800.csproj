@@ -99,6 +99,7 @@
       <DependentUpon>Address.cs</DependentUpon>
     </Compile>
     <Compile Include="Debugger\RangeType.cs" />
+    <Compile Include="Debugger\SelectLineEventArgs.cs" />
     <Compile Include="Goto.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -165,6 +166,7 @@
     <Compile Include="Trainer\Watch.cs" />
     <Compile Include="Trainer\WatchEventArgs.cs" />
     <Compile Include="Common\VScrollBarExtensions.cs" />
+    <Compile Include="Common\Win32.cs" />
     <None Include="Resources\vton.bmp" />
     <None Include="Resources\dpon.png" />
     <None Include="Resources\hroff.png" />
@@ -266,15 +268,25 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\0.bmp" />
+    <Content Include="Resources\0_on.bmp" />
     <Content Include="Resources\1.bmp" />
+    <Content Include="Resources\1_on.bmp" />
     <Content Include="Resources\2.bmp" />
+    <Content Include="Resources\2_on.bmp" />
     <Content Include="Resources\3.bmp" />
+    <Content Include="Resources\3_on.bmp" />
     <Content Include="Resources\4.bmp" />
+    <Content Include="Resources\4_on.bmp" />
     <Content Include="Resources\5.bmp" />
+    <Content Include="Resources\5_on.bmp" />
     <Content Include="Resources\6.bmp" />
+    <Content Include="Resources\6_on.bmp" />
     <Content Include="Resources\7.bmp" />
+    <Content Include="Resources\7_on.bmp" />
     <Content Include="Resources\8.bmp" />
+    <Content Include="Resources\8_on.bmp" />
     <Content Include="Resources\9.bmp" />
+    <Content Include="Resources\9_on.bmp" />
     <Content Include="Resources\a.png" />
     <Content Include="Resources\b.png" />
     <Content Include="Resources\bg.png" />
@@ -285,12 +297,19 @@
     <Content Include="Resources\f.png" />
     <Content Include="Resources\g.png" />
     <Content Include="Resources\key A.bmp" />
+    <Content Include="Resources\key A_on.bmp" />
     <Content Include="Resources\key B.bmp" />
+    <Content Include="Resources\key B_on.bmp" />
     <Content Include="Resources\key C.bmp" />
+    <Content Include="Resources\key C_on.bmp" />
     <Content Include="Resources\key D.bmp" />
+    <Content Include="Resources\key D_on.bmp" />
     <Content Include="Resources\key E.bmp" />
+    <Content Include="Resources\key E_on.bmp" />
     <Content Include="Resources\key F.bmp" />
+    <Content Include="Resources\key F_on.bmp" />
     <Content Include="Resources\Reset.bmp" />
+    <Content Include="Resources\Reset_on.bmp" />
     <Content Include="Sharp6800.ico" />
   </ItemGroup>
   <ItemGroup />

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
+using Sharp6800.Common;
 using Sharp6800.Trainer;
 
 namespace Sharp6800
@@ -20,7 +21,7 @@ namespace Sharp6800
 
         private string[] flags = { "H", "I", "N", "Z", "V", "C" };
         
-        private System.Threading.Timer _updateTimer;
+        //private System.Threading.Timer _updateTimer;
 
         public LedDisplay(PictureBox target, IMemory trainer)
         {
@@ -42,10 +43,10 @@ namespace Sharp6800
                 dp[0] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/dpoff.png"));
                 dp[1] = Image.FromStream(ResourceHelper.GetEmbeddedResourceStream(typeof(LedDisplay).Assembly, "display/dpon.png"));
 
-                _updateTimer = new System.Threading.Timer(state =>
-                {
-                    Redraw();
-                }, null, 0, 16);
+                //_updateTimer = new System.Threading.Timer(state =>
+                //{
+                //    Redraw();
+                //}, null, 0, 16);
             }
             catch (Exception)
             {
@@ -182,8 +183,8 @@ namespace Sharp6800
         public void Dispose()
         {
             _target.Paint -= TargetOnPaint;
-            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            _updateTimer?.Dispose();
+            //_updateTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            //_updateTimer?.Dispose();
         }
     }
 }

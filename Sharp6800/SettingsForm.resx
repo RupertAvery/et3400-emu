@@ -120,4 +120,13 @@
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Setting the frequency below 70kHz may make the keypad appear unresponsive.
+The keypad is read by a software loop in the ET-3400 firmware and reducing the
+speed will require keeping the button pressed and released for a longer period 
+while the program attempts to "debounce" the keypress.
+
+At 10 kHz you will need to keep the button pressed and released for almost 
+3 seconds</value>
+  </data>
 </root>

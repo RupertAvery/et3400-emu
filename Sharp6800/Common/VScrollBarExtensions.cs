@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace Sharp6800.Debugger
+namespace Sharp6800.Common
 {
     public static class VScrollBarExtensions
     {

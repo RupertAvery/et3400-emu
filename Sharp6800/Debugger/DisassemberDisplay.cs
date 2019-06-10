@@ -23,6 +23,7 @@ namespace Sharp6800.Debugger
         private Bitmap _breakpointDisabledBitmap;
         private object lockObject = new object();
         private Control _target;
+        private DisassemblyView currentView;
 
         public int ViewOffset { get; set; }
         public int Width { get; private set; }
@@ -31,6 +32,7 @@ namespace Sharp6800.Debugger
 
         public DisassemblyLine? SelectedLine { get; private set; }
         public DisassemblyLine? CurrentLine { get; private set; }
+        public EventHandler<SelectLineEventArgs> OnSelectLine { get; set; }
 
         public DisassemblyLine? GetLine(int x, int y)
         {
@@ -104,7 +106,16 @@ namespace Sharp6800.Debugger
         //    _disassemblyViews.Add(disassemblyView);
         //}
 
-        public DisassemblyView CurrentView { get; set; }
+        public DisassemblyView CurrentView
+        {
+            get => currentView;
+            set
+            {
+                currentView = value;
+                Resize();
+                _scrollBar.Value = 0;
+            }
+        }
 
         private void SetUpColors()
         {
@@ -131,7 +142,6 @@ namespace Sharp6800.Debugger
 
         private void LoadImages()
         {
-            var rm = new ResourceManager("Resources", this.GetType().Assembly);
             _breakpointEnabledBitmap = Sharp6800.Properties.Resources.BreakpointEnable_16x;
             _breakpointDisabledBitmap = Sharp6800.Properties.Resources.BreakpointDisable_16x;
         }
@@ -144,11 +154,27 @@ namespace Sharp6800.Debugger
             _scrollBar = scrollBar;
             _targetWnd = target.Handle;
             SetUpColors();
+            _target.MouseClick += MouseClick;
+            _scrollBar.Scroll += Scroll;
+            _scrollBar.ValueChanged += ValueChanged;
+
             LoadImages();
             _brush = new SolidBrush(Color.Black);
             _font = new Font("Courier New", 12, FontStyle.Regular);
             //_disassemblyViews = new List<DisassemblyView>();
         }
+
+
+        private void Scroll(object sender, ScrollEventArgs e)
+        {
+            ViewOffset = _scrollBar.Value;
+        }
+
+        private void ValueChanged(object sender, EventArgs e)
+        {
+            ViewOffset = _scrollBar.Value;
+        }
+
 
         public DisassemblyLine? GetLineFromAddress(int address)
         {
@@ -293,6 +319,10 @@ namespace Sharp6800.Debugger
                 IsDisposed = true;
                 //_breakpointEnabledBitmap.Dispose();
                 //_breakpointDisabledBitmap.Dispose();
+                _target.MouseClick -= MouseClick;
+                _scrollBar.Scroll -= Scroll;
+                _scrollBar.ValueChanged -= ValueChanged;
+
                 _brush?.Dispose();
                 _font?.Dispose();
             }
@@ -443,13 +473,51 @@ namespace Sharp6800.Debugger
             Width = _target.Width;
             Height = _target.Height;
             VisibleItems = Height / _textheight - 1;
+
             if (CurrentView != null)
             {
                 _scrollBar.Maximum = CurrentView.LineCount - VisibleItems / 2;
             }
         }
+
+
+        private void MouseClick(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    if (e.X < 20)
+                    {
+                        var line = GetLine(e.X, e.Y);
+                        if (line.HasValue)
+                        {
+                            _trainer.ToggleBreakPoint(line.Value.Address);
+                            //_trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        SelectLine(e.X, e.Y);
+                    }
+
+
+                    break;
+                case MouseButtons.Right:
+                    SelectLine(e.X, e.Y);
+
+                    if (SelectedLine.HasValue)
+                    {
+                        var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(SelectedLine.Value.Address);
+
+                        OnSelectLine?.Invoke(this, new SelectLineEventArgs(CurrentLine, memoryMap));
+                        
+                    }
+
+
+                    break;
+            }
+        }
+
     }
-
-
-
 }

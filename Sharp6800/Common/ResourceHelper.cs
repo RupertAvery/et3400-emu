@@ -1,7 +1,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace Sharp6800
+namespace Sharp6800.Common
 {
     class ResourceHelper
     {

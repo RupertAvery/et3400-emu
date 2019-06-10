@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.ResetButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.CpuPercentTrackBar = new System.Windows.Forms.TrackBar();
@@ -42,6 +43,7 @@
             this.CloseButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.CpuPercentTrackBar)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -143,7 +145,7 @@
             // CloseButton
             // 
             this.CloseButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.CloseButton.Location = new System.Drawing.Point(383, 277);
+            this.CloseButton.Location = new System.Drawing.Point(383, 330);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(75, 23);
             this.CloseButton.TabIndex = 31;
@@ -157,12 +159,13 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(451, 259);
+            this.tabControl1.Size = new System.Drawing.Size(451, 312);
             this.tabControl1.TabIndex = 32;
             // 
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.BaseFrequencyLabel);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.ResetButton);
@@ -175,16 +178,26 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(443, 233);
+            this.tabPage1.Size = new System.Drawing.Size(443, 286);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Clock Settings";
+            this.tabPage1.Text = "Clock Speed";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(26, 181);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(385, 91);
+            this.label1.TabIndex = 31;
+            this.label1.Text = resources.GetString("label1.Text");
+            this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.CloseButton;
-            this.ClientSize = new System.Drawing.Size(470, 312);
+            this.ClientSize = new System.Drawing.Size(470, 365);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.CloseButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
@@ -215,5 +228,6 @@
         private System.Windows.Forms.Button CloseButton;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.Label label1;
     }
 }

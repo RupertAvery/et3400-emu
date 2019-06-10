@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 
 namespace Sharp6800.Trainer.Threads
@@ -12,12 +13,12 @@ namespace Sharp6800.Trainer.Threads
         {
         }
 
-        protected override void Run()
+        protected override void Run(CancellationToken cancellationToken)
         {
             //Running = true;
             var loopCycles = 0;
 
-            while (Running)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 int cycles = _trainer.Emulator.PreExecute();
 
@@ -47,11 +48,13 @@ namespace Sharp6800.Trainer.Threads
                 if (loopCycles > limit)
                 {
                     loopCycles = 0;
+                    OnSleep?.Invoke(this, new EventArgs());
                     manualResetEventSlim.Wait(17);
                     sleeps++;
                 }
             }
             resetEvent.Set();
+            Running = false;
         }
 
     }

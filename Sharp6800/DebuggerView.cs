@@ -4,16 +4,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using Sharp6800.Common;
+using Sharp6800.Debugger;
 using Sharp6800.Debugger.Breakpoints;
 using Sharp6800.Debugger.MemoryMaps;
-using Sharp6800.Trainer;
 using Timer = System.Threading.Timer;
 
-namespace Sharp6800.Debugger
+namespace Sharp6800
 {
     public partial class DebuggerView : Form
     {
@@ -21,24 +20,10 @@ namespace Sharp6800.Debugger
         private object lockObject = new object();
         private bool IsDisposing;
 
-        // P/Invoke declarations
-        [DllImport("user32.dll")]
-        private static extern IntPtr WindowFromPoint(Point pt);
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
-        [DllImport("USER32.dll")]
-        public static extern short GetKeyState(Keys nVirtKey);
-
         private readonly MemoryDisplay _memoryDisplay;
         private readonly DisassemberDisplay _disassemberDisplay;
 
         private Control focusObject;
-
-        private const int WM_LBUTTONDOWN = 0x0201;
-        private const int WM_KEYDOWN = 0x0100;
-        private const int WM_MOUSEWHEEL = 0x20a;
-        private const int WM_SYSKEYDOWN = 0x104;
-        private const int KEY_PRESSED = 0x80;
         private Timer _updateTimer;
 
         public ListViewItem FromMemoryMap(MemoryMap memoryMap)
@@ -59,12 +44,12 @@ namespace Sharp6800.Debugger
             InitializeComponent();
             //Application.AddMessageFilter(this);
             this.Closing += OnClosing;
-
-            MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
 
             _memoryDisplay = new MemoryDisplay(MemoryViewPictureBox, MemoryViewScrollBar, trainer);
             _disassemberDisplay = new DisassemberDisplay(DasmViewPictureBox, DasmViewScrollBar, trainer);
+            _disassemberDisplay.OnSelectLine += OnSelectLine;
+
             _trainer = trainer;
 
             _trainer.OnStop += OnStop;
@@ -96,6 +81,32 @@ namespace Sharp6800.Debugger
             BreakpointsListView.ListViewItemSorter = new BreakpointComparer();
             RangesListView.Sorting = SortOrder.Ascending;
             RangesListView.ListViewItemSorter = new MemoryMapComparer();
+        }
+
+        private void OnSelectLine(object sender, SelectLineEventArgs e)
+        {
+            if (e.MemoryMap == null)
+            {
+                addRangeToolStripMenuItem.Enabled = true;
+                addCommentToolStripMenuItem.Enabled = true;
+                removeRangeToolStripMenuItem.Enabled = false;
+                removeCommentToolStripMenuItem.Enabled = false;
+            }
+            else
+            {
+                addRangeToolStripMenuItem.Enabled = false;
+                addCommentToolStripMenuItem.Enabled = false;
+                switch (e.MemoryMap.Type)
+                {
+                    case RangeType.Data:
+                        removeRangeToolStripMenuItem.Enabled = true;
+                        break;
+                    case RangeType.Comment:
+                        removeCommentToolStripMenuItem.Enabled = true;
+                        break;
+                }
+            }
+            disassemblerContextMenuStrip.Show(Cursor.Position);
         }
 
         private void OnChange(object sender, BreakpointEventArgs e)
@@ -185,6 +196,7 @@ namespace Sharp6800.Debugger
             _trainer.OnStep -= OnStep;
 
             _trainer.Breakpoints.OnChange -= OnChange;
+            _disassemberDisplay.OnSelectLine -= OnSelectLine;
 
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Add, AddMapEventAction);
             _trainer.MemoryMapEventBus.Unsubscribe(MapEventType.Update, UpdateMapEventAction);
@@ -302,11 +314,6 @@ namespace Sharp6800.Debugger
             DasmViewScrollBar.SetDeltaValue(mouseEventArgs.Delta);
         }
 
-        private void MemoryViewPictureBoxOnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
-        {
-            MemoryViewScrollBar.SetDeltaValue(mouseEventArgs.Delta);
-        }
-
         private void DebuggerView_Load(object sender, EventArgs e)
         {
             MemToolStripComboBox.Items.Add(new MemoryRange() { Description = "RAM", Start = 0x0000, End = 0x07FF });
@@ -322,26 +329,6 @@ namespace Sharp6800.Debugger
             DasmToolStripComboBox.ComboBox.ValueMember = "Description";
 
             DasmToolStripComboBox.SelectedItem = DasmToolStripComboBox.Items[0];
-        }
-
-        private void MemoryViewScrollBar_Scroll(object sender, ScrollEventArgs e)
-        {
-            _memoryDisplay.MemoryOffset = ((MemoryRange)MemToolStripComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
-        }
-
-        private void DasmViewScrollBar_Scroll(object sender, ScrollEventArgs e)
-        {
-            _disassemberDisplay.ViewOffset = DasmViewScrollBar.Value;
-        }
-
-        private void MemoryViewScrollBar_ValueChanged(object sender, EventArgs e)
-        {
-            _memoryDisplay.MemoryOffset = ((MemoryRange)MemToolStripComboBox.SelectedItem).Start + MemoryViewScrollBar.Value * 8;
-        }
-
-        private void DasmViewScrollBar_ValueChanged(object sender, EventArgs e)
-        {
-            _disassemberDisplay.ViewOffset = DasmViewScrollBar.Value;
         }
 
         private void DasmAddrTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -363,87 +350,6 @@ namespace Sharp6800.Debugger
         //    }
         //}
 
-        public static Control FindControlAtPoint(Control container, Point pos)
-        {
-            Control child;
-            foreach (Control c in container.Controls)
-            {
-                if (c.Visible && c.Bounds.Contains(pos))
-                {
-                    //
-                    child = FindControlAtPoint(c, new Point(pos.X - c.Left, pos.Y - c.Top));
-                    if (child == null) return c;
-                    else return child;
-                }
-            }
-            return null;
-        }
-
-        public static Control FindControlAtPoint(Form form)
-        {
-            Point pos = Cursor.Position;
-            if (form.Bounds.Contains(pos))
-                return FindControlAtPoint(form, form.PointToClient(Cursor.Position));
-            return null;
-        }
-
-        private void DasmViewPictureBox_MouseClick(object sender, MouseEventArgs e)
-        {
-
-            switch (e.Button)
-            {
-                case MouseButtons.Left:
-                    if (e.X < 20)
-                    {
-                        var line = _disassemberDisplay.GetLine(e.X, e.Y);
-                        if (line.HasValue)
-                        {
-                            _trainer.ToggleBreakPoint(line.Value.Address);
-                            //_trainer.ToggleBreakPointEnabled(_disassemberDisplay.SelectedLine.Value.Address);
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        _disassemberDisplay.SelectLine(e.X, e.Y);
-                    }
-
-
-                    break;
-                case MouseButtons.Right:
-                    _disassemberDisplay.SelectLine(e.X, e.Y);
-
-                    if (_disassemberDisplay.SelectedLine.HasValue)
-                    {
-                        var memoryMap = _trainer.MemoryMapManager.GetMemoryMap(_disassemberDisplay.SelectedLine.Value.Address);
-                        if (memoryMap == null)
-                        {
-                            addRangeToolStripMenuItem.Enabled = true;
-                            addCommentToolStripMenuItem.Enabled = true;
-                            removeRangeToolStripMenuItem.Enabled = false;
-                            removeCommentToolStripMenuItem.Enabled = false;
-                        }
-                        else
-                        {
-                            addRangeToolStripMenuItem.Enabled = false;
-                            addCommentToolStripMenuItem.Enabled = false;
-                            switch (memoryMap.Type)
-                            {
-                                case RangeType.Data:
-                                    removeRangeToolStripMenuItem.Enabled = true;
-                                    break;
-                                case RangeType.Comment:
-                                    removeCommentToolStripMenuItem.Enabled = true;
-                                    break;
-                            }
-                        }
-                        disassemblerContextMenuStrip.Show(Cursor.Position);
-                    }
-
-
-                    break;
-            }
-        }
 
         private void ResetMenuItem_Click(object sender, EventArgs e)
         {
@@ -608,44 +514,23 @@ namespace Sharp6800.Debugger
         private void MemToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedRange = (MemoryRange)MemToolStripComboBox.SelectedItem;
-            _memoryDisplay.MemoryOffset = selectedRange.Start;
             _memoryDisplay.MemoryRange = selectedRange;
-
-            _memoryDisplay.Resize();
-            MemoryViewScrollBar.Value = 0;
         }
 
         private void DasmToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var view = (DisassemblyView)DasmToolStripComboBox.SelectedItem;
             _disassemberDisplay.CurrentView = view;
-            _disassemberDisplay.Resize();
-            DasmViewScrollBar.Value = 0;
-        }
-
-        private void DasmViewPictureBox_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void DebuggerView_Activated(object sender, EventArgs e)
         {
             Application.AddMessageFilter(this);
-            Debug.WriteLine("Added message filter");
-        }
-
-        private void DebuggerView_Enter(object sender, EventArgs e)
-        {
-        }
-
-        private void DebuggerView_Leave(object sender, EventArgs e)
-        {
         }
 
         private void DebuggerView_Deactivate(object sender, EventArgs e)
         {
             Application.RemoveMessageFilter(this);
-            Debug.WriteLine("Removed message filter");
         }
 
         private void AddRangeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -662,7 +547,6 @@ namespace Sharp6800.Debugger
         {
             ShowAddComment();
         }
-
 
         private void removeCommentToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -691,7 +575,6 @@ namespace Sharp6800.Debugger
                 }
             }
         }
-
 
         private void RemoveComment()
         {
@@ -787,11 +670,6 @@ namespace Sharp6800.Debugger
                     RemoveRangeButton_Click(null, EventArgs.Empty);
                     break;
             }
-        }
-
-        private void RangesListView_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
 
         public void RefreshDisassemblyViews()
@@ -922,14 +800,6 @@ namespace Sharp6800.Debugger
         private void MemoryViewPictureBox_SizeChanged(object sender, EventArgs e)
         {
             _memoryDisplay.Resize();
-        }
-
-        private void DasmViewPictureBox_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-        }
-
-        private void DasmViewPictureBox_MouseMove(object sender, MouseEventArgs e)
-        {
         }
     }
 }

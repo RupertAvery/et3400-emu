@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Windows.Forms;
 
-namespace Sharp6800.Debugger
+namespace Sharp6800
 {
     public class BreakpointComparer : IComparer
     {

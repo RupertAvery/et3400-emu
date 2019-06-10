@@ -1,15 +1,15 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
+using Sharp6800.Common;
 
-namespace Sharp6800.Debugger
+namespace Sharp6800
 {
 
     partial class DebuggerView : IMessageFilter
     {
         private bool IsKeyDown(Keys key)
         {
-            return (GetKeyState(key) & KEY_PRESSED) == KEY_PRESSED;
+            return (Win32.GetKeyState(key) & Win32.KEY_PRESSED) == Win32.KEY_PRESSED;
         }
 
         public bool PreFilterMessage(ref Message m)
@@ -23,7 +23,7 @@ namespace Sharp6800.Debugger
 
             switch (m.Msg)
             {
-                case WM_SYSKEYDOWN:
+                case Win32.WM_SYSKEYDOWN:
                     {
                         // Extract the keys being pressed
                         Keys keys = ((Keys)((int)m.WParam.ToInt64()));
@@ -50,7 +50,7 @@ namespace Sharp6800.Debugger
                 //        //}
                 //    }
                 //break;
-                case WM_LBUTTONDOWN:
+                case Win32.WM_LBUTTONDOWN:
                     {
                         var lParam = ((int)m.LParam.ToInt64());
 
@@ -60,7 +60,7 @@ namespace Sharp6800.Debugger
                             Y = (lParam >> 0x10) & 0xFFFF,
                         };
 
-                        focusObject = FindControlAtPoint(this);
+                        focusObject = Win32.FindControlAtPoint(this);
 
                         //WindowFromPoint(focusObject.PointToScreen(pos)) == this.Handle;
 
@@ -72,7 +72,7 @@ namespace Sharp6800.Debugger
                     }
 
                     break;
-                case WM_KEYDOWN:
+                case Win32.WM_KEYDOWN:
                     {
                         // Extract the keys being pressed
                         Keys keys = ((Keys)((int)m.WParam.ToInt64()));

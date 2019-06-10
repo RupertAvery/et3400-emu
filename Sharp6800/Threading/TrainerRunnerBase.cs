@@ -14,10 +14,12 @@ namespace Sharp6800.Trainer.Threads
         protected Thread _runner;
         public int sleeps;
         protected ManualResetEvent resetEvent;
+        private CancellationTokenSource _cancelSource;
 
         public event OnTimerDelegate OnTimer;
 
         public bool Running { get; protected set; }
+        public EventHandler<EventArgs> OnSleep { get; set; }
 
         protected TrainerRunnerBase(Trainer trainer)
         {
@@ -25,7 +27,7 @@ namespace Sharp6800.Trainer.Threads
             resetEvent = new ManualResetEvent(false);
         }
 
-        protected abstract void Run();
+        protected abstract void Run(CancellationToken cancellationToken);
 
         protected virtual void Init()
         {
@@ -38,7 +40,7 @@ namespace Sharp6800.Trainer.Threads
         }
 
         /// <summary>
-        /// Sets the quit flag on the emulator and waits for execution of the current opcode to complete
+        /// Sets the quit flag on the emulator and waits for execution of the current instruction to complete
         /// </summary>
         public void Stop(bool noWait = false)
         {
@@ -49,7 +51,7 @@ namespace Sharp6800.Trainer.Threads
             //}
             if (Running)
             {
-                Running = false;
+                _cancelSource.Cancel();
                 if (!noWait)
                 {
                     resetEvent.WaitOne();
@@ -61,14 +63,17 @@ namespace Sharp6800.Trainer.Threads
         public void Start()
         {
             Init();
-            _runner = new Thread(Run);
+            _cancelSource?.Dispose();
+            _cancelSource = new CancellationTokenSource();
+            _runner = new Thread(() => { Run(_cancelSource.Token); });
             Running = true;
             _runner.Start();
         }
 
         public virtual void Dispose()
         {
-           Stop();
+            Stop();
+            _cancelSource?.Dispose();
         }
 
         public virtual void Recalibrate()
