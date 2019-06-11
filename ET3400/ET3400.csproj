@@ -1,0 +1,330 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4124C3D6-3760-4766-BEDB-C3F30B514B63}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ET3400</RootNamespace>
+    <AssemblyName>ET3400</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ET3400.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddBreakpoint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddBreakpoint.Designer.cs">
+      <DependentUpon>AddBreakpoint.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddComment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddComment.Designer.cs">
+      <DependentUpon>AddComment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddDataRange.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDataRange.Designer.cs">
+      <DependentUpon>AddDataRange.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BreakpointComparer.cs" />
+    <Compile Include="Common\MemoryRange.cs" />
+    <Compile Include="Common\CustomMemoryRange.cs" />
+    <Compile Include="Common\EmulationModes.cs" />
+    <Compile Include="Common\OnTimerDelegate.cs" />
+    <Compile Include="Common\OnUpdateDelegate.cs" />
+    <Compile Include="Common\TrainerKeys.cs" />
+    <Compile Include="Debugger\DisassemberDisplay.cs" />
+    <Compile Include="Debugger\DisassemblyView.cs" />
+    <Compile Include="Debugger\DisassemblyLine.cs" />
+    <Compile Include="Debugger\LineType.cs" />
+    <Compile Include="Debugger\MemoryMap.cs" />
+    <Compile Include="DebuggerView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DebuggerView.Designer.cs">
+      <DependentUpon>DebuggerView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Debugger\Disassembler.cs" />
+    <Compile Include="Debugger\MemoryDisplay.cs" />
+    <Compile Include="Address.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Address.Designer.cs">
+      <DependentUpon>Address.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Debugger\RangeType.cs" />
+    <Compile Include="Debugger\SelectLineEventArgs.cs" />
+    <Compile Include="Goto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Goto.Designer.cs">
+      <DependentUpon>Goto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IO\CsvWriter.cs" />
+    <Compile Include="MemoryMapComparer.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ranges.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Ranges.Designer.cs">
+      <DependentUpon>Ranges.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\ResourceHelper.cs" />
+    <Compile Include="IO\CsvReader.cs" />
+    <Compile Include="RecentFilesCollection.cs" />
+    <Compile Include="RecentFilesItem.cs" />
+    <Compile Include="Terminal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Terminal.Designer.cs">
+      <DependentUpon>Terminal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Threading\CycleExactRunner.cs" />
+    <Compile Include="Threading\ITrainerRunner.cs" />
+    <Compile Include="Threading\StandardRunner.cs" />
+    <Compile Include="Threading\TrainerRunnerBase.cs" />
+    <Compile Include="Debugger\Breakpoints\Breakpoint.cs" />
+    <Compile Include="Debugger\Breakpoints\BreakpointCollection.cs" />
+    <Compile Include="Debugger\Breakpoints\BreakpointEventArgs.cs" />
+    <Compile Include="Debugger\Breakpoints\BreakpointEventType.cs" />
+    <Compile Include="Trainer\IIODevice.cs" />
+    <Compile Include="Trainer\IMemory.cs" />
+    <Compile Include="Trainer\IMemoryMap.cs" />
+    <Compile Include="Trainer\ITrainer.cs" />
+    <Compile Include="IO\SrecBlock.cs" />
+    <Compile Include="IO\SrecHelper.cs" />
+    <Compile Include="IO\SrecReader.cs" />
+    <Compile Include="IO\SrecWriter.cs" />
+    <Compile Include="IO\RomReader.cs" />
+    <Compile Include="Debugger\MemoryMaps\MapEventArgs.cs" />
+    <Compile Include="Debugger\MemoryMaps\MapEventType.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapCollection.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapEvent.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapEventBus.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapManager.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapRegion.cs" />
+    <Compile Include="Debugger\MemoryMaps\MemoryMapRegionType.cs" />
+    <Compile Include="Trainer\MC6820.cs" />
+    <Compile Include="Trainer\Trainer.cs" />
+    <Compile Include="TrainerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TrainerForm.Designer.cs">
+      <DependentUpon>TrainerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Trainer\Sharp6800Settings.cs" />
+    <Compile Include="DebuggerView.MessageFilter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Trainer\Watch.cs" />
+    <Compile Include="Trainer\WatchEventArgs.cs" />
+    <Compile Include="Common\VScrollBarExtensions.cs" />
+    <Compile Include="Common\Win32.cs" />
+    <None Include="Resources\vton.bmp" />
+    <None Include="Resources\dpon.png" />
+    <None Include="Resources\hroff.png" />
+    <None Include="Resources\hron.png" />
+    <None Include="Resources\vtoff.png" />
+    <None Include="Resources\vton.png" />
+    <None Include="Resources\dpoff.png" />
+    <None Include="Resources\Stop_16x.png" />
+    <None Include="Resources\Add_16x.png" />
+    <None Include="Resources\BreakpointDisable_16x.png" />
+    <None Include="Resources\BreakpointEnable_16x.png" />
+    <None Include="Resources\ClearCollection_16x.png" />
+    <None Include="Resources\Remove_16x.png" />
+    <None Include="Resources\Run_16x.png" />
+    <None Include="Resources\Restart_16x.png" />
+    <None Include="Resources\StepIntoArrow_16x.png" />
+    <None Include="Resources\GoToSourceCode_16x.png" />
+    <EmbeddedResource Include="About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddBreakpoint.resx">
+      <DependentUpon>AddBreakpoint.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddComment.resx">
+      <DependentUpon>AddComment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddDataRange.resx">
+      <DependentUpon>AddDataRange.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Address.resx">
+      <DependentUpon>Address.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DebuggerView.resx">
+      <DependentUpon>DebuggerView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Goto.resx">
+      <DependentUpon>Goto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Ranges.resx">
+      <DependentUpon>Ranges.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsForm.resx">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Terminal.resx">
+      <DependentUpon>Terminal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TrainerForm.resx">
+      <DependentUpon>TrainerForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="..\LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="LedDisplay.cs" />
+    <Compile Include="SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="display\dpoff.png" />
+    <EmbeddedResource Include="display\dpon.png" />
+    <EmbeddedResource Include="display\hroff.png" />
+    <EmbeddedResource Include="display\hron.png" />
+    <EmbeddedResource Include="display\vtoff.png" />
+    <EmbeddedResource Include="display\vton.png" />
+    <None Include="..\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <EmbeddedResource Include="ROM\FantomII.bin" />
+    <EmbeddedResource Include="ROM\TinyBasic.bin" />
+    <EmbeddedResource Include="ROM\Monitor.bin" />
+    <EmbeddedResource Include="ROM\Monitor.hex" />
+    <EmbeddedResource Include="ROM\Monitor.map" />
+    <EmbeddedResource Include="ROM\MonitorKeyHack.bin" />
+    <EmbeddedResource Include="ROM\MonitorKeyHack.hex" />
+    <EmbeddedResource Include="ROM\FantomII.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ET3400.ico" />
+    <Content Include="Resources\0.bmp" />
+    <Content Include="Resources\0_on.bmp" />
+    <Content Include="Resources\1.bmp" />
+    <Content Include="Resources\1_on.bmp" />
+    <Content Include="Resources\2.bmp" />
+    <Content Include="Resources\2_on.bmp" />
+    <Content Include="Resources\3.bmp" />
+    <Content Include="Resources\3_on.bmp" />
+    <Content Include="Resources\4.bmp" />
+    <Content Include="Resources\4_on.bmp" />
+    <Content Include="Resources\5.bmp" />
+    <Content Include="Resources\5_on.bmp" />
+    <Content Include="Resources\6.bmp" />
+    <Content Include="Resources\6_on.bmp" />
+    <Content Include="Resources\7.bmp" />
+    <Content Include="Resources\7_on.bmp" />
+    <Content Include="Resources\8.bmp" />
+    <Content Include="Resources\8_on.bmp" />
+    <Content Include="Resources\9.bmp" />
+    <Content Include="Resources\9_on.bmp" />
+    <Content Include="Resources\a.png" />
+    <Content Include="Resources\b.png" />
+    <Content Include="Resources\bg.png" />
+    <Content Include="Resources\c.png" />
+    <Content Include="Resources\d.png" />
+    <Content Include="Resources\dp.png" />
+    <Content Include="Resources\e.png" />
+    <Content Include="Resources\f.png" />
+    <Content Include="Resources\g.png" />
+    <Content Include="Resources\key A.bmp" />
+    <Content Include="Resources\key A_on.bmp" />
+    <Content Include="Resources\key B.bmp" />
+    <Content Include="Resources\key B_on.bmp" />
+    <Content Include="Resources\key C.bmp" />
+    <Content Include="Resources\key C_on.bmp" />
+    <Content Include="Resources\key D.bmp" />
+    <Content Include="Resources\key D_on.bmp" />
+    <Content Include="Resources\key E.bmp" />
+    <Content Include="Resources\key E_on.bmp" />
+    <Content Include="Resources\key F.bmp" />
+    <Content Include="Resources\key F_on.bmp" />
+    <Content Include="Resources\Reset.bmp" />
+    <Content Include="Resources\Reset_on.bmp" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Core6800\Core6800.csproj">
+      <Project>{310f0583-6dac-4742-b4f5-e8d3c3870ed8}</Project>
+      <Name>Core6800</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
