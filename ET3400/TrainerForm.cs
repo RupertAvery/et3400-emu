@@ -9,6 +9,7 @@ using ET3400.Debugger.MemoryMaps;
 using ET3400.Trainer;
 using ET3400.IO;
 using Timer = System.Threading.Timer;
+using System.Drawing;
 
 namespace ET3400
 {
@@ -34,17 +35,35 @@ namespace ET3400
             InitializeComponent();
         }
 
+        private Timer _timer;
+        private long lastCycles;
+
         private void TrainerForm_Load(object sender, EventArgs e)
         {
             InitKeys();
             InitTrainer();
             LoadDefaultMemoryMaps();
 #if !DEBUG
+            _timer = new Timer(Callback, null, 0, 1000);
+ 
             sendTerminalToolStripMenuItem.Visible = false;
             modeToolStripMenuItem.Visible = false;
 #endif
 
             _recentFiles = new RecentFilesCollection(RecentToolStripMenuItem, GetAppFolderFile("recent.ini"), 10, LoadRam);
+        }
+
+        private void Callback(object state)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((Action<object>)Callback, new[] {state});
+            }
+            else
+            {
+                Text = $"{Math.Round((_trainer.Runner.Cycles - lastCycles) / 1000f, 0):#,###}K cycles/sec";
+                lastCycles = _trainer.Runner.Cycles;
+            }
         }
 
         #region Initialization
@@ -309,6 +328,8 @@ namespace ET3400
             this.KeyUp -= OnReleaseKey;
 
             ET3400Settings.Save(ET3400Settings, _settingsPath);
+
+            _timer?.Dispose();
 
             Thread.Sleep(200);
         }
@@ -953,7 +974,8 @@ namespace ET3400
 
         private void sendTerminalToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _trainer.SendTerminal("G 1C00\r");
+            
+            _trainer.SendTerminal(InputBox("Terminal", "Enter command", "G 1C00") + "\r");
         }
 
         private void ModeET3400ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1084,5 +1106,98 @@ namespace ET3400
             return result;
         }
 
+        public static String InputBox(String caption, String prompt, String defaultText)
+        {
+            String localInputText = defaultText;
+            if (InputQuery(caption, prompt, ref localInputText))
+            {
+                return localInputText;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public static Boolean InputQuery(String caption, String prompt, ref String value)
+        {
+            Form form;
+            form = new Form();
+            form.AutoScaleMode = AutoScaleMode.Font;
+            form.Font = SystemFonts.IconTitleFont;
+
+            SizeF dialogUnits;
+            dialogUnits = form.AutoScaleDimensions;
+
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
+            form.Text = caption;
+
+            form.ClientSize = new Size(
+                        MulDiv(180, (int)dialogUnits.Width, 4),
+                        MulDiv(63, (int)dialogUnits.Height, 8));
+
+            form.StartPosition = FormStartPosition.CenterScreen;
+
+            System.Windows.Forms.Label lblPrompt;
+            lblPrompt = new System.Windows.Forms.Label();
+            lblPrompt.Parent = form;
+            lblPrompt.AutoSize = true;
+            lblPrompt.Left = MulDiv(8, (int)dialogUnits.Width, 4);
+            lblPrompt.Top = MulDiv(8, (int)dialogUnits.Height, 8);
+            lblPrompt.Text = prompt;
+
+            System.Windows.Forms.TextBox edInput;
+            edInput = new System.Windows.Forms.TextBox();
+            edInput.Parent = form;
+            edInput.Left = lblPrompt.Left;
+            edInput.Top = MulDiv(19, (int)dialogUnits.Height, 8);
+            edInput.Width = MulDiv(164, (int)dialogUnits.Width, 4);
+            edInput.Text = value;
+            edInput.SelectAll();
+
+
+            int buttonTop = MulDiv(41, (int)dialogUnits.Height, 8);
+            //Command buttons should be 50x14 dlus
+            Size buttonSize = new Size(MulDiv(50, (int)dialogUnits.Width, 4), MulDiv(14, (int)dialogUnits.Height, 8));
+
+            System.Windows.Forms.Button bbOk = new System.Windows.Forms.Button();
+            bbOk.Parent = form;
+            bbOk.Text = "OK";
+            bbOk.DialogResult = DialogResult.OK;
+            form.AcceptButton = bbOk;
+            bbOk.Location = new Point(MulDiv(38, (int)dialogUnits.Width, 4), buttonTop);
+            bbOk.Size = buttonSize;
+
+            System.Windows.Forms.Button bbCancel = new System.Windows.Forms.Button();
+            bbCancel.Parent = form;
+            bbCancel.Text = "Cancel";
+            bbCancel.DialogResult = DialogResult.Cancel;
+            form.CancelButton = bbCancel;
+            bbCancel.Location = new Point(MulDiv(92, (int)dialogUnits.Width, 4), buttonTop);
+            bbCancel.Size = buttonSize;
+
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                value = edInput.Text;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Multiplies two 32-bit values and then divides the 64-bit result by a 
+        /// third 32-bit value. The final result is rounded to the nearest integer.
+        /// </summary>
+        public static int MulDiv(int nNumber, int nNumerator, int nDenominator)
+        {
+            return (int)Math.Round((float)nNumber * nNumerator / nDenominator);
+        }
     }
+
+
 }

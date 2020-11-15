@@ -25,6 +25,7 @@ namespace ET3400.Threading
                 if (_trainer.BreakpointsEnabled && _trainer.AtBreakPoint && lastBreakPointPC != _trainer.State.PC)
                 {
                     Stop(true);
+                    Running = false;
                     _trainer.RaiseStopEvent();
                     lastBreakPointPC = _trainer.State.PC;
                     break;
@@ -49,7 +50,7 @@ namespace ET3400.Threading
                 {
                     loopCycles = 0;
                     OnSleep?.Invoke(this, new EventArgs());
-                    manualResetEventSlim.Wait(17);
+                    manualResetEventSlim.Wait(2);
                     sleeps++;
                 }
             }

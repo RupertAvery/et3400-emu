@@ -9,7 +9,7 @@ namespace ET3400
 {
     public class LedDisplay : IDisposable
     {
-        private object bglock = new object();
+        //private object bglock = new object();
         private readonly IMemory _trainer;
         private readonly IntPtr targetWnd;
         private readonly int width, height;
@@ -19,7 +19,7 @@ namespace ET3400
         private readonly PictureBox _target;
 
         private string[] flags = { "H", "I", "N", "Z", "V", "C" };
-        
+
         //private System.Threading.Timer _updateTimer;
 
         public LedDisplay(PictureBox target, IMemory trainer)
@@ -99,32 +99,32 @@ namespace ET3400
 
         public void Repaint(Graphics graphics)
         {
-            try
+            //try
+            //{
+            //if (Monitor.TryEnter(bglock, 10))
+            //{
+            for (int address = 0xC16F; address >= 0xC110; address--)
             {
-                if (Monitor.TryEnter(bglock, 10))
+                if ((address & 0x08) != 0x08)
                 {
-                    for (int address = 0xC16F; address >= 0xC110; address--)
-                    {
-                        if ((address & 0x08) != 0x08)
-                        {
-                            Write(address, _trainer.Memory[address], graphics);
-                        }
-                    }
-
-                    using (var font = new Font("Arial", 8))
-                    {
-                        for (int position = 0; position < 6; position++)
-                        {
-                            graphics.DrawString(flags[position], font, Brushes.White, 42 + position * 45, 62);
-                        }
-                    }
-                    Monitor.Exit(bglock);
+                    Write(address, _trainer.Memory[address], graphics);
                 }
             }
-            catch
-            {
-                // Swallow
-            }
+
+            //using (var font = new Font("Arial", 8))
+            //{
+            //    for (int position = 0; position < 6; position++)
+            //    {
+            //        graphics.DrawString(flags[position], font, Brushes.White, 42 + position * 45, 62);
+            //    }
+            //}
+            //    Monitor.Exit(bglock);
+            //}
+            //}
+            //catch
+            //{
+            //    // Swallow
+            //}
 
         }
 

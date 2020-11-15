@@ -301,7 +301,7 @@
             this.tabControl1.Location = new System.Drawing.Point(11, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(949, 204);
+            this.tabControl1.Size = new System.Drawing.Size(949, 203);
             this.tabControl1.TabIndex = 14;
             // 
             // tabPage1
@@ -312,7 +312,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(941, 178);
+            this.tabPage1.Size = new System.Drawing.Size(941, 177);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Breakpoints";
             // 
@@ -324,9 +324,10 @@
             this.BreakpointsListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.BreakpointsListView.FullRowSelect = true;
             this.BreakpointsListView.GridLines = true;
+            this.BreakpointsListView.HideSelection = false;
             this.BreakpointsListView.Location = new System.Drawing.Point(3, 28);
             this.BreakpointsListView.Name = "BreakpointsListView";
-            this.BreakpointsListView.Size = new System.Drawing.Size(935, 147);
+            this.BreakpointsListView.Size = new System.Drawing.Size(935, 146);
             this.BreakpointsListView.TabIndex = 1;
             this.BreakpointsListView.UseCompatibleStateImageBehavior = false;
             this.BreakpointsListView.View = System.Windows.Forms.View.Details;
@@ -409,7 +410,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(941, 178);
+            this.tabPage2.Size = new System.Drawing.Size(941, 177);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Memory Maps";
             // 
@@ -423,9 +424,10 @@
             this.RangesListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RangesListView.FullRowSelect = true;
             this.RangesListView.GridLines = true;
+            this.RangesListView.HideSelection = false;
             this.RangesListView.Location = new System.Drawing.Point(3, 28);
             this.RangesListView.Name = "RangesListView";
-            this.RangesListView.Size = new System.Drawing.Size(935, 147);
+            this.RangesListView.Size = new System.Drawing.Size(935, 146);
             this.RangesListView.TabIndex = 1;
             this.RangesListView.UseCompatibleStateImageBehavior = false;
             this.RangesListView.View = System.Windows.Forms.View.Details;
@@ -744,6 +746,7 @@
             this.DasmViewPictureBox.TabIndex = 7;
             this.DasmViewPictureBox.TabStop = false;
             this.DasmViewPictureBox.SizeChanged += new System.EventHandler(this.DasmViewPictureBox_SizeChanged);
+            this.DasmViewPictureBox.Click += new System.EventHandler(this.DasmViewPictureBox_Click);
             // 
             // MemoryGroupBox
             // 

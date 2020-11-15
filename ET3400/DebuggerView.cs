@@ -45,6 +45,7 @@ namespace ET3400
             //Application.AddMessageFilter(this);
             this.Closing += OnClosing;
             DasmViewPictureBox.MouseWheel += DasmViewPictureBoxOnMouseWheel;
+            MemoryViewPictureBox.MouseWheel += MemoryViewPictureBoxOnMouseWheel;
 
             _memoryDisplay = new MemoryDisplay(MemoryViewPictureBox, MemoryViewScrollBar, trainer);
             _disassemberDisplay = new DisassemberDisplay(DasmViewPictureBox, DasmViewScrollBar, trainer);
@@ -315,10 +316,16 @@ namespace ET3400
             }
         }
 
+        private void MemoryViewPictureBoxOnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
+        {
+            var direction = Math.Sign(mouseEventArgs.Delta);
+            MemoryViewScrollBar.SetDeltaValue(-direction * 8);
+        }
 
         private void DasmViewPictureBoxOnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
         {
-            DasmViewScrollBar.SetDeltaValue(mouseEventArgs.Delta);
+            var direction = Math.Sign(mouseEventArgs.Delta);
+            DasmViewScrollBar.SetDeltaValue(-direction * 8);
         }
 
         private void DebuggerView_Load(object sender, EventArgs e)
@@ -831,6 +838,11 @@ namespace ET3400
         private void DebuggerView_ResizeEnd(object sender, EventArgs e)
         {
             debuggerSettings.FormHeight = Height;
+        }
+
+        private void DasmViewPictureBox_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

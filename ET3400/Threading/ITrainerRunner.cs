@@ -11,5 +11,6 @@ namespace ET3400.Threading
         void Stop(bool noWait = false);
         void Start();
         void Recalibrate();
+        long Cycles { get;  }
     }
 }

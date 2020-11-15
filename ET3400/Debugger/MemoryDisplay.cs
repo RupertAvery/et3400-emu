@@ -46,18 +46,18 @@ namespace ET3400.Debugger
             Resize();
             targetWnd = target.Handle;
             
-            _target.MouseWheel += OnMouseWheel;
-            _scrollBar.Scroll += Scroll;
+            //_target.MouseWheel += OnMouseWheel;
+            //_scrollBar.Scroll += Scroll;
             _scrollBar.ValueChanged += ValueChanged;
 
             _brush = new SolidBrush(Color.Black);
             _font = new Font("Courier New", 12, FontStyle.Regular);
         }
 
-        private void Scroll(object sender, ScrollEventArgs e)
-        {
-            MemoryOffset = MemoryRange.Start + _scrollBar.Value * 8;
-        }
+        //private void Scroll(object sender, ScrollEventArgs e)
+        //{
+        //    MemoryOffset = MemoryRange.Start + _scrollBar.Value * 8;
+        //}
 
         private void ValueChanged(object sender, EventArgs e)
         {
@@ -66,10 +66,10 @@ namespace ET3400.Debugger
 
 
 
-        private void OnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
-        {
-            _scrollBar.SetDeltaValue(mouseEventArgs.Delta);
-        }
+        //private void OnMouseWheel(object sender, MouseEventArgs mouseEventArgs)
+        //{
+        //    _scrollBar.SetDeltaValue(mouseEventArgs.Delta);
+        //}
 
 
         private int Min(int a, int b)
@@ -142,8 +142,8 @@ namespace ET3400.Debugger
             lock (_lockObject)
             {
                 IsDisposed = true;
-                _target.MouseWheel -= OnMouseWheel;
-                _scrollBar.Scroll -= Scroll;
+                //_target.MouseWheel -= OnMouseWheel;
+                //_scrollBar.Scroll -= Scroll;
                 _scrollBar.ValueChanged -= ValueChanged;
                 _brush?.Dispose();
                 _font?.Dispose();

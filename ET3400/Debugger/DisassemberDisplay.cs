@@ -122,13 +122,15 @@ namespace ET3400.Debugger
             var isSelected = 2;
             var isCurrentPC = 4;
 
-            var allFlags = Color.Yellow;
-            var selectedAndCurrent = Color.Yellow;
+            var yellow = Color.FromArgb(0xff, 0xff, 0xf1, 0x81);
+
+            var allFlags = yellow;
+            var selectedAndCurrent = yellow;
+            var breakAndCurrent = yellow;
             var breakAndSelected = Color.DarkRed;
-            var breakAndCurrent = Color.Orange;
             var @break = Color.DarkRed;
             var selected = Color.Blue;
-            var current = Color.Yellow;
+            var current = yellow;
 
             colorLookup.Add(isAtBreakPoint | isSelected | isCurrentPC, allFlags);
             colorLookup.Add(isSelected | isCurrentPC, selectedAndCurrent);
@@ -154,7 +156,7 @@ namespace ET3400.Debugger
             _targetWnd = target.Handle;
             SetUpColors();
             _target.MouseClick += MouseClick;
-            _scrollBar.Scroll += Scroll;
+            //_scrollBar.Scroll += Scroll;
             _scrollBar.ValueChanged += ValueChanged;
 
             LoadImages();
@@ -164,10 +166,10 @@ namespace ET3400.Debugger
         }
 
 
-        private void Scroll(object sender, ScrollEventArgs e)
-        {
-            ViewOffset = _scrollBar.Value;
-        }
+        //private void Scroll(object sender, ScrollEventArgs e)
+        //{
+        //    ViewOffset = _scrollBar.Value;
+        //}
 
         private void ValueChanged(object sender, EventArgs e)
         {
@@ -305,7 +307,10 @@ namespace ET3400.Debugger
 
         private void DrawText(Graphics g, int x, int y, string text, Color defaultColor, bool isAtBreakPoint, bool isSelected, bool isCurrent)
         {
-            using (var brush = new SolidBrush(isAtBreakPoint && !isCurrent || isSelected ? Color.White : defaultColor))
+            var color = isCurrent ? Color.Black :
+                isAtBreakPoint || isSelected ? Color.White: defaultColor;
+
+            using (var brush = new SolidBrush(color))
             {
                 g.DrawString(text, _font, brush, x, y);
             }
@@ -319,7 +324,7 @@ namespace ET3400.Debugger
                 //_breakpointEnabledBitmap.Dispose();
                 //_breakpointDisabledBitmap.Dispose();
                 _target.MouseClick -= MouseClick;
-                _scrollBar.Scroll -= Scroll;
+                //_scrollBar.Scroll -= Scroll;
                 _scrollBar.ValueChanged -= ValueChanged;
 
                 _brush?.Dispose();

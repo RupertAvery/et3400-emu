@@ -7,8 +7,7 @@ namespace ET3400.Threading
     public abstract class TrainerRunnerBase : ITrainerRunner, IDisposable
     {
         protected readonly Trainer.Trainer _trainer;
-        protected int _cycles;
-        protected int _lastCycles;
+        protected long _cycles;
         protected Thread _runner;
         public int sleeps;
         protected ManualResetEvent resetEvent;
@@ -18,6 +17,10 @@ namespace ET3400.Threading
 
         public bool Running { get; protected set; }
         public EventHandler<EventArgs> OnSleep { get; set; }
+        public long Cycles
+        {
+            get => _cycles;
+        }
 
         protected TrainerRunnerBase(Trainer.Trainer trainer)
         {
