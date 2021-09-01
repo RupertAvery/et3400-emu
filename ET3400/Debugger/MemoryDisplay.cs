@@ -100,7 +100,7 @@ namespace ET3400.Debugger
 
                             while (address + k < _trainer.Memory.Length && k < 8)
                             {
-                                s.Append(" " + string.Format("{0:X2}", _trainer.Memory[address + k] & 0xff));
+                                s.Append(" " + string.Format("{0:X2}", _trainer.Memory.ReadMem(address + k) & 0xff));
                                 k++;
                             }
 

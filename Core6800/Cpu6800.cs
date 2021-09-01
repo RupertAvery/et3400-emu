@@ -4,6 +4,8 @@ namespace Core6800
     {
         private bool _isHalted = false;
 
+        public Memory Memory { get; set; }
+
         public Cpu6800()
         {
             Initialize();
@@ -17,7 +19,7 @@ namespace Core6800
             }
             else
             {
-                int fetchCode = ReadMem(State.PC) & 0xff;
+                int fetchCode = Memory.ReadMem(State.PC) & 0xff;
                 State.PC++;
                 InterpretOpCode(fetchCode);
                 return cycles[fetchCode];

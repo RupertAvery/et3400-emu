@@ -4,42 +4,79 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject1
 {
+    public class TestMemory : Memory
+    {
+        readonly int[] _memory = new int[65536];
+
+        public override int ReadMem(int address)
+        {
+            address = address & 0xFFFF;
+            return _memory[address];
+        }
+
+        public override void WriteMem(int address, int value)
+        {
+            address = address & 0xFFFF;
+            if (address >= 0xFC00)
+            {
+                return;
+            }
+            _memory[address] = value;
+        }
+
+        public override void SetMem(int address, int value)
+        {
+            address = address & 0xFFFF;
+            if (address >= 0xFC00)
+            {
+                return;
+            }
+            _memory[address] = value;
+        }
+
+
+        public override void And(int address, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Or(int address, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int Length => _memory.Length;
+
+        public override int[] Data => _memory;
+    }
+
     [TestClass]
     public class UnitTest1
     {
         private Cpu6800 emu;
-        int[] Memory = new int[65536];
+        private Memory mem;
+
+
 
         private void Write(string addr, string data)
         {
             int baseAddr = Convert.ToInt32(addr, 16);
             for (int p = 0; p < data.Length; p += 2)
             {
-                Memory[baseAddr + p / 2] = Convert.ToInt32(data.Substring(p, 2), 16);
+                mem.WriteMem(baseAddr + p / 2, Convert.ToInt32(data.Substring(p, 2), 16));
             }
         }
 
         [TestInitialize]
         public void Init()
         {
+            mem = new Memory6800();
+
             emu = new Cpu6800
-                {
-                    State = new Cpu6800State(),
-                    ReadMem = loc =>
-                        {
-                            loc = loc & 0xFFFF;
-                            return Memory[loc];
-                        },
-                    WriteMem = (loc, value) =>
-                        {
-                            loc = loc & 0xFFFF;
-                            if (loc >= 0xFC00)
-                            {
-                                return;
-                            }
-                            Memory[loc] = value;
-                        }
-                };
+            {
+                State = new Cpu6800State(),
+                Memory = mem
+            };
             emu.State.CC = 0;
             emu.State.PC = 0;
         }
@@ -79,13 +116,13 @@ namespace UnitTestProject1
             // Clear first 255 bytes of memory
             for (int i = 0; i < 0xFF; i++)
             {
-                Memory[i] = 0;
+                mem.WriteMem(i, 0);
             }
         }
 
         private void RunToNop()
         {
-            while (Memory[emu.State.PC] != 0x01)
+            while (mem.ReadMem(emu.State.PC) != 0x01)
             {
                 emu.Execute();
             }

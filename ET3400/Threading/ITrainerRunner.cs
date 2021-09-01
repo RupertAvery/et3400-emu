@@ -5,9 +5,8 @@ namespace ET3400.Threading
 {
     public interface ITrainerRunner : IDisposable
     {
-        event OnTimerDelegate OnTimer;
         bool Running { get; }
-        EventHandler<EventArgs> OnSleep { get; set; }
+        EventHandler<EventArgs> OnFrameComplete { get; set; }
         void Stop(bool noWait = false);
         void Start();
         void Recalibrate();

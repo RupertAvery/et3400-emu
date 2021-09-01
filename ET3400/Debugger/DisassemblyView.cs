@@ -59,7 +59,7 @@ namespace ET3400.Debugger
             var code = "";
             for (var k = 0; k < length; k++)
             {
-                code = code + string.Format("{0:X2}", _trainer.Memory[start + k]) + " ";
+                code = code + string.Format("{0:X2}", _trainer.Memory.ReadMem(start + k)) + " ";
             }
             return code;
         }
@@ -99,7 +99,7 @@ namespace ET3400.Debugger
 
                     if (memoryMap == null || memoryMap.Type == RangeType.Comment)
                     {
-                        var result = Disassembler.Disassemble(_trainer.Memory, currentAddress);
+                        var result = Disassembler.Disassemble(_trainer.Memory.Data, currentAddress);
 
                         var opCodes = BytesToString(currentAddress, result.ByteLength);
 

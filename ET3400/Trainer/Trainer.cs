@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using Core6800;
@@ -31,7 +32,7 @@ namespace ET3400.Trainer
         public MemoryMapEventBus MemoryMapEventBus { get; private set; }
         public ITrainerRunner Runner { get; private set; }
         public Cpu6800 Emulator { get; private set; }
-        public int[] Memory { get; }
+        public Memory Memory { get; }
         public ET3400Settings Settings { get; set; }
         public Cpu6800State State { get; set; }
 
@@ -62,7 +63,7 @@ namespace ET3400.Trainer
 
         public Trainer(ET3400Settings settings, PictureBox displayTarget)
         {
-            Memory = new int[65536];
+            Memory = new Memory6800();
             Breakpoints = new BreakpointCollection();
             Settings = settings;
             Watches = new List<Watch>();
@@ -85,94 +86,20 @@ namespace ET3400.Trainer
             Emulator = new Cpu6800
             {
                 State = State,
-
-                ReadMem = address =>
-                    {
-                        address = address & 0xFFFF;
-
-                        if (address >= 0x1000 && address <= 0x1003)
-                        {
-                            //_mc6820.RegisterSelect(address & 3);
-                            //return _mc6820.Get();
-                            return _mc6820.Get(address & 3);
-                        }
-
-                        //foreach (var watch in Watches.ToList())
-                        //{
-                        //    if (watch.EventType == EventType.Read)
-                        //    {
-                        //        //if (watch.Address == address)
-                        //        //{
-
-                        //        //}
-                        //        watch.Action(new WatchEventArgs() { Address = address });
-                        //    }
-                        //}
-
-                        return Memory[address];
-                    },
-
-                WriteMem = (address, value) =>
-                    {
-                        address = address & 0xFFFF;
-
-                        foreach (var watch in Watches.ToList())
-                        {
-                            if (watch.EventType == EventType.Write)
-                            {
-                                //if (watch.Address == address)
-                                //{
-
-                                //}
-
-                                watch.Action(new WatchEventArgs() { Address = address });
-                            }
-                        }
-
-                        if (address >= 0x1000 && address <= 0x1003)
-                        {
-                            //_mc6820.RegisterSelect(address & 3);
-                            //_mc6820.Set(value);
-                            _mc6820.Set(address & 3, value);
-                            return;
-                        }
-
-                        if (address >= 0x1400 && address <= 0x1BFF)
-                        {
-                            // Prevent writing to ROM-mapped space
-                            return;
-                        }
-
-                        if (address >= 0x1C00 && address <= 0x23FF)
-                        {
-                            // Prevent writing to ROM-mapped space
-                            return;
-                        }
-
-                        if (address >= 0xFC00)
-                        {
-                            // Prevent writing to ROM-mapped space
-                            return;
-                        }
-
-                        // Limit writing to RAM addresses only?
-                        Memory[address] = value;
-                    }
+                Memory = Memory
             };
 
             //Runner = new StandardRunner(this);
-            Runner = new CycleExactRunner(this);
+            //Runner = new CycleExactRunner(this);
+            Runner = new ThreadSyncRunner(this);
 
             _display = new LedDisplay(displayTarget, this);
-            Runner.OnSleep += OnSleep;
+            Runner.OnFrameComplete += OnFrameComplete;
 
-            // Set keyboard mapped memory 'high'
-            Memory[0xC003] = 0xFF;
-            Memory[0xC005] = 0xFF;
-            Memory[0xC006] = 0xFF;
+
         }
 
-        private void OnSleep(object sender, EventArgs e)
+        private void OnFrameComplete(object sender, EventArgs e)
         {
             _display.Redraw();
         }
@@ -275,52 +202,52 @@ namespace ET3400.Trainer
             {
                 // pull appropriate bit at mem location LOW
                 case TrainerKeys.Key0:
-                    Memory[0xC006] &= 0xDF;
+                    Memory.And(0xC006, 0xDF);
                     break;
                 case TrainerKeys.Key1:// 1, ACCA
-                    Memory[0xC006] &= 0xEF;
+                    Memory.And(0xC006, 0xEF);
                     break;
                 case TrainerKeys.Key2:// 2
-                    Memory[0xC005] &= 0xEF;
+                    Memory.And(0xC005, 0xEF);
                     break;
                 case TrainerKeys.Key3:// 3
-                    Memory[0xC003] &= 0xEF;
+                    Memory.And(0xC003, 0xEF);
                     break;
                 case TrainerKeys.Key4:// 4, INDEX
-                    Memory[0xC006] &= 0xF7;
+                    Memory.And(0xC006, 0xF7);
                     break;
                 case TrainerKeys.Key5:// 5, CC
-                    Memory[0xC005] &= 0xF7;
+                    Memory.And(0xC005, 0xF7);
                     break;
                 case TrainerKeys.Key6:// 6
-                    Memory[0xC003] &= 0xF7;
+                    Memory.And(0xC003, 0xF7);
                     break;
                 case TrainerKeys.Key7:// 7, RTI;
-                    Memory[0xC006] &= 0xFB;
+                    Memory.And(0xC006, 0xFB);
                     break;
                 case TrainerKeys.Key8:// 8
-                    Memory[0xC005] &= 0xFB;
+                    Memory.And(0xC005, 0xFB);
                     break;
                 case TrainerKeys.Key9:// 9
-                    Memory[0xC003] &= 0xFB;
+                    Memory.And(0xC003, 0xFB);
                     break;
                 case TrainerKeys.KeyA:// A, Auto
-                    Memory[0xC006] &= 0xFD;
+                    Memory.And(0xC006, 0xFD);
                     break;
                 case TrainerKeys.KeyB:// B
-                    Memory[0xC005] &= 0xFD;
+                    Memory.And(0xC005, 0xFD);
                     break;
                 case TrainerKeys.KeyC:// C
-                    Memory[0xC003] &= 0xFD;
+                    Memory.And(0xC003, 0xFD);
                     break;
                 case TrainerKeys.KeyD:// D, Do
-                    Memory[0xC006] &= 0xFE;
+                    Memory.And(0xC006, 0xFE);
                     break;
                 case TrainerKeys.KeyE:// E, Exam
-                    Memory[0xC005] &= 0xFE;
+                    Memory.And(0xC005, 0xFE);
                     break;
                 case TrainerKeys.KeyF:// F
-                    Memory[0xC003] &= 0xFE;
+                    Memory.And(0xC003, 0xFE);
                     break;
                 case TrainerKeys.KeyReset:// RESET
                     Emulator.State.Reset = 0;
@@ -336,9 +263,9 @@ namespace ET3400.Trainer
         {
             // just pull everything high. 
             // we're not monitoring multiple presses anyway
-            Memory[0xC003] = 0xFF;
-            Memory[0xC005] = 0xFF;
-            Memory[0xC006] = 0xFF;
+            Memory.SetMem(0xC003, 0xFF);
+            Memory.SetMem(0xC005, 0xFF);
+            Memory.SetMem(0xC006, 0xFF);
             switch (trainerKey)
             {
                 case TrainerKeys.KeyReset:// RESET
@@ -357,7 +284,7 @@ namespace ET3400.Trainer
         {
             for (var i = 0; i < length; i++)
             {
-                Memory[address + i] = data[i];
+                Memory.SetMem(address + i, data[i]);
             }
         }
 
@@ -371,7 +298,7 @@ namespace ET3400.Trainer
         {
             for (var i = 0; i < length; i++)
             {
-                Memory[address + i] = data[i];
+                Memory.SetMem(address + i, data[i]);
             }
         }
 
@@ -387,7 +314,7 @@ namespace ET3400.Trainer
 
             for (var i = 0; i < data.Length; i++)
             {
-                data[i] = Memory[address + i];
+                data[i] = Memory.ReadMem(address + i);
             }
 
             return data;
@@ -438,7 +365,7 @@ namespace ET3400.Trainer
 
         public void StepOutOf()
         {
-            var nextOpCode = Memory[Emulator.State.PC] & 0xFF;
+            var nextOpCode = Memory.ReadMem(Emulator.State.PC) & 0xFF;
             do
             {
                 Emulator.Execute();
@@ -447,7 +374,7 @@ namespace ET3400.Trainer
 
         private bool StepInto()
         {
-            var nextOpCode = Memory[Emulator.State.PC] & 0xFF;
+            var nextOpCode = Memory.ReadMem(Emulator.State.PC) & 0xFF;
             Emulator.Execute();
             return Disassembler.IsSubroutine(nextOpCode);
         }
@@ -456,10 +383,11 @@ namespace ET3400.Trainer
 
         public void Dispose()
         {
-            _mc6820.OnPeripheralWrite -= OnPeripheralWrite;
-            Runner.OnSleep -= OnSleep;
-            Runner.Dispose();
             _display.Dispose();
+            _mc6820.OnPeripheralWrite -= OnPeripheralWrite;
+            Runner.Stop();
+            Runner.OnFrameComplete -= OnFrameComplete;
+            Runner.Dispose();
         }
 
         public void SendTerminal(string value)

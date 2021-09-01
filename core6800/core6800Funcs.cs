@@ -22,40 +22,48 @@
  * Specifically the Motorla 6800 CPU core https://github.com/mamedev/mame/tree/master/src/devices/cpu/m6800
  */
 
+using System.Runtime.CompilerServices;
+
 namespace Core6800
 {
     public partial class Cpu6800
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int IMMBYTE()
         {
-            var result = ReadMem(State.PC);
+            var result = Memory.ReadMem(State.PC);
             State.PC++;
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int DIRBYTE()
         {
             DIRECT();
-            return ReadMem(State.EAD);
+            return Memory.ReadMem(State.EAD);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void IMM8()
         {
             State.EAD = State.PC++;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void IMM16()
         {
             State.EAD = State.PC;
             State.PC += 2;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int EXTBYTE()
         {
             EXTENDED();
-            return ReadMem(State.EAD);
+            return Memory.ReadMem(State.EAD);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int EXTWORD()
         {
             EXTENDED();
@@ -65,51 +73,58 @@ namespace Core6800
 
         private int ONE_MORE_INSN()
         {
-            int fetchCode = ReadMem(State.PC) & 0xff;
+            int fetchCode = Memory.ReadMem(State.PC) & 0xff;
             State.PC++;
             InterpretOpCode(fetchCode);
             return cycles[fetchCode];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int SIGNED(int b)
         {
             return ((int)((b & 0x80) == 0x80 ? b | 0xffffff00 : b));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool NXORV()
         {
             return ((State.CC & 0x08) ^ ((State.CC & 0x02) << 2)) == 0x08;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int PULLBYTE()
         {
             State.S++;
-            return ReadMem(State.S);
+            return Memory.ReadMem(State.S);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int PULLWORD()
         {
             State.S++;
-            int result = ReadMem(State.S) << 8;
+            int result = Memory.ReadMem(State.S) << 8;
             State.S++;
-            result |= ReadMem(State.S);
+            result |= Memory.ReadMem(State.S);
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PUSHBYTE(int b)
         {
-            WriteMem(State.S, b);
+            Memory.WriteMem(State.S, b);
             --State.S;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PUSHWORD(int w)
         {
-            WriteMem(State.S, w & 0xFF);
+            Memory.WriteMem(State.S, w & 0xFF);
             --State.S;
-            WriteMem(State.S, w >> 8);
+            Memory.WriteMem(State.S, w >> 8);
             --State.S;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void BRANCH(bool f)
         {
             var t = IMMBYTE();
@@ -181,82 +196,136 @@ namespace Core6800
               0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08
           };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_FLAGS8I(int a) { State.CC |= flags8i[(a) & 0xff]; }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_FLAGS8D(int a) { State.CC |= flags8d[(a) & 0xff]; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int RM16(int Addr)
         {
-            int result = ReadMem(Addr) << 8 | ReadMem(Addr + 1);
+            int result = Memory.ReadMem(Addr) << 8 | Memory.ReadMem(Addr + 1);
             return result & 0xffff;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void WM16(int Addr, int p)
         {
-            WriteMem(Addr, p >> 8 & 0xff);
-            WriteMem((Addr + 1) & 0xffff, p & 0xff);
+            Memory.WriteMem(Addr, p >> 8 & 0xff);
+            Memory.WriteMem((Addr + 1) & 0xffff, p & 0xff);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int DIRWORD()
         {
             DIRECT();
             return RM16(State.EAD);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void DIRECT()
         {
             State.EAD = IMMBYTE();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EXTENDED() { State.EAD = IMMWORD(); }
 
-        private void INDEXED() { State.EAD = State.X + ReadMem(State.PC); State.PC++; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void INDEXED() { State.EAD = State.X + Memory.ReadMem(State.PC); State.PC++; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int IMMWORD()
         {
-            var result = (ReadMem(State.PC) << 8) | ReadMem((State.PC + 1) & 0xffff);
+            var result = (Memory.ReadMem(State.PC) << 8) | Memory.ReadMem((State.PC + 1) & 0xffff);
             State.PC += 2;
             return result;
         }
 
-        private int IDXBYTE() { INDEXED(); return ReadMem(State.EAD); }
-        private int IDXWORD() { INDEXED(); return RM16(State.EAD); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int IDXBYTE()
+        {
+            INDEXED(); 
+            return Memory.ReadMem(State.EAD);
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int IDXWORD()
+        {
+            INDEXED(); 
+            return RM16(State.EAD);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SEC() { State.CC |= 0x01; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLC() { State.CC &= 0xfe; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SEZ() { State.CC |= 0x04; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLZ() { State.CC &= 0xfb; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SEN() { State.CC |= 0x08; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLN() { State.CC &= 0xf7; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SEV() { State.CC |= 0x02; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLV() { State.CC &= 0xfd; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SEH() { State.CC |= 0x20; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLH() { State.CC &= 0xdf; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SEI() { State.CC |= 0x10; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLI() { State.CC &= ~0x10; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_HNZVC() { State.CC &= 0xd0; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_NZV() { State.CC &= 0xf1; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_HNZC() { State.CC &= 0xd2; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_NZVC() { State.CC &= 0xf0; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_Z() { State.CC &= 0xfb; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_NZC() { State.CC &= 0xf2; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_ZC() { State.CC &= 0xfa; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CLR_C() { State.CC &= 0xfe; }
 
         /* macros for State.CC -- State.CC bits affected should be reset before calling */
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_Z(int a) { if ((a & 0xff) == 0) SEZ(); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_Z8(int a) { SET_Z(a); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_Z16(int a) { SET_Z(a); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_N8(int a) { State.CC |= (((a) & 0x80) >> 4); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_N16(int a) { State.CC |= (((a) & 0x8000) >> 12); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_H(int a, int b, int r) { State.CC |= ((((a) ^ (b) ^ (r)) & 0x10) << 1); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_C8(int a) { State.CC |= (((a) & 0x100) >> 8); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_C16(int a) { State.CC |= (((a) & 0x10000) >> 16); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_V8(int a, int b, int r) { State.CC |= ((((a) ^ (b) ^ (r) ^ ((r) >> 1)) & 0x80) >> 6); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_V16(int a, int b, int r) { State.CC |= ((((a) ^ (b) ^ (r) ^ ((r) >> 1)) & 0x8000) >> 14); }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_NZ8(int a) { SET_N8(a); SET_Z8(a); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_NZ16(int a) { SET_N16(a); SET_Z16(a); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_FLAGS8(int a, int b, int r) { SET_N8(r); SET_Z8(r); SET_V8(a, b, r); SET_C8(r); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SET_FLAGS16(int a, int b, int r) { SET_N16(r); SET_Z16(r); SET_V16(a, b, r); SET_C16(r); }
 
         private int ADD8(int a, int b)

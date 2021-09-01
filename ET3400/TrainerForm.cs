@@ -22,7 +22,6 @@ namespace ET3400
         }
 
         private RecentFilesCollection _recentFiles;
-        private Timer timer;
         private Trainer.Trainer _trainer;
         private ET3400Settings ET3400Settings;
         private DebuggerView _debuggerView;
@@ -35,7 +34,7 @@ namespace ET3400
             InitializeComponent();
         }
 
-        private Timer _timer;
+        //private Timer _timer;
         private long lastCycles;
 
         private void TrainerForm_Load(object sender, EventArgs e)
@@ -44,7 +43,7 @@ namespace ET3400
             InitTrainer();
             LoadDefaultMemoryMaps();
 #if !DEBUG
-            _timer = new Timer(Callback, null, 0, 1000);
+            //_timer = new Timer(Callback, null, 0, 1000);
  
             sendTerminalToolStripMenuItem.Visible = false;
             modeToolStripMenuItem.Visible = false;
@@ -162,24 +161,24 @@ namespace ET3400
             UpdateState();
         }
 
-        private void RunnerOnTimer(int cyclesPerSecond)
-        {
-            if (InvokeRequired)
-            {
-                try
-                {
-                    Invoke((Action<int>)RunnerOnTimer, new object[] { cyclesPerSecond });
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e);
-                }
-            }
-            else
-            {
-                Text = string.Format("ET-3400 ({0:0}%)", ((float)cyclesPerSecond / (float)_trainer.Settings.BaseFrequency) * 100);
-            }
-        }
+        //private void RunnerOnTimer(int cyclesPerSecond)
+        //{
+        //    if (InvokeRequired)
+        //    {
+        //        try
+        //        {
+        //            Invoke((Action<int>)RunnerOnTimer, new object[] { cyclesPerSecond });
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Debug.WriteLine(e);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Text = string.Format("ET-3400 ({0:0}%)", ((float)cyclesPerSecond / (float)_trainer.Settings.BaseFrequency) * 100);
+        //    }
+        //}
 
         #endregion
 
@@ -280,9 +279,9 @@ namespace ET3400
                 _debuggerView.Dispose();
             }
 
-            _trainer.Runner.OnTimer -= RunnerOnTimer;
             _trainer.OnStart -= OnStart;
             _trainer.OnStop -= OnStop;
+            
             _trainer.Dispose();
 
             Shown -= OnShown;
@@ -329,7 +328,7 @@ namespace ET3400
 
             ET3400Settings.Save(ET3400Settings, _settingsPath);
 
-            _timer?.Dispose();
+            //_timer?.Dispose();
 
             Thread.Sleep(200);
         }

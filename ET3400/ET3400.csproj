@@ -76,7 +76,6 @@
     <Compile Include="Common\MemoryRange.cs" />
     <Compile Include="Common\CustomMemoryRange.cs" />
     <Compile Include="Common\EmulationModes.cs" />
-    <Compile Include="Common\OnTimerDelegate.cs" />
     <Compile Include="Common\OnUpdateDelegate.cs" />
     <Compile Include="Common\TrainerKeys.cs" />
     <Compile Include="Debugger\DisassemberDisplay.cs" />
@@ -126,9 +125,9 @@
     <Compile Include="Terminal.Designer.cs">
       <DependentUpon>Terminal.cs</DependentUpon>
     </Compile>
-    <Compile Include="Threading\CycleExactRunner.cs" />
+    <Compile Include="Threading\PerformanceCounter.cs" />
+    <Compile Include="Threading\ThreadSyncRunner.cs" />
     <Compile Include="Threading\ITrainerRunner.cs" />
-    <Compile Include="Threading\StandardRunner.cs" />
     <Compile Include="Threading\TrainerRunnerBase.cs" />
     <Compile Include="Debugger\Breakpoints\Breakpoint.cs" />
     <Compile Include="Debugger\Breakpoints\BreakpointCollection.cs" />

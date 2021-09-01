@@ -9,7 +9,7 @@ namespace ET3400
 {
     public class LedDisplay : IDisposable
     {
-        //private object bglock = new object();
+        private object bglock = new object();
         private readonly IMemory _trainer;
         private readonly IntPtr targetWnd;
         private readonly int width, height;
@@ -82,6 +82,14 @@ namespace ET3400
 
         private void Write(int address, int data, Graphics graphics)
         {
+            int position = 6 - ((address & 0xF0) >> 4);
+            int segment = address & 0x7;
+
+            DrawSingleSegData(graphics, 20 + position * 45, 5, segment, data);
+        }
+
+        private void WriteOld(int address, int data, Graphics graphics)
+        {
             using (var buffer = new Bitmap(38, 54))
             {
                 int position = 6 - ((address & 0xF0) >> 4);
@@ -101,39 +109,54 @@ namespace ET3400
         {
             //try
             //{
-            //if (Monitor.TryEnter(bglock, 10))
-            //{
-            for (int address = 0xC16F; address >= 0xC110; address--)
+            // Rendering is so slow we need to check if we're still doing something
+            if (Monitor.TryEnter(bglock, 0))
             {
-                if ((address & 0x08) != 0x08)
+                using (var buffer = new Bitmap(307, 84))
                 {
-                    Write(address, _trainer.Memory[address], graphics);
+                    using (var g = Graphics.FromImage(buffer))
+                    {
+                        for (int address = 0xC16F; address >= 0xC110; address--)
+                        {
+                            Write(address, _trainer.Memory.ReadMem(address), g);
+                            //if ((address & 0x08) != 0x08)
+                            //{
+                            //    Write(address, _trainer.Memory.ReadMem(address), g);
+                            //}
+                        }
+
+                    }
+                    graphics.DrawImage(buffer, 0, 0);
+                    //using (var font = new Font("Arial", 8))
+                    //{
+                    //    for (int position = 0; position < 6; position++)
+                    //    {
+                    //        graphics.DrawString(flags[position], font, Brushes.White, 42 + position * 45, 62);
+                    //    }
+                    //}
+                    Monitor.Exit(bglock);
                 }
+                //}
+                //catch
+                //{
+                //    // Swallow
+                //}
             }
 
-            //using (var font = new Font("Arial", 8))
-            //{
-            //    for (int position = 0; position < 6; position++)
-            //    {
-            //        graphics.DrawString(flags[position], font, Brushes.White, 42 + position * 45, 62);
-            //    }
-            //}
-            //    Monitor.Exit(bglock);
-            //}
-            //}
-            //catch
-            //{
-            //    // Swallow
-            //}
+
 
         }
 
+        public bool IsBusy { get; private set; }
+
         public void Redraw()
         {
+            IsBusy = true;
             using (var graphics = Graphics.FromHwnd(targetWnd))
             {
                 Repaint(graphics);
             }
+            IsBusy = false;
         }
 
         private void DrawSingleSegData(Graphics g, int x, int y, int segment, int segdata)
@@ -181,6 +204,10 @@ namespace ET3400
 
         public void Dispose()
         {
+            while (IsBusy)
+            {
+                Thread.Sleep(50);
+            }
             _target.Paint -= TargetOnPaint;
             //_updateTimer?.Change(Timeout.Infinite, Timeout.Infinite);
             //_updateTimer?.Dispose();

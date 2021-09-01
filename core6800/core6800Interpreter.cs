@@ -783,7 +783,7 @@ namespace Core6800
                         int r, t;
                         t = IDXBYTE(); r = -t;
                         CLR_NZVC(); SET_FLAGS8(0, t, r);
-                        WriteMem(State.EAD, r);
+                        Memory.WriteMem(State.EAD, r);
                     }
 
                     /* 0x61 AIM --**0- */
@@ -796,7 +796,7 @@ namespace Core6800
                     //        r = IDXBYTE();
                     //        r &= t;
                     //        CLR_NZV(); SET_NZ8(r);
-                    //        WriteMem(State.EAD, r);
+                    //        Memory.WriteMem(State.EAD, r);
                     //    }
 
                     /* 0x62 OIM --**0- */
@@ -809,7 +809,7 @@ namespace Core6800
                     //        r = IDXBYTE();
                     //        r |= t;
                     //        CLR_NZV(); SET_NZ8(r);
-                    //        WriteMem(State.EAD, r);
+                    //        Memory.WriteMem(State.EAD, r);
                     //    }
 
                     /* 0x63 COM indexed -**01 */
@@ -819,7 +819,7 @@ namespace Core6800
                         int t;
                         t = IDXBYTE(); t = ~t;
                         CLR_NZV(); SET_NZ8(t); SEC();
-                        WriteMem(State.EAD, t);
+                        Memory.WriteMem(State.EAD, t);
                     }
 
                     /* 0x64 LSR indexed -0*-* */
@@ -829,7 +829,7 @@ namespace Core6800
                         int t;
                         t = IDXBYTE(); CLR_NZC(); State.CC |= (t & 0x01);
                         t >>= 1; SET_Z8(t);
-                        WriteMem(State.EAD, t);
+                        Memory.WriteMem(State.EAD, t);
                     }
 
                     /* 0x65 EIM --**0- */
@@ -842,7 +842,7 @@ namespace Core6800
                     //        r = IDXBYTE();
                     //        r ^= t;
                     //        CLR_NZV(); SET_NZ8(r);
-                    //        WriteMem(State.EAD, r);
+                    //        Memory.WriteMem(State.EAD, r);
                     //    }
 
                     /* 0x66 ROR indexed -**-* */
@@ -853,7 +853,7 @@ namespace Core6800
                         t = IDXBYTE(); r = (State.CC & 0x01) << 7;
                         CLR_NZC(); State.CC |= (t & 0x01);
                         r |= t >> 1; SET_NZ8(r);
-                        WriteMem(State.EAD, r);
+                        Memory.WriteMem(State.EAD, r);
                     }
 
                     /* 0x67 ASR indexed ?**-* */
@@ -864,7 +864,7 @@ namespace Core6800
                         t = IDXBYTE(); CLR_NZC(); State.CC |= (t & 0x01);
                         t >>= 1; t |= ((t & 0x40) << 1);
                         SET_NZ8(t);
-                        WriteMem(State.EAD, t);
+                        Memory.WriteMem(State.EAD, t);
                     }
 
                     /* 0x68 ASL indexed ?**** */
@@ -874,7 +874,7 @@ namespace Core6800
                         int t, r;
                         t = IDXBYTE(); r = t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        WriteMem(State.EAD, r);
+                        Memory.WriteMem(State.EAD, r);
                     }
 
                     /* 0x69 ROL indexed -**** */
@@ -884,7 +884,7 @@ namespace Core6800
                         int t, r;
                         t = IDXBYTE(); r = State.CC & 0x01; r |= t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        WriteMem(State.EAD, r);
+                        Memory.WriteMem(State.EAD, r);
                     }
 
                     /* 0x6a DEC indexed -***- */
@@ -894,7 +894,7 @@ namespace Core6800
                         int t;
                         t = IDXBYTE(); --t;
                         CLR_NZV(); SET_FLAGS8D(t);
-                        WriteMem(State.EAD, t);
+                        Memory.WriteMem(State.EAD, t);
                     }
 
                     /* 0x6b TIM --**0- */
@@ -916,7 +916,7 @@ namespace Core6800
                         int t;
                         t = IDXBYTE(); ++t;
                         CLR_NZV(); SET_FLAGS8I(t);
-                        WriteMem(State.EAD, t);
+                        Memory.WriteMem(State.EAD, t);
                     }
 
                     /* 0x6d TST indexed -**0- */
@@ -938,7 +938,7 @@ namespace Core6800
                     break;
                 case 0x6f:
                     {
-                        INDEXED(); WriteMem(State.EAD, 0);
+                        INDEXED(); Memory.WriteMem(State.EAD, 0);
                         CLR_NZVC(); SEZ();
                     }
 
@@ -949,7 +949,7 @@ namespace Core6800
                         int r, t;
                         t = EXTBYTE(); r = -t;
                         CLR_NZVC(); SET_FLAGS8(0, t, r);
-                        WriteMem(State.EAD, r);
+                        Memory.WriteMem(State.EAD, r);
                     }
 
                     /* 0x71 AIM --**0- */
@@ -962,7 +962,7 @@ namespace Core6800
                     //        DIRBYTE(r);
                     //        r &= t;
                     //        CLR_NZV(); SET_NZ8(r);
-                    //        WriteMem(State.EAD, r);
+                    //        Memory.WriteMem(State.EAD, r);
                     //    }
 
                     /* 0x72 OIM --**0- */
@@ -975,7 +975,7 @@ namespace Core6800
                     //        DIRBYTE(r);
                     //        r |= t;
                     //        CLR_NZV(); SET_NZ8(r);
-                    //        WriteMem(State.EAD, r);
+                    //        Memory.WriteMem(State.EAD, r);
                     //    }
 
                     /* 0x73 COM extended -**01 */
@@ -985,7 +985,7 @@ namespace Core6800
                         int t;
                         t = EXTBYTE(); t = ~t;
                         CLR_NZV(); SET_NZ8(t); SEC();
-                        WriteMem(State.EAD, t & 0xff);
+                        Memory.WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x74 LSR extended -0*-* */
@@ -998,7 +998,7 @@ namespace Core6800
                         State.CC |= (t & 0x01);
                         t >>= 1;
                         SET_Z8(t);
-                        WriteMem(State.EAD, t & 0xff);
+                        Memory.WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x75 EIM --**0- */
@@ -1011,7 +1011,7 @@ namespace Core6800
                     //        DIRBYTE(r);
                     //        r ^= t;
                     //        CLR_NZV(); SET_NZ8(r);
-                    //        WriteMem(State.EAD, r);
+                    //        Memory.WriteMem(State.EAD, r);
                     //    }
 
                     /* 0x76 ROR extended -**-* */
@@ -1022,7 +1022,7 @@ namespace Core6800
                         t = EXTBYTE(); r = (State.CC & 0x01) << 7;
                         CLR_NZC(); State.CC |= (t & 0x01);
                         r |= t >> 1; SET_NZ8(r);
-                        WriteMem(State.EAD, r & 0xff);
+                        Memory.WriteMem(State.EAD, r & 0xff);
                     }
 
                     /* 0x77 ASR extended ?**-* */
@@ -1033,7 +1033,7 @@ namespace Core6800
                         t = EXTBYTE(); CLR_NZC(); State.CC |= (t & 0x01);
                         t >>= 1; t |= ((t & 0x40) << 1);
                         SET_NZ8(t);
-                        WriteMem(State.EAD, t & 0xff);
+                        Memory.WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x78 ASL extended ?**** */
@@ -1043,7 +1043,7 @@ namespace Core6800
                         int t, r;
                         t = EXTBYTE(); r = t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        WriteMem(State.EAD, r & 0xff);
+                        Memory.WriteMem(State.EAD, r & 0xff);
                     }
 
                     /* 0x79 ROL extended -**** */
@@ -1053,7 +1053,7 @@ namespace Core6800
                         int t, r;
                         t = EXTBYTE(); r = State.CC & 0x01; r |= t << 1;
                         CLR_NZVC(); SET_FLAGS8(t, t, r);
-                        WriteMem(State.EAD, r & 0xff);
+                        Memory.WriteMem(State.EAD, r & 0xff);
                     }
 
                     /* 0x7a DEC extended -***- */
@@ -1063,7 +1063,7 @@ namespace Core6800
                         int t;
                         t = EXTBYTE(); --t;
                         CLR_NZV(); SET_FLAGS8D(t);
-                        WriteMem(State.EAD, t & 0xff);
+                        Memory.WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x7b TIM --**0- */
@@ -1085,7 +1085,7 @@ namespace Core6800
                         int t;
                         t = EXTBYTE(); ++t;
                         CLR_NZV(); SET_FLAGS8I(t);
-                        WriteMem(State.EAD, t & 0xff);
+                        Memory.WriteMem(State.EAD, t & 0xff);
                     }
 
                     /* 0x7d TST extended -**0- */
@@ -1107,7 +1107,7 @@ namespace Core6800
                     break;
                 case 0x7f:
                     {
-                        EXTENDED(); WriteMem(State.EAD, 0);
+                        EXTENDED(); Memory.WriteMem(State.EAD, 0);
                         CLR_NZVC(); SEZ();
                     }
 
@@ -1191,7 +1191,7 @@ namespace Core6800
                             CLR_NZV();
                             SET_NZ8(State.A);
                             IMM8();
-                            WriteMem(State.EAD, State.A);
+                            Memory.WriteMem(State.EAD, State.A);
                         }
                         else
                         {
@@ -1378,7 +1378,7 @@ namespace Core6800
                         CLR_NZV();
                         SET_NZ8(State.A);
                         DIRECT();
-                        WriteMem(State.EAD, State.A);
+                        Memory.WriteMem(State.EAD, State.A);
                     }
 
                     /* 0x98 EORA direct -**0- */
@@ -1569,7 +1569,7 @@ namespace Core6800
                         CLR_NZV();
                         SET_NZ8(State.A);
                         INDEXED();
-                        WriteMem(State.EAD, State.A);
+                        Memory.WriteMem(State.EAD, State.A);
                     }
 
                     /* 0xa8 EORA indexed -**0- */
@@ -1762,7 +1762,7 @@ namespace Core6800
                         CLR_NZV();
                         SET_NZ8(State.A);
                         EXTENDED();
-                        WriteMem(State.EAD, State.A);
+                        Memory.WriteMem(State.EAD, State.A);
                     }
 
                     /* 0xb8 EORA extended -**0- */
@@ -1959,7 +1959,7 @@ namespace Core6800
                             CLR_NZV();
                             SET_NZ8(State.B);
                             IMM8();
-                            WriteMem(State.EAD, State.B);
+                            Memory.WriteMem(State.EAD, State.B);
                         }
                         else
                         {
@@ -2150,7 +2150,7 @@ namespace Core6800
                         CLR_NZV();
                         SET_NZ8(State.B);
                         DIRECT();
-                        WriteMem(State.EAD, State.B);
+                        Memory.WriteMem(State.EAD, State.B);
                     }
 
                     /* 0xd8 EORB direct -**0- */
@@ -2326,7 +2326,7 @@ namespace Core6800
                         CLR_NZV();
                         SET_NZ8(State.B);
                         INDEXED();
-                        WriteMem(State.EAD, State.B);
+                        Memory.WriteMem(State.EAD, State.B);
                     }
 
                     /* 0xe8 EORB indexed -**0- */
@@ -2515,7 +2515,7 @@ namespace Core6800
                         CLR_NZV();
                         SET_NZ8(State.B);
                         EXTENDED();
-                        WriteMem(State.EAD, State.B);
+                        Memory.WriteMem(State.EAD, State.B);
                     }
 
                     /* 0xf8 EORB extended -**0- */

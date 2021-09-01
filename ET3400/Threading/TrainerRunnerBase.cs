@@ -12,11 +12,8 @@ namespace ET3400.Threading
         public int sleeps;
         protected ManualResetEvent resetEvent;
         private CancellationTokenSource _cancelSource;
-
-        public event OnTimerDelegate OnTimer;
-
         public bool Running { get; protected set; }
-        public EventHandler<EventArgs> OnSleep { get; set; }
+        public EventHandler<EventArgs> OnFrameComplete { get; set; }
         public long Cycles
         {
             get => _cycles;
@@ -32,12 +29,6 @@ namespace ET3400.Threading
 
         protected virtual void Init()
         {
-
-        }
-
-        protected void RaiseTimerEvent(int cyclesPerSecond)
-        {
-            OnTimer?.Invoke(cyclesPerSecond);
         }
 
         /// <summary>
@@ -66,8 +57,13 @@ namespace ET3400.Threading
             Init();
             _cancelSource?.Dispose();
             _cancelSource = new CancellationTokenSource();
-            _runner = new Thread(() => { Run(_cancelSource.Token); });
-            Running = true;
+            _runner = new Thread(() =>
+            {
+                Running = true;
+                Run(_cancelSource.Token);
+                Running = false;
+                resetEvent.Set();
+            });
             _runner.Start();
         }
 

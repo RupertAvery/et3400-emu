@@ -337,8 +337,8 @@ namespace ET3400
             MemToolStripComboBox.SelectedItem = MemToolStripComboBox.Items[0];
 
             DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "RAM", 0x0000, 0x07FF));
-            //DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "Fantom II", 0x1400, 0x1BFF));
-            //DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "TinyBasic", 0x1C00, 0x23FF));
+            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "Fantom II", 0x1400, 0x1BFF));
+            DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "TinyBasic", 0x1C00, 0x23FF));
             DasmToolStripComboBox.Items.Add(new DisassemblyView(_trainer, "ROM", 0xFC00, 0xFFFF));
             DasmToolStripComboBox.ComboBox.ValueMember = "Description";
 

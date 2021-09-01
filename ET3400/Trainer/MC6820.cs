@@ -60,7 +60,7 @@ namespace ET3400.Trainer
 
         public void WriteString(string value)
         {
-            foreach (var chr in value)
+            foreach (var chr in value + "\r\n")
             {
                 inputBuffer.Enqueue(chr);
             }
@@ -72,6 +72,79 @@ namespace ET3400.Trainer
         }
 
         public int Write()
+        {
+            // The PIA is wired like so for Peripheral A
+            // PA0 - Output bit (pulled high)
+            // PA1 - pulled high w/ jumper to ground
+            // PA2 - pulled high w/ jumper to ground
+            // PA3 - pulled high w/ jumper to ground
+            // PA4 - pulled low
+            // PA5 - NC
+            // PA6 - NC
+            // PA7 - Input bit
+
+            // Y--0111X
+            // Y is the input. 
+            // Mask: 10000000 = 0x80
+            // Mask: 00001110 = 0x0E
+            // Mask: 11101111 = 0xEF
+
+            var value = 0x0E;
+
+            if (rcvState > 0)
+            {
+                Debug.WriteLine($"STATE: {rcvState}");
+            }
+
+            if (rcvState == 0)
+            {
+                if (inputBuffer.Count > 0)
+                {
+                    tempBuffer = inputBuffer.Dequeue();
+                    rcvState++;
+                    value = 0x8E;
+                }
+            }
+            else if (rcvState == 1)
+            {
+                value = 0b0000_1110;
+                rcvState++;
+            }
+            else if (rcvState == 2)
+            {
+                value = 0x8E;
+                rcvState++;
+            }
+            //else if (rcvState == 3)
+            //{
+            //    value = 0b0000_1110;
+            //    rcvState++;
+            //}
+            else if (rcvState == 10)
+            {
+                value = 0x0E;
+                rcvState++;
+            }
+            else if (rcvState == 11)
+            {
+                value = 0x0E;
+                rcvState = 0;
+            }
+            else
+            {
+                value = ~tempBuffer;
+                value = value << (7 - rcvState + 3);
+                value = value & 0x80; // mask all bits but the 8th
+                value = value | 0x0E; // set bits 1-3
+                value = value & 0xEF; // clear bit 4
+
+                rcvState++;
+            }
+
+            return value;
+        }
+
+        public int WriteEx()
         {
             var value = 0x7F;
 
@@ -86,7 +159,7 @@ namespace ET3400.Trainer
             }
             else if (rcvState == 1)
             {
-                value = 0xFF;
+                value = 0x7F;
                 rcvState++;
             }
             else if (rcvState == 2)
@@ -101,10 +174,11 @@ namespace ET3400.Trainer
             }
             else
             {
-                //value = 0x7E | (tempBuffer >> rcvState - 1);
-                value = tempBuffer << 7 - (rcvState - 3);
-                value = value & 0x80;
-                value = value | 0b1110;
+                value = 0x7E | (tempBuffer >> rcvState - 2) & 1;
+                //value = tempBuffer << 7 - (rcvState - 3);
+                value = ~value & 0xFF;
+                ////value = value & 0x80;
+                ////value = value | 0b1110;
                 rcvState++;
             }
 
